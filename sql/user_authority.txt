@@ -1,0 +1,5 @@
+CREATE TABLE user_authority
+(
+   userid   varchar(128),
+   authid   int(10)
+)

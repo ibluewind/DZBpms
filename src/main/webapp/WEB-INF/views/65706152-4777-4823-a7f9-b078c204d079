@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="//mgcrea.github.io/angular-strap/styles/libs.min.css">
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.css" />
+</head>
+<body ng-app='bpmApp'>
+<div class="row" ng-controller="mainController as ctrl">
+	<form name="form" class="form-horizontal">
+		<div class="form-group">
+			<label class="col-md-2 control-label">부서</label>
+			<div class="col-md-8">
+				<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['deptName']" readonly>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-md-2 control-label">직위/직책</label>
+			<div class="col-md-8">
+				<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['positionName']" readonly>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-md-2 control-label">성명</label>
+			<div class="col-md-8">
+				<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['userName']"> {{ctrl.form.fields['userName']}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-offset-2 col-md-8">
+				<div class="well">상기 본인은 다음과 같이 휴가를 가고자 하오니 결재 바랍니다.</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-offset-2 col-md-8">
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>구분</th>
+							<th width="300">기간</th>
+							<th>일수</th>
+							<th>사유</th>
+							<th>비고</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="field in ctrl.form.fields['fieldRows'][0] track by $index">
+							<td>
+								<select name="type" class="form-control input-sm" ng-model="field.type">
+									<option value=1>연차 휴가</option>
+									<option value=2>경조 휴가</option>
+									<option value=3>생리 휴가</option>
+									<option value=4>산천후휴가</option>
+									<option value=5>특별 휴가</option>
+									<option value=6>공가</option>
+									<option value=7>대휴</option>
+									<option value=8>공상</option>
+									<option value=9>기타</option>
+								</select>
+									
+							</td>
+							<td>
+								<div class="form-group">
+									<div class="col-md-6">
+										<input type="text" class="form-control input-sm" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker/>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control input-sm" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker/>
+									</div>
+								</div>
+							</td>
+							<td>
+								<span >{{ctrl.dateDiff(field.startDate, field.endDate)}}</span>
+							</td>
+							<td>
+								<input type="text" class="form-control input-sm" ng-model="field.comment"/>
+							</td>
+							<td>
+								<input type="text" class="form-control input-sm" ng-model="field.remark"/>
+							</td>
+							<td ng-show="$index > 0">
+								<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.removeField($index)"><span class="glyphicon glyphicon-minus"></span></button>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="6">
+								<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.addField()">항목추가</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</form>
+	<div class="row">
+			<div class="col-md-8 col-md-offset-2">
+				<button type="button" class="btn btn-primary btn-sm pull-right" ng-click="ctrl.submit()">완료</button>
+			</div>
+		</div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.min.js"></script>
+<script src="//mgcrea.github.io/angular-strap/dist/angular-strap.js" data-semver="v2.3.8"></script>
+<script src="//mgcrea.github.io/angular-strap/dist/angular-strap.tpl.js" data-semver="v2.3.8"></script>
+<script>
+	angular.module('bpmApp', ['mgcrea.ngStrap'])
+	.config(['$datepickerProvider', function($datepickerProvider) {
+		angular.extend($datepickerProvider.defaults, {
+			dateFormat: 'yyyy-MM-dd',
+			startWeek: 0
+		});
+	}])
+	.controller('mainController', ['formService', function(formService) {
+		var self = this;
+		self.form = {};
+		self.form.fields = [];
+		
+		self.form.fields = formService.getFormFields();
+		console.log('form.field = ', self.form.fields);
+		
+		self.removeField = function(index) {
+			self.form.fields['fieldRows'][0].splice(index, 1);
+		};
+		
+		self.addField = function() {
+			self.form.fields['fieldRows'][0].push(
+				{
+					type: '',
+					startDate: '',
+					endDate: '',
+					comment: '',
+					remark: ''
+				}
+			);
+		};
+		
+		self.dateDiff = function(start, end) {
+			var milliDay = 1000 * 60 * 60 * 24;
+			var days = Math.floor((end - start) / milliDay) + 1;
+			return days < 0 ? 0 : days;
+		};
+		
+		self.submit = function() {
+			for (var i = 0; i < self.form.fields.length; i++) {
+				console.log(i + ':' + "{"
+					+ "type: ", self.form.fields[i].type + ", "
+					+ "startDate: " + self.form.fields[i].startDate + ","
+					+ "endDate: " + self.form.fields[i].endDate + ", "
+					+ "comment: " + self.form.fields[i].comment + ", "
+					+ "remark: " + self.form.fields[i].remark
+					+ "}");
+			}
+		}
+	}])
+	.service('formService', ['$filter', function($filter) {
+		
+		/**
+		  * RESTful API에서 전달된 fields의 값을 폼 양식에 맞는 구조로 변경한다.
+		 */
+		this.getFormFields = function() {
+			var fields = [];
+			var result = [];
+			var clause = [];
+			
+			fields.push({category:0, clause:0, name: 'userName', value: '김현곤'});
+			fields.push({category:1, clause:0, name: 'positionName', value:'부장'});
+			fields.push({category:2, clause:0, name: 'deptName', value: '시너지개발부'});
+			
+			//
+			fields.push({category:4, clause:0, name: 'type', value:9});
+			fields.push({category:4, clause:0, name: 'startDate', value:'2016-12-19 00:00:00'});
+			fields.push({category:4, clause:0, name: 'endDate', value:'2016-12-19 00:00:00'});
+			fields.push({category:4, clause:0, name: 'comment', value:'건강검진'});
+			fields.push({category:4, clause:0, name: 'remark', value:''});
+			fields.push({category:4, clause:1, name: 'type', value:1});
+			fields.push({category:4, clause:1, name: 'startDate', value:'2016-12-20 00:00:00'});
+			fields.push({category:4, clause:1, name: 'endDate', value:'2016-12-21 00:00:00'});
+			fields.push({category:4, clause:1, name: 'comment', value:'개인연차'});
+			fields.push({category:4, clause:1, name: 'remark', value:''});
+			fields.push({category:4, clause:2, name: 'type', value:1});
+			fields.push({category:4, clause:2, name: 'startDate', value:'2016-12-30 00:00:00'});
+			fields.push({category:4, clause:2, name: 'endDate', value:'2016-12-30 00:00:00'});
+			fields.push({category:4, clause:2, name: 'comment', value:'개인연차'});
+			fields.push({category:4, clause:2, name: 'remark', value:''});
+			
+			fields.push({category:3, clause:0, name: 'type', value:9});
+			fields.push({category:3, clause:0, name: 'startDate', value:'2016-12-19 00:00:00'});
+			fields.push({category:3, clause:0, name: 'endDate', value:'2016-12-19'});
+			fields.push({category:3, clause:0, name: 'comment', value:'건강검진'});
+			fields.push({category:3, clause:0, name: 'remark', value:''});
+			fields.push({category:3, clause:1, name: 'type', value:1});
+			fields.push({category:3, clause:1, name: 'startDate', value:'2016-12-20 00:00:00'});
+			fields.push({category:3, clause:1, name: 'endDate', value:'2016-12-21'});
+			fields.push({category:3, clause:1, name: 'comment', value:'개인연차'});
+			fields.push({category:3, clause:1, name: 'remark', value:''});
+			fields.push({category:3, clause:2, name: 'type', value:1});
+			fields.push({category:3, clause:2, name: 'startDate', value:'2016-12-26 00:00:00'});
+			fields.push({category:3, clause:2, name: 'endDate', value:'2016-12-26 00:00:00'});
+			fields.push({category:3, clause:2, name: 'comment', value:'개인연차'});
+			fields.push({category:3, clause:2, name: 'remark', value:''});
+			
+			// category별, clause별로 구분한다.
+			// 양식 폼에서는 self.form.fields['name']의 형식으로 모델을 정의한다.
+			var currentClause = -1;
+			var catIdx = -1;
+			
+			var arrCats = [];
+			var currentCat = -1;
+			
+			// full search.. 배열이 예제처럼 카테고리 별로 정렬되어 있으리라는 법은 없다.
+			// array를 orderBy로 정리한 후 처리해도 되긴 할 것 같다.
+			fields = $filter('orderBy')(fields, 'category');		// category별로 정렬
+			result['fieldRows'] = [];
+			
+			for (var i = 0; i < fields.length; i++) {
+				if (currentCat == fields[i].categoty) 	continue;
+				
+				currentCat = fields[i].category;
+				var cats = $filter('filter')(fields, {category:currentCat});
+				if (cats.length > 1) {
+					// category를 기준으로 clause 별로 분류한다.
+					var clauses = [];
+					for (var j = 0; j < cats.length; j++) {
+						if (currentClause == cats[j].clause) {
+							continue;
+						}
+						else {
+							currentClause = cats[j].clause;
+							clause = ($filter('filter')(cats, {clause:currentClause}));
+						}
+						
+						// 분류된 claus를 resulst['fieldRows'][currentClause]에 넣는다.
+						var val = [];
+						for (var k = 0; k < clause.length; k++) {
+							val[clause[k].name] = clause[k].value;
+						}
+						
+						clauses.push(val);
+					}		// for (j);
+					
+					 i += cats.length;
+					result['fieldRows'].push(clauses);
+				} else {
+					// 단일 필드
+					result[cats[0].name] = cats[0].value;
+				}
+ 			}
+			
+			console.log('result: ', result);
+			return result;
+		};
+	}]);
+</script>
+</body>
+</html>

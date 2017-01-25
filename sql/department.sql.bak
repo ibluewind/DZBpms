@@ -1,0 +1,11 @@
+SELECT d.id,
+       d.pid,
+       p.name 'parentName',
+       d.deptid,
+       d.name,
+       d.companyid,
+       c.name 'companyName',
+       d.useyn,
+       d.lastmodified
+  FROM departments d, company c, (SELECT id, name FROM departments) p
+ WHERE d.companyid = c.id AND d.pid = p.id AND d.id = 5

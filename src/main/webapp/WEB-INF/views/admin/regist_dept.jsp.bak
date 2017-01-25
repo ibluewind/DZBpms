@@ -1,0 +1,37 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="panel-title">부서 정보 {{ctrl.edit ? "수정" : "등록"}}</div>
+	</div>
+	<div class="panel-body">
+		<form class="form-horizontal">
+		<input type="hidden" name="pId" ng-model="ctrl.dept.pId"/>
+		<input type="hidden" name="deptId" ng-model="ctrl.dept.deptId"/>
+		<input type="hidden" name="useYN" ng-model="ctrl.dept.userYN"/>
+		<input type="hidden" name="companyId" ng-model="ctrl.dept.companyId"/>
+		
+		<div class="form-group">
+			<label class="col-md-3 control-lable" for="parentName">상위부서</label>
+			<div class="col-md-7">
+				<input type="text" id="parentName" class="form-control" ng-model="ctrl.dept.parentName" ng-click="ctrl.selectParent()" readonly/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-md-3 control-lable" for="name">부서명</label>
+			<div class="col-md-7">
+				<input type="text" id="name" class="form-control" ng-model="ctrl.dept.name"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-mg-3 control-label" for="companyName">소속회사</label>
+			<div class="col-md-7">
+				<input type="text" id="companyName" class="form-control" ng-model="ctrl.dept.companyName"/>
+			</div>
+		</div>
+		</form>
+	</div>
+	<div class="panel-footer">
+		<button type="button" class="btn btn-primary" ng-click="ctrl.submit()">{{ctrl.edit ? '수정' : '확인'}}</button>
+		<button ng-view="ctrl.edit" type="button"  class="btn btn-danger" ng-click="ctrl.delete(ctrl.dept.id)">Delete</button>
+	</div>
+</div>

@@ -1,0 +1,44 @@
+/*
+ * 결재 문서를 위한 CSS 정의
+ */
+ul.appline {
+	list-style: none;
+}
+
+ul.appline li {
+	border: 1px solid #a0a0a0;
+	display: inline;
+	float: left;
+	position: relative;
+	text-align: center;
+	padding: 3px;
+	min-height: 28px;
+}
+
+.title {
+	background-color: #efefef;
+	font-weight: bold;
+	padding: 5px;
+	cursor: pointer;
+}
+
+ul.sub-menu {
+	list-style: none;
+	background-color: #efefef;
+	width: 100%;
+	display: none;
+	position: absolute;
+	top: 0;
+}
+
+ul.sub-menu li {
+	border: none;
+	display: inline;
+	position: relative;
+	text-aling: center;
+	padding: 3px;
+}
+li:hover .sub-menu {
+	display: block;
+	z-index: 100;
+}

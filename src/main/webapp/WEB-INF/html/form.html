@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="//mgcrea.github.io/angular-strap/styles/libs.min.css">
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.css" />
+</head>
+<body ng-app='bpmApp'>
+<div class="row" ng-controller="mainController as ctrl">
+	<form name="form" class="form-horizontal">
+		<div class="form-group">
+			<label class="col-md-2 control-label">부서</label>
+			<div class="col-md-8">
+				<input type="text" class="form-control input-sm" ng-model="ctrl.user.deptName" readonly>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-md-2 control-label">직위/직책</label>
+			<div class="col-md-8">
+				<input type="text" class="form-control input-sm" ng-model="ctrl.user.positionName" readonly>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-md-2 control-label">성명</label>
+			<div class="col-md-8">
+				<input type="text" class="form-control input-sm" ng-model="ctrl.user.name" readonly>
+				<input type="hidden" ng-model="ctrl.user.userId"/>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-offset-2 col-md-8">
+				<div class="well">상기 본인은 다음과 같이 휴가를 가고자 하오니 결재 바랍니다.</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-offset-2 col-md-8">
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th>구분</th>
+							<th width="300">기간</th>
+							<th>일수</th>
+							<th>사유</th>
+							<th>비고</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="field in ctrl.form.fields">
+							<td>
+								<select name="type" class="form-control" ng-model="field.type">
+									<option value='1'>연차 휴가</option>
+									<option value='2'>경조 휴가</option>
+									<option value='3'>생리 휴가</option>
+									<option value='4'>산천후휴가</option>
+									<option value='5'>특별 휴가</option>
+									<option value='6'>공가</option>
+									<option value='7'>대휴</option>
+									<option value='8'>공상</option>
+									<option value='9'>기타</option>
+								</select>
+									
+							</td>
+							<td>
+								<div class="form-group">
+									<div class="col-md-6">
+										<input type="text" class="form-control input-sm" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker/>
+									</div>
+									<div class="col-md-6">
+										<input type="text" class="form-control input-sm" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker/>
+									</div>
+								</div>
+							</td>
+							<td>
+								<span >{{ctrl.dateDiff(field.startDate, field.endDate)}}</span>
+							</td>
+							<td>
+								<input type="text" class="form-control input-sm" ng-model="field.comment"/>
+							</td>
+							<td>
+								<input type="text" class="form-control input-sm" ng-model="field.remark"/>
+							</td>
+							<td ng-show="$index > 0">
+								<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.removeField($index)"><span class="glyphicon glyphicon-minus"></span></button>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="6">
+								<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.addField()">항목추가</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2">
+				<button type="button" class="btn btn-primary btn-sm pull-right" ng-click="ctrl.submit()">완료</button>
+			</div>
+		</div>
+	</form>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.min.js"></script>
+<script src="//mgcrea.github.io/angular-strap/dist/angular-strap.js" data-semver="v2.3.8"></script>
+<script src="//mgcrea.github.io/angular-strap/dist/angular-strap.tpl.js" data-semver="v2.3.8"></script>
+<script>
+	angular.module('bpmApp', ['mgcrea.ngStrap'])
+	.config(['$datepickerProvider', function($datepickerProvider) {
+		angular.extend($datepickerProvider.defaults, {
+			dateFormat: 'yyyy-MM-dd',
+			startWeek: 0
+		});
+	}])
+	.controller('mainController', [function() {
+		var self = this;
+		
+		self.form = {};
+		self.form.fields = [{
+			type:'',
+			startDate:'',
+			endDate:'',
+			comment:'',
+			remark:''}];
+		
+		self.user = {};
+		self.user.userId = "andrew@chosun.com";
+		self.user.name = "김현곤";
+		self.user.deptName = "시너지개발부";
+		self.user.positionName = "부장";
+		
+		self.removeField = function(index) {
+			self.form.fields.splice(index, 1);
+		};
+		
+		self.addField = function() {
+			self.form.fields.push(
+				{
+					type:'',
+					startDate:'',
+					endDate:'',
+					comment:'',
+					remark:''
+				}
+			);
+		};
+		
+		self.dateDiff = function(start, end) {
+			var milliDay = 1000 * 60 * 60 * 24;
+			var days = Math.floor((end - start) / milliDay) + 1;
+			return days < 0 ? 0 : days;
+		};
+		
+		self.submit = function() {
+			for (var i = 0; i < self.form.fields.length; i++) {
+				console.log(i + ':' + "{"
+					+ "type: ", self.form.fields[i].type + ", "
+					+ "startDate: " + self.form.fields[i].startDate + ","
+					+ "endDate: " + self.form.fields[i].endDate + ", "
+					+ "comment: " + self.form.fields[i].comment + ", "
+					+ "remark: " + self.form.fields[i].remark
+					+ "}");
+			}
+		}
+	}]);
+</script>
+</body>
+</html>

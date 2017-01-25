@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>Insert title here</title>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.css" />
+<style>
+.login-container {
+    margin-top: 100px;
+    background-color: floralwhite;
+    width: 40%;
+    left: 30%;
+    position: absolute;
+}
+
+.login-card {
+    width: 80%;
+    margin: auto;
+}
+.login-form {
+    padding: 10%;
+}
+</style>
+</head>
+<body ng-app="loginApp">
+	<div class="container">
+		<div class="login-container">
+			<div class="login-card">
+				<div class="login-form">
+					<form action="/bpms/login" method="post" class="form-horizontal">
+						<div class="input-group">
+							<label for="userId" class="input-group-addon"><i class="fa fa-user"></i></label>
+							<input type="text" id="userId" name="userId" placeholder="Enter your email" class="form-control" required/>
+						</div>
+						<div class="input-group">
+							<label for="password" class="input-group-addon"><i class="fa fa-lock"></i></label>
+							<input type="password" id="password" name="password" class="form-control" placeholder="Enter password"/>
+						</div>
+						<div class="form-action">
+							<input type="submit" class="btn btn-primary btn-sm" value="Login"/>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-cookies.js"></script>
+<script>
+	angular.module('loginApp', ['ngCookies'])
+	.run(['$http', '$cookies', function($http, $cookies) {
+		$http.defaults.headers.post['X-CSRFToken'] = $cookies.csrftoken;
+	}]);
+</script>
+</body>
+</html>
