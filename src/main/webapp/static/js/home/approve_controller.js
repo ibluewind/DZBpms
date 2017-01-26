@@ -7,7 +7,6 @@ App
 	var self = this;
 	var formId = $routeParams.formId;
 	self.edit = true;
-	self.submit = false;
 	
 	self.form = {};
 	self.form.fields = [];
@@ -213,42 +212,58 @@ App
 	var appId = $routeParams.appId;
 	var	prevUrl = '';
 	
-	self.edit = true;
-	self.submit = false;
-	self.owner = false;
+	self.canApprove = false;
+	self.canEdit = false;
+	
 	self.form = {};
 	self.approveLine = [];
 	self.summary = {}
 	
 	self.user = userService.getLoggedInUser();
 
-	approveService.getApproveSummary(appId)
-	.then(
-		function(summary) {
-			self.summary = summary;
-			if (summary.status == approveStatus.PROCESSING) {
-				self.edit = false;
-				self.submit = true;
-			}
-			if (self.user.userId == summary.userId)
-				self.owner = true;
-		},
-		function(err) {
-			console.error('Error while fetching Approve summary information');
-		}
-	);
-
-	approveService.getApproveForm(appId)
+	approveService.getApproveDocumentInformation(appId)
 	.then(
 		function(results) {
-			getSavedApproveLine(appId);
-			self.form = results[0].data;
-			self.form.fields = approveService.parseFormField(results[1].data);
+			self.summary = results[0].data;
+			self.from = results[1].data;
+			self.form.fields = approveService.parseFormField(results[2].data);
+			self.approveLine = results[3].data;
+			
+			self.canApprove = checkCanApprove();
+			self.canEdit = checkCanEdit();
 		},
 		function(err) {
-			$q.reject(err);
+			console.error('Error while fetching Approve Document Information');
 		}
 	);
+	
+	/**
+	 * 결재 가능한가 체크
+	 * 1. 결재중이고,
+	 * 2. 로그인 사용자가 결재자이며, 결재 순서인 경우
+	 */
+	function checkCanApprove() {
+		if (self.summary.status != approveStatus.PROCESSING)		return false;
+		
+		for (var i = 0; i < self.approveLine[i]; i++) {
+			if (self.approveLine[i].approvalId == self.user.userId) {
+				// 결재 순서를 확인할 수 있는 방법은?
+				// 1. 본인의 결재 일자가 없어야 한다.
+				// 2. 이전 결재자의 결재 일자가 있어야 한다.
+				if (self.approveLine[i].modified != null)		return false;
+				else return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	function checkCanEdit() {
+		console.log('summary: ', self.summary);
+		console.log('approveLine: ', self.approveLine);
+		console.log('user: ', self.user);
+	}
+	
 	
 	self.addApproveLine = function(index) {
 		var line = {};
@@ -392,19 +407,6 @@ App
 		);
 	}
 	
-	
-	function getSavedApproveLine(appId) {
-		approveService.getSavedApproveLine(appId)
-		.then(
-			function(lines) {
-				console.log('lines: ', lines);
-				self.approveLine = lines;
-			},
-			function(err) {
-				console.error('Error while fetching saved approve lines');
-			}
-		);
-	}
 	
 	function saveApproveFormField(form) {
 		console.log('save form fields: ', form);

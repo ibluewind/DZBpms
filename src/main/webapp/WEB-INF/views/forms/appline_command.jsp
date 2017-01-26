@@ -9,7 +9,7 @@
 				<ul class="appline">
 					<li class="title" style="width: {{100 / ctrl.approveLine.length}}%"  ng-repeat="appLine in ctrl.approveLine">
 						{{$index == 0 ? "담당" : appLine.approvalPosition}}
-						<ul class="sub-menu" ng-if="$index > 0 && !ctrl.submit">
+						<ul class="sub-menu" ng-if="$index > 0 && (ctrl.edit && ctrl.owner)">
 							<li><button type="button" class="btn btn-default btn-xs" ng-click="ctrl.addApproveLine($index)"><span class="glyphicon glyphicon-plus">&nbsp;추가</span></button>
 							<li><button type="button" class="btn btn-danger btn-xs" ng-click="ctrl.deleteApproveLine($index)"><span class="glyphicon glyphicon-trash">&nbsp;삭제</span></button>
 						</ul>
@@ -20,7 +20,7 @@
 						{{appLine.approvalName}}
 					</li>
 				</ul>
-				<ul class="appline" ng-if="ctrl.submit">
+				<ul class="appline" ng-if="!ctrl.edit">
 					<li style="width: {{100 /ctrl.approveLine.length}}%" ng-repeat="appLine in ctrl.approveLine">
 						<small>{{appLine.modified|date:'yyyy-MM-dd HH:mm:dd'}}</small>
 					</li>

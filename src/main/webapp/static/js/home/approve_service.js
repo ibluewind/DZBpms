@@ -252,6 +252,33 @@ App.service('approveService', ['$http', '$q', '$filter',
 		return deferred.promise;
 	};
 
+	/*
+	 * 결재 문서 정보를 한번에 조회한다.
+	 * 조회할 정보는
+	 * 1. 결재 요약 정보 (approve_summary)
+	 * 2. 양식 정보 (approve_form, approve_form_field)
+	 * 3. 저장된 결재 라인 정보 (approve_line)
+	 */
+	this.getApproveDocumentInformation = function(appId) {
+		var	deferred = $q.defer();
+		var summary = $http.get('/bpms/rest/approve/summary/get/' + appId),
+			formInfo = $http.get('/bpms/rest/approve/form/' + appId),
+			fieldInfo = $http.get('/bpms/rest/approve/formFields/' + appId),
+			appLine = $http.get('/bpms/rest/approve/line/save/' + appId);
+		
+			$q.all([summary, formInfo, fieldInfo, appLine])
+			.then(
+				function(results) {
+					deferred.resolve(results);
+				},
+				function(err) {
+					$q.reject();
+				}
+			);
+			
+			return deferred.promise;
+	};
+	
 	/**
 	 * 결재 문서를 삭제한다.
 	 * 삭제할 Table: approve_form_field, approve_line, approve_summary
@@ -369,5 +396,5 @@ App.service('approveService', ['$http', '$q', '$filter',
 				$q.reject(err);
 			}
 		);
-	}
+	};
 }])
