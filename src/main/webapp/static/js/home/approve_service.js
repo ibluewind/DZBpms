@@ -36,9 +36,8 @@ App.service('approveService', ['$http', '$q', '$filter',
 	};
 	
 	/**
-	 * 결재 양식에 따라 결재 라인을 생성한다.
-	 * 1) 사용자가 해당 양식에 대한 결재 라인을 정의했는 체크
-	 * 2) 시스템이 조직도를 참고하여 결재 라인을 생성.
+	 * 결재 양식에 따라 결재 라인을 생성한다. 1) 사용자가 해당 양식에 대한 결재 라인을 정의했는 체크 2) 시스템이 조직도를 참고하여
+	 * 결재 라인을 생성.
 	 * 
 	 * 1), 2) 모두 WAS의 콘트롤러에서 처리한다.
 	 */
@@ -140,7 +139,7 @@ App.service('approveService', ['$http', '$q', '$filter',
 	};
 	
 	/**
-	  * RESTful API에서 전달된 fields의 값을 폼 양식에 맞는 구조로 변경한다.
+	 * RESTful API에서 전달된 fields의 값을 폼 양식에 맞는 구조로 변경한다.
 	 */
 	this.getFormFields = function(formId) {
 		var deferred = $q.defer();
@@ -251,10 +250,34 @@ App.service('approveService', ['$http', '$q', '$filter',
 		
 		return deferred.promise;
 	};
-
-	/*
-	 * 결재 문서 정보를 한번에 조회한다.
-	 * 조회할 정보는
+	
+	/**
+	 * 결재 양식 정보를 조회한다. (결재 문서 신규 작성시)
+	 * 1. 결재 양식 정보
+	 * 2. 결재 양식 필드 정보
+	 * 3. 결재 라인 정보
+	 */
+	this.getFormInformation = function(formId) {
+		var deferred = $q.defer();
+		var formInfo = $http.get('/bpms/rest/form/' + formId),
+			formFields = $http.get('/bpms/rest/form/field/' + formId),
+			appLines = $http.get('/bpms/rest/approve/line/' + formId);
+		
+		$q.all([formInfo, formFields, appLines])
+		.then(
+			function(results) {
+				deferred.resolve(results);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+		
+		return deferred.promise;
+	};
+	
+	/**
+	 * 결재 문서 정보를 한번에 조회한다. (저장된 문서 수정 또는 결재시)
 	 * 1. 결재 요약 정보 (approve_summary)
 	 * 2. 양식 정보 (approve_form, approve_form_field)
 	 * 3. 저장된 결재 라인 정보 (approve_line)
@@ -279,9 +302,9 @@ App.service('approveService', ['$http', '$q', '$filter',
 			return deferred.promise;
 	};
 	
+	
 	/**
-	 * 결재 문서를 삭제한다.
-	 * 삭제할 Table: approve_form_field, approve_line, approve_summary
+	 * 결재 문서를 삭제한다. 삭제할 Table: approve_form_field, approve_line, approve_summary
 	 */
 	this.cancelApprove = function(appId) {
 		return $http.delete('/bpms/rest/approve/' + appId)
@@ -386,8 +409,14 @@ App.service('approveService', ['$http', '$q', '$filter',
 		return formFields;
 	};
 	
+	/**
+	 * 사용자의 결재함 정보 조회
+	 */
+	/*
+	 * 미결함, 완료함, 기결함, 예정함 등 조회
+	 */
 	this.getTray = function(type) {
-		return $http.get('/bpms/rest/approve/tray/' + type)
+		return $http.get('/bpms/rest/approve/tray/box/' + type)
 		.then(
 			function(response) {
 				return response.data;
@@ -397,4 +426,31 @@ App.service('approveService', ['$http', '$q', '$filter',
 			}
 		);
 	};
-}])
+	
+	/*
+	 * 사용자의 특정 결재문서에 대한 결재함 조회
+	 */
+	this.getTrayForUserByApproveId = function(appId) {
+		return $http.get('/bpms/rest/approve/tray/box/user/' + appId)
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+	
+	this.saveApproveHistory = function(history) {
+		return $http.post('/bpms/rest/approve/history', history)
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+}]);

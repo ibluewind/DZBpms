@@ -23,7 +23,12 @@ public class ApproveTrayRestController {
 	@Autowired
 	ApproveTrayService		trayService;
 	
-	@RequestMapping(value="/{type}", method=RequestMethod.GET)
+	/**
+	 * 결재함별 결재자의 결재문서 리스트 조회
+	 * @param type
+	 * @return
+	 */
+	@RequestMapping(value="/box/{type}", method=RequestMethod.GET)
 	public List<ApproveTray> getTray(@PathVariable String type) {
 		
 		String	userId = getPrincipal();
@@ -42,6 +47,13 @@ public class ApproveTrayRestController {
 		}
 		
 		return trays;
+	}
+	
+	@RequestMapping(value="/box/user/{appId}", method=RequestMethod.GET)
+	public ApproveTray getTrayForUserByApproveId(@PathVariable String appId) {
+		String		userId = getPrincipal();
+		
+		return trayService.getApproveTrayForUser(userId, appId);
 	}
 	
 	private String getPrincipal() {

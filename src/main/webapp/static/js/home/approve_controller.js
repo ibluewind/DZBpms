@@ -3,57 +3,72 @@
 App
 .controller('registAppController', ['approveStatus', 'approveService', 'userService', 'selectUserModal', '$routeParams', '$location',
 	function(approveStatus, approveService, userService, selectUserModal, $routeParams, $location) {
-	// 결재 문서 작성 (처음 작성을 시작)
+
+	// 결재 문서 작성
 	var self = this;
-	var formId = $routeParams.formId;
-	self.edit = true;
+	var formId = '';
+	var appId = '';
+	var action = $routeParams.action;
+	var history = {};
+	
+	history.historyId = '';
+	history.appId = '';
+	history.comment = '';
+	history.created = '';
+	history.userId = self.user.userId;
+	
+	self.edit = false;
+	
+	if (action == 'regist') {
+		formId = $routeParams.id;
+		appId = '';
+		self.edit = true;
+	} else if (action == 'edit' || action == 'proc') {
+		formId = '';
+		appId = $routeParams.id;
+	}
+	
+	if (action == 'edit')	self.edit = true;
 	
 	self.form = {};
 	self.form.fields = [];
 	self.user = {};
 	self.approveLine = [];
-	
-	self.form.formId = formId;
+	self.summary = {};
 	
 	self.user = userService.getLoggedInUser();
 	
-	approveService.getFormInfo(formId)
-	.then(
-		function(result) {
-			self.form = result;
-		},
-		function(err) {
-			console.error('Error while fetching form information');
-		}
-	);
-	
-	// 사용자와 양식에 대한 결재 라인을 조회한다.
-	// 사용자 정보는 WAS에서 조회하여 처리한다. controller에서는 양식 아이디만 제공한다.
-	approveService.getApproveLine(formId)
-	.then(
-		function(lines) {
-			self.approveLine = lines;
-		},
-		function(err) {
-			console.error('Error while fetching approve lines');
-		}
-	);
-	
-	if (!angular.isUndefined(formId)) {
-		approveService.getFormFields(formId)
+	if (action == 'regist') {
+		// 결재 양식 정보 조회
+		approveService.getFormInformation(formId)
 		.then(
-			function(fields) {
-				self.form.fields = approveService.parseFormField(fields);
+			function(results) {
+				self.form = results[0].data;
+				self.form.fields = approveService.parseFormField(results[1].data);
+				self.approveLine = results[2].data;
+				
 				self.form.fields['userName'] = self.user.lastName + self.user.firstName;
 				self.form.fields['deptName'] = self.user.deptPositions[0].deptName;
 				self.form.fields['positionName'] = self.user.deptPositions[0].positionName;
 			},
 			function(err) {
-				console.error('Error while fetching form fields');
+				console.error('Error while fetching document form information');
 			}
 		);
 	} else {
-		self.form.fields['fieldRows'] = [];
+		// 결재 문서 정보 조회
+		approveService.getApproveDocumentInformation(appId)
+		.then(
+			function(results) {
+				self.summary = results[0].data;
+				self.form = results[1].data;
+				self.form.fields = approveService.parseFormField(results[2].data);
+				self.approveLine = results[3].data;
+			},
+			function(err) {
+				console.error('Error while fetching Approve Document Information');
+			}
+		);
 	}
 	
 	self.dateDiff = function(start, end) {
@@ -77,7 +92,8 @@ App
 	}
 	
 	self.cancelApprove = function() {
-		$location.path('/list_app');
+		console.log('prevUrl: ' + $rootScope.prevUrl);
+		$location.path($rootScope.prevUrl);
 	};
 	
 	self.addApproveLine = function(index) {
@@ -112,6 +128,7 @@ App
 		
 		var formFields = approveService.makeFormField(self.form.fields);
 		var form = {};
+		
 		form.appId = '';
 		form.formId = formId;
 		form.formFields = formFields;
@@ -126,12 +143,18 @@ App
 		summary.title = getFormTitle();
 		summary.status = status;
 		
+		history.status = status;
+		
 		approveService.saveApproveSummary(summary)
 		.then(
 			function(result) {
 				form.appId = result.appId;
+				history.appId = result.appId;
+				
 				saveApproveFormField(form);
 				saveApproveLine(form.appId, status);
+				
+				saveHistory(history);
 			},
 			function(err) {
 				console.error('Error while saving Approve Summary information');
@@ -147,13 +170,31 @@ App
 	 */
 	self.submitApprove = function() {
 		// 결재 상신
-		self.saveApprove(approveStatus.PROCESSING);
+		if (action == 'regist')
+			self.saveApprove(approveStatus.PROCESSING);
+		else if (action == 'edit'){
+			// 이미 저장되어 있던 결재 문서를 상신
+		} else {
+			// action == 'proc'
+			// 결재자가 결재하는 경우
+		}
 	};
 	
 	self.cancelApprove = function() {
 		$location.path('/list_app');
 	}
 	
+	function saveHistory(history) {
+		approveService.saveApproveHistory(history)
+		.then(
+			function(data) {
+				console.log('Saved approve history: ', data);
+			},
+			function(err) {
+				console.error('Error while saving approve history');
+			}
+		);
+	}
 	
 	function saveApproveLine(appId, status) {
 		
@@ -206,14 +247,15 @@ App
 .controller('editAppController', ['approveService', 'userService', 'approveStatus', 'confirmModal', 'selectUserModal', '$scope', '$routeParams', '$location', '$q', '$rootScope',
 	function(approveService, userService, approveStatus, confirmModal, selectUserModal, $scope, $routeParams, $location, $q, $rootScope) {
 	
-	//TODO 결재권한과 owner권한을 구분할 수 있게 처리한다.
-	// approve_command.jsp에서 단순한 권한으로 명령 버튼을 설정할 수 있게한다.
+	/**
+	 * 작성자가 작성중인 결재 문서를 수정하는데 필요한 콘트롤러
+	 */
 	var self = this;
 	var appId = $routeParams.appId;
 	var	prevUrl = '';
 	
 	self.canApprove = false;
-	self.canEdit = false;
+	self.canEdit = true;
 	
 	self.form = {};
 	self.approveLine = [];
@@ -225,45 +267,14 @@ App
 	.then(
 		function(results) {
 			self.summary = results[0].data;
-			self.from = results[1].data;
+			self.form = results[1].data;
 			self.form.fields = approveService.parseFormField(results[2].data);
 			self.approveLine = results[3].data;
-			
-			self.canApprove = checkCanApprove();
-			self.canEdit = checkCanEdit();
 		},
 		function(err) {
 			console.error('Error while fetching Approve Document Information');
 		}
 	);
-	
-	/**
-	 * 결재 가능한가 체크
-	 * 1. 결재중이고,
-	 * 2. 로그인 사용자가 결재자이며, 결재 순서인 경우
-	 */
-	function checkCanApprove() {
-		if (self.summary.status != approveStatus.PROCESSING)		return false;
-		
-		for (var i = 0; i < self.approveLine[i]; i++) {
-			if (self.approveLine[i].approvalId == self.user.userId) {
-				// 결재 순서를 확인할 수 있는 방법은?
-				// 1. 본인의 결재 일자가 없어야 한다.
-				// 2. 이전 결재자의 결재 일자가 있어야 한다.
-				if (self.approveLine[i].modified != null)		return false;
-				else return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	function checkCanEdit() {
-		console.log('summary: ', self.summary);
-		console.log('approveLine: ', self.approveLine);
-		console.log('user: ', self.user);
-	}
-	
 	
 	self.addApproveLine = function(index) {
 		var line = {};
@@ -434,6 +445,107 @@ App
 		}
 		
 		return title;
+	}
+}])
+.controller('procAppController', ['approveService', 'userService', 'approveTrayType', '$routeParams', '$rootScope', '$location',
+                                  function(approveService, userService, approveTrayType, $routeParams, $rootScope, $location) {
+	/**
+	 * 결재함에서 결재문서를 선택해서 결재를 진행하는 경우에 대한 콘트롤러
+	 */
+	var	self = this;
+	var appId = $routeParams.appId;
+	var user = {};
+	var summary ={};
+	var	approveTray = {};
+	
+	self.canApprove = true;
+	self.canEdit = false;
+	self.form = {};
+	self.approveLine = [];
+	
+	user = userService.getLoggedInUser();
+	
+	approveService.getApproveDocumentInformation(appId)
+	.then(
+		function(results) {
+			self.summary = results[0].data;
+			self.form = results[1].data;
+			self.form.fields = approveService.parseFormField(results[2].data);
+			self.approveLine = results[3].data;
+		},
+		function(err) {
+			console.error('Error while fetching Approve Document Information');
+		}
+	);
+	
+	approveService.getTrayForUserByApproveId(appId)
+	.then(
+		function(data) {
+			approveTray = data;
+			self.canApprove = checkCanApprove();
+		},
+		function(err) {
+			console.error('Error while fetcing Approve Tray Information');
+		}
+	);
+	
+	/**
+	 * 결재 승인
+	 */
+	self.submitApprove = function() {
+		
+	};
+	
+	/**
+	 * 결재 취소
+	 */
+	self.cancelApprove = function() {
+		$location.path($rootScope.prevUrl);
+	};
+	
+	/**
+	 * 결재 반려
+	 */
+	self.rejectApprove = function() {
+		
+	};
+	
+	/**
+	 * 결재 보류
+	 */
+	self.deferApprove = function() {
+		
+	};
+	
+	/**
+	 * 사용자가 결재를 진행할 수 있는 상태인지 체크
+	 */
+	function checkCanApprove() {
+		var	check = false;
+		
+		console.log('user: ', user);
+		/**
+		 * 결재를 진행할 수 있는 조건은 현재 사용자가 결재자이며(이 부분은 이미 결재함을 통해서 진입을 했으므로 패스할 수 있다.),
+		 * 현재 시점에서 사용자의 결재 순서가 일치해야 한다. (결재 순서는 결재 라인과 결재함 정보를 확인하여 처리할 수 있다.)
+		 */
+		for (var i = 0; i < self.approveLine.length; i++) {
+			console.log('approveLine[' + i + ']:', self.approveLine[i]);
+			
+			if (user.userId == self.approveLine[i].approvalId) {
+				check = true;
+				break;
+			}
+		}
+		
+		console.log('approveTray: ', approveTray);
+		
+		if (check && (user.userId == approveTray.userId) && (approveTray.type == approveTrayType.UNDECIDE)) {
+			check = true;
+		} else {
+			check = false;
+		}
+		
+		return check;
 	}
 }])
 .controller('listAppController', ['approveService', 'userService', 'approveStatus', '$rootScope',

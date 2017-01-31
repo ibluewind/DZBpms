@@ -125,6 +125,25 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		return tray;
 	}
 
+	@Override
+	public ApproveTray getApproveTrayForUser(String userId, String appId) {
+		String query = "SELECT s.appId,"
+					 + " s.title 'appTitle',"
+					 + " s.userId 'creator',"
+       				 + " t.userId,"
+       				 + " t.type,"
+       				 + " concat(u.lastName, u.firstName) 'creatorName',"
+       				 + " s.created,"
+       				 + " t.modified"
+  				 + " FROM approve_summary s, approve_tray t, users u"
+ 				 + " WHERE     t.appId = ?"
+       				 + " AND t.userId = ?"
+       				 + " AND t.appId = s.appId"
+       				 + " AND s.userId = u.userId";
+		
+		return new JdbcTemplate(dataSource).queryForObject(query, new Object[] {appId,  userId}, new ApproveTrayRowMapper());
+	}
+
 	/**
 	 * 미결 목록.
 	 * type='U'

@@ -15,6 +15,9 @@ public interface ApproveTrayDao {
 	public List<ApproveTray>	resetTray(String appId);
 	public ApproveTray			upate(ApproveTray tray);
 	
+	// 사용자의 특정 결재문서함 정보
+	public ApproveTray			getApproveTrayForUser(String userId, String appId);
+	
 	// user's own tray
 	public List<ApproveTray>	undecideTray(String userId);	// 미결함
 	public List<ApproveTray>	completedTray(String userId);	// 기결함

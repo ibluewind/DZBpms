@@ -43,6 +43,12 @@ App
 		},
 		controller: 'editAppController as ctrl'
 	})
+	.when('/proc_app/:appId', {
+		templateUrl: function(params) {
+			return '/bpms/app/edit/' + params.appId;
+		},
+		controller: 'procAppController as ctrl'
+	})
 	.when('/undecide_app', {
 		templateUrl: '/bpms/app/undecide',
 		controller: 'undecideAppController as ctrl'

@@ -15,6 +15,8 @@ public interface ApproveTrayService {
 	public List<ApproveTray>	resetTray(String appId);
 	public ApproveTray			update(ApproveTray tray);
 	
+	public ApproveTray			getApproveTrayForUser(String userId, String appId);
+	
 	// user's own tray
 	public List<ApproveTray>	undecideTray(String userId);
 	public List<ApproveTray>	completedTray(String userId);

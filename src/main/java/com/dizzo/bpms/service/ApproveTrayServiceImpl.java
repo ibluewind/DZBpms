@@ -55,6 +55,11 @@ public class ApproveTrayServiceImpl implements ApproveTrayService {
 	}
 
 	@Override
+	public ApproveTray getApproveTrayForUser(String userId, String appId) {
+		return dao.getApproveTrayForUser(userId, appId);
+	}
+
+	@Override
 	public List<ApproveTray> undecideTray(String userId) {
 		return dao.undecideTray(userId);
 	}

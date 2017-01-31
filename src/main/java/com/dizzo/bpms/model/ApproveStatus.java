@@ -2,6 +2,7 @@ package com.dizzo.bpms.model;
 
 public enum ApproveStatus {
 
+	CHECK("C"),			// 결재 확인
 	SAVE("S"),			// 임시 저장
 	FINISH("F"),		// 결재 완료
 	PROCESSING("P"),	// 결재 진행 중
