@@ -65,6 +65,15 @@ public class ApproveRestController {
 		return summaryService.insert(summary);
 	}
 	
+	/**
+	 * 결재 요약 정보를 수정하는 경우는 사용자가 결재문서를 저장했다가 불러와서 상신하거나, 재 저장을 할 떄이다.
+	 * 기존 요약 정보의 내용을 수정하고, 기존의 양식 필드와 결재 라인 정보를 삭제한다.
+	 * 양식 필드와 결재 라인 정보는 스크립트에서 새로운 정보를 저장한다.
+	 * WAS에서 이렇게 처리함으로써 JS에서는 좀 더 단순한 프로세스 플로우를 작성할 수 있다.
+	 * 저장이던 수정이던, 항상 양식 필드 정보와 결재 라인은 저장만 한다.
+	 * @param summary
+	 * @return
+	 */
 	@RequestMapping(value="/summary", method=RequestMethod.PUT)
 	public ApproveSummary updateApproveSummary(@RequestBody ApproveSummary summary) {
 		/**
@@ -72,6 +81,12 @@ public class ApproveRestController {
 		 * 그러면, 여기서 아예 기존 form field를 삭제하고 JS에서 save하는 것이 나을 듯...
 		 */
 		formFieldService.delete(summary.getAppId());
+		/**
+		 * 기존의 결재라인 정보를 삭제한다.
+		 * 새로운(또는 변경 없는) 결재라인은 JS에서 저장을 호출한다.
+		 */
+		appLineService.deleteAll(summary.getAppId());
+		
 		return summaryService.update(summary);
 	}
 	

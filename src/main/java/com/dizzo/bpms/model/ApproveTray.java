@@ -4,14 +4,17 @@ import java.util.Date;
 
 public class ApproveTray {
 
+	// DB Table Fields
 	private String	appId;
-	private String	appTitle;
 	private String	userId;			// 결재자 ID
+	private Date	modified;		// 결재함 도착 일자
+	private String	type;			// 결재함 종류
+	
+	// 추가 정보 Fields
 	private String	creator;		// 작성자ID
 	private String	creatorName;	// 작성자 이름
 	private Date	created;		// 작성 일자
-	private Date	modified;		// 결재함 도착 일자
-	private String	type;			// 결재함 종류
+	private String	appTitle;		// 결재 문서 제목
 	
 	public ApproveTray() {}
 	
@@ -64,5 +67,9 @@ public class ApproveTray {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+	
+	public String toString() {
+		return "ApproveTray: {appId: " + appId + ", userId: " + userId + ", type: " + type + "}";
 	}
 }

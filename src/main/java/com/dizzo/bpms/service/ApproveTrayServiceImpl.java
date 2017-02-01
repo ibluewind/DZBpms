@@ -51,7 +51,7 @@ public class ApproveTrayServiceImpl implements ApproveTrayService {
 
 	@Override
 	public ApproveTray update(ApproveTray tray) {
-		return dao.upate(tray);
+		return dao.update(tray);
 	}
 
 	@Override

@@ -31,7 +31,7 @@ App
 		templateUrl: '/bpms/app/list',
 		controller: 'listAppController as ctrl'
 	})
-	.when('/regist_app/:formId', {
+	.when('/regist_app/:id', {
 		templateUrl: function(params) {
 			return '/bpms/app/regist/' + params.formId;
 		},

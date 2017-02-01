@@ -58,4 +58,9 @@ public class ApproveLineServiceImpl implements ApproveLineService {
 	public List<ApproveLine> getByOrganize(String userId) {
 		return dao.getByOrganize(userId);
 	}
+
+	@Override
+	public ApproveLine getNextOrder(String appId, String userId) {
+		return dao.getNextOrder(appId, userId);
+	}
 }

@@ -13,7 +13,7 @@ public interface ApproveTrayDao {
 	public List<ApproveTray>	insertAll(List<ApproveTray> trays);
 	public List<ApproveTray>	deleteAll(String appId);
 	public List<ApproveTray>	resetTray(String appId);
-	public ApproveTray			upate(ApproveTray tray);
+	public ApproveTray			update(ApproveTray tray);
 	
 	// 사용자의 특정 결재문서함 정보
 	public ApproveTray			getApproveTrayForUser(String userId, String appId);
@@ -23,4 +23,7 @@ public interface ApproveTrayDao {
 	public List<ApproveTray>	completedTray(String userId);	// 기결함
 	public List<ApproveTray>	deferTray(String userId);		// 보류함
 	public List<ApproveTray>	expectedTray(String userId);	// 예정함
+	
+	// 결재 완료 처리
+	public List<ApproveTray>	submitTray(String userId, String appId);
 }

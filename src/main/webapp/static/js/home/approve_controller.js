@@ -1,8 +1,8 @@
 'use strict';
 
 App
-.controller('registAppController', ['approveStatus', 'approveService', 'userService', 'selectUserModal', '$routeParams', '$location',
-	function(approveStatus, approveService, userService, selectUserModal, $routeParams, $location) {
+.controller('registAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', '$routeParams', '$location',
+	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, $routeParams, $location) {
 
 	// 결재 문서 작성
 	var self = this;
@@ -18,6 +18,7 @@ App
 	history.userId = self.user.userId;
 	
 	self.edit = false;
+	self.proc = false;
 	
 	if (action == 'regist') {
 		formId = $routeParams.id;
@@ -28,7 +29,8 @@ App
 		appId = $routeParams.id;
 	}
 	
-	if (action == 'edit')	self.edit = true;
+	if (action == 'edit')	self.edit = true;		// 수정 가능
+	if (action == 'proc')	self.proc = true;		// 수정 불가, 결재 가능
 	
 	self.form = {};
 	self.form.fields = [];
@@ -123,6 +125,10 @@ App
 		self.approveLine.splice(index, 1);
 	};
 	
+	/**
+	 * 결재 저장은 작성자만 수행할 수 있는 기능이다.
+	 * 상신 이후에는 결재 저장을 수행할 수 있는 방법이나 플로우가 없다.
+	 */
 	self.saveApprove = function(status) {
 		// 결재 임시 저장
 		
@@ -145,38 +151,95 @@ App
 		
 		history.status = status;
 		
-		approveService.saveApproveSummary(summary)
-		.then(
-			function(result) {
-				form.appId = result.appId;
-				history.appId = result.appId;
-				
-				saveApproveFormField(form);
-				saveApproveLine(form.appId, status);
-				
-				saveHistory(history);
-			},
-			function(err) {
-				console.error('Error while saving Approve Summary information');
-			}
-		);
+		if (action == 'regist') {
+			approveService.saveApproveSummary(summary)
+			.then(
+				function(result) {
+					form.appId = result.appId;
+					history.appId = result.appId;
+					
+					saveApproveFormField(form);
+					saveApproveLine(form.appId, status);
+					
+					saveHistory(history);
+				},
+				function(err) {
+					console.error('Error while saving Approve Summary information');
+				}
+			);
+		} else if (action == 'edit') {
+			summary = self.summary;
+			summary.status = status;
+			
+			approveService.updateApproveSummary(summary)
+			.then(
+				function(result) {
+					// 요약을 수정하면, 양식 필드와 결재라인은 WAS에서 삭제된다.
+					// 따라서, 저장과 같이 양식 필드와 결재 라인은 저장만 호출한다.
+					form.appId = result.appId;
+					history.appId = result.appId;
+					
+					saveApproveFormField(form);
+					saveApproveLine(form.appId, status);
+					
+					saveHistory(history);
+				}
+			);
+		}
 		
 		$location.path('/list_app');
 	};
 	
 	/**
-	 * 저장과 상신의 차이는 결재 문서 요약 정보의 상태로 판단한다.
-	 * 상신하면, 다음 결재자의 미결함에 결재 문서를 저장한다.
+	 * 사용자의 결재라인 정보를 이용하여 결재함 목록을 생성한다.
+	 */
+	function makeApproveTray() {
+		var trays = [];
+		
+		for (var i = 0; i < self.approveLine.length; i++) {
+			var tray = {};
+			if (i == 0)
+				tray.type = approveTrayType.COMPLETED;		// 작성자 본인은 완료함
+			else if (i == 1)
+				tray.type = approveTrayType.UNDECIDE;		// 다음 결재자는 미결함
+			else
+				tray.type = approveTrayType.EXPECTED;		// 그 외의 결재자는 예정함
+			
+			tray.appId = self.summary.appId;
+			tray.userId = self.approveLine[i].userId;
+			tray.modified = '';
+			
+			trays.push(tray);
+		}
+		return trays;
+	}
+	
+	/**
+	 * 작성자가 작성한 문서를 상신하거나, 결재자가 상신된 문서를 결재한다.
 	 */
 	self.submitApprove = function() {
-		// 결재 상신
-		if (action == 'regist')
+		var	trays = makeApproveTray();
+		
+		console.log('trays: ', trays);
+		
+		if (action == 'regist' || action == 'edit') {
+			// 작성된 결재 문서를 상신한다.
+			// 작성한 결재문서의 정보를 저장하고, 결재 라인에 있는 결재자들의 결재함에 결재 문서 정보를 수정한다.
 			self.saveApprove(approveStatus.PROCESSING);
-		else if (action == 'edit'){
-			// 이미 저장되어 있던 결재 문서를 상신
+			approveService.saveTray(trays)
+			.then(
+				function(data) {
+					console.log('Saved approve trays successfully');
+				},
+				function(err) {
+					console.error('Error while saving approve trays');
+				}
+			);
 		} else {
 			// action == 'proc'
 			// 결재자가 결재하는 경우
+			// 결재자의 결재함 정보를 수정하고, 결재라인 정보를 수정한다.
+			// 다음 결재자의 결재함 정보 수정과 결재 완료에 대한 후 처리는 WAS에서 처리한다.
 		}
 	};
 	
@@ -208,6 +271,7 @@ App
 		approveService.saveApproveLine(self.approveLine)
 		.then(
 			function(lines) {
+				self.approveLine = lines;
 				console.log('Save Approve line successfully');
 				console.log('lines: ', lines);
 			},

@@ -442,6 +442,21 @@ App.service('approveService', ['$http', '$q', '$filter',
 		);
 	};
 	
+	/**
+	 * 결재함 저장
+	 */
+	this.saveTray = function(trays) {
+		return $http.post('/boms/rest/approve/tray', trays)
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+	
 	this.saveApproveHistory = function(history) {
 		return $http.post('/bpms/rest/approve/history', history)
 		.then(

@@ -15,7 +15,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="form in ctrl.forms">
-							<td><a href="#/regist_app/{{form.id}}">{{form.title}}</a></td>
+							<td><a href="#/regist_app/{{form.id}}?action=regist">{{form.title}}</a></td>
 							<td>{{form.comment}}</td>
 						</tr>
 					</tbody>
@@ -38,7 +38,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="summary in ctrl.summaries | filter:ctrl.filterSaved">
-							<td><a href="#/edit_app/{{summary.appId}}">{{summary.title}}</a></td>
+							<td><a href="#/regist_app/{{summary.appId}}?action=edit">{{summary.title}}</a></td>
 							<td>{{summary.created|date:'yyyy-MM-dd'}}</td>
 						</tr>
 					</tbody>
@@ -61,7 +61,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="summary in ctrl.summaries |filter:ctrl.filterProcessing">
-							<td><a href="#/edit_app/{{summary.appId}}">{{summary.title}}</a></td>
+							<td><a href="#/regist_app/{{summary.appId}}?action=proc">{{summary.title}}</a></td>
 							<td>{{summary.created|date:'yyyy-MM-dd'}}</td>
 						</tr>
 					</tbody>

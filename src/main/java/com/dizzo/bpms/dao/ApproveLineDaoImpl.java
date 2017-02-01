@@ -10,6 +10,7 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -238,5 +239,41 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
    			 + " ORDER BY l.depth DESC";
 		return new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new ApproveLineRowMapper());
 	}
+
+	@Override
+	public ApproveLine getNextOrder(String appId, String userId) {
+		String query = "  SELECT l.lineId,"
+				     + "    l.appId,"
+				     + "    l.userId,"
+				     + "    l.status,"
+				     + "    l.modified,"
+				     + "    l.seq,"
+				     + "    p.name 'positionName',"
+				     + "    concat(u.lastName, u.firstName) 'userName'"
+				     + " FROM approve_line l"
+				     + "    JOIN"
+				     + "    (SELECT @pv := seq"
+				     + "       FROM approve_line"
+				     + "      WHERE     appId = ?"
+				     + "            AND userId = ?) t,"
+				     + "    users u,"
+				     + "    user_dept_position udp,"
+				     + "    position p"
+				   + " WHERE     l.seq = @pv + 1"
+				   + "      AND u.userid = l.userId"
+				   + "      AND udp.userid = u.userid"
+				+ " GROUP BY u.userid";
+		ApproveLine	line = null;
+		
+		try {
+			line = new JdbcTemplate(dataSource).queryForObject(query, new Object[] {appId, userId}, new ApproveLineRowMapper());
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+		
+		return line;
+	}
+	
+	
 
 }

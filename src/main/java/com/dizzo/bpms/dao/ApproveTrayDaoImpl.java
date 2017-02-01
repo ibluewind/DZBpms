@@ -2,24 +2,31 @@ package com.dizzo.bpms.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.taglibs.standard.tag.el.sql.UpdateTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.ApproveTray;
 import com.dizzo.bpms.model.ApproveTrayRowMapper;
 import com.dizzo.bpms.model.ApproveTrayType;
+import com.dizzo.bpms.service.ApproveLineService;
 
 @Repository("approveTrayDao")
 public class ApproveTrayDaoImpl implements ApproveTrayDao {
 	
 	@Autowired
 	DataSource		dataSource;
+	
+	@Autowired
+	ApproveLineService	appLineService;
 
 	@Override
 	public ApproveTray insert(ApproveTray tray) {
@@ -118,7 +125,7 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 	 * 변경할 수 있는 내용은 type과 modified 뿐이어야 한다.
 	 */
 	@Override
-	public ApproveTray upate(ApproveTray tray) {
+	public ApproveTray update(ApproveTray tray) {
 		String query = "UPDATE approve_tray SET type=?, modified=now() WHERE appId=? AND userId=?";
 		
 		new JdbcTemplate(dataSource).update(query, new Object[] {tray.getType(), tray.getAppId(), tray.getUserId()});
@@ -169,6 +176,59 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		return getTray(userId, ApproveTrayType.EXPECTED.getType());
 	}
 	
+	/**
+	 * 결재 완료하면 결재자의 결재함을 완료로 변경하고 다음 결재자의 결재함을 미결로 변경한다.
+	 * 최종 결재자라면 아무런 처리를 하지 않는다.
+	 * 결재 완료에 대한 처리가 필요하다. 결재 완료에 대한 처리는 결재라인 처리에서 수행한다.
+	 */
+	@Override
+	public List<ApproveTray> submitTray(String userId, String appId) {
+		ApproveTray	tray = getApproveTrayForUser(userId, appId);
+		List<ApproveTray> trays = listByAppId(appId);
+		ApproveLine		line = appLineService.getNextOrder(appId, userId);
+		
+		tray.setType(ApproveTrayType.COMPLETED.getType());
+		tray = update(tray); 
+		
+		if (line != null) {
+			// 다음 결재자를 결재함 목록에서 찾는다.
+			Iterator<ApproveTray>	it = trays.iterator();
+			
+			while (it.hasNext()) {
+				tray = it.next();
+				if (tray.getUserId().equals(line.getApprovalId())) {
+					tray.setType(ApproveTrayType.UNDECIDE.getType());
+					tray = this.update(tray);
+				}
+			}
+		}
+		return null;
+	}
+	
+	private ApproveTray findNextApproveTray(String userId, String appId, List<ApproveTray> trays) {
+		Iterator	it = null;
+		ApproveTray			tray = null;
+		List<ApproveLine>	appLines = appLineService.getByAppId(appId);
+		ApproveLine			line = null;
+		
+		it = appLines.iterator();
+		while (it.hasNext()) {
+			line = (ApproveLine)it.next();
+			
+			if (userId.equals(line.getApprovalId()))	break;
+		}
+		// next approvalId
+		int	idx = appLines.indexOf(line);
+		
+		if ((idx + 1) == appLines.size())	return null;
+		else {
+			it = trays.iterator();
+			
+		}
+		
+		return tray;
+	}
+
 	private List<ApproveTray>	getTray(String userId, String type) {
 		String query = "SELECT s.appId,"
 				 + " s.title 'appTitle',"

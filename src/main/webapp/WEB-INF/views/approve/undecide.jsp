@@ -15,7 +15,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="doc in ctrl.documents">
-							<td></td><td><a href="#/proc_app/{{doc.appId}}">{{doc.appTitle}}</a></td><td>{{doc.creatorName}}</td><td>{{doc.created|date:'yyyy-MM-dd HH:mm:ss'}}
+							<td></td><td><a href="#/regist_app/{{doc.appId}}?action=proc">{{doc.appTitle}}</a></td><td>{{doc.creatorName}}</td><td>{{doc.created|date:'yyyy-MM-dd HH:mm:ss'}}
 						</tr>
 					</tbody>
 				</table>
