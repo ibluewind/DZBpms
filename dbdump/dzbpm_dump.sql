@@ -38,8 +38,36 @@ CREATE TABLE `approve_form_field` (
 
 LOCK TABLES `approve_form_field` WRITE;
 /*!40000 ALTER TABLE `approve_form_field` DISABLE KEYS */;
-INSERT INTO `approve_form_field` VALUES ('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',0,0,'type','1'),('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',0,0,'startDate','2017-01-11T15:00:00.000Z'),('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',0,0,'endDate','2017-01-12T15:00:00.000Z'),('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',0,0,'comment','개인연차'),('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',0,0,'remark',''),('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',1,0,'deptName','시너지개발부'),('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',2,0,'positionName','부장'),('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','9a43387a-b7c4-4976-a608-a18bd8a296b1',3,0,'userName','김현곤');
+INSERT INTO `approve_form_field` VALUES ('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,0,0,'type','1'),('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,0,0,'startDate','2017-01-30T15:00:00.000Z'),('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,0,0,'endDate','2017-01-31T15:00:00.000Z'),('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,0,0,'comment','개인연차'),('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,0,0,'remark',''),('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,1,0,'deptName','시너지개발부'),('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,2,0,'positionName','부장'),('a96bde1a-6a78-418b-ab95-ed1139dc936f',NULL,3,0,'userName','김현곤');
 /*!40000 ALTER TABLE `approve_form_field` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `approve_history`
+--
+
+DROP TABLE IF EXISTS `approve_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `approve_history` (
+  `historyId` varchar(128) NOT NULL COMMENT 'UUID',
+  `appId` varchar(128) NOT NULL COMMENT '결재 아이디',
+  `comment` varchar(512) DEFAULT NULL COMMENT '결재 의견',
+  `created` datetime NOT NULL COMMENT '이력 생성 일시',
+  `userId` varchar(128) NOT NULL COMMENT '결재자 아이디',
+  `status` char(1) NOT NULL COMMENT '결재 상태:\r\nF: 완료\r\nR: 반려\r\nD: 보류\r\nC: 확인\r\nS: 저장',
+  PRIMARY KEY (`historyId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='결재시 사용자가 취한 행동에 대한 이력 관리 테이블\r\n결재 상태가 변경될 때 마다 내용을 기록하고, 반려, 보류 시에 의견을 저장한다.';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `approve_history`
+--
+
+LOCK TABLES `approve_history` WRITE;
+/*!40000 ALTER TABLE `approve_history` DISABLE KEYS */;
+INSERT INTO `approve_history` VALUES ('5448b886-e775-11e6-b086-d067e51fd414','a96bde1a-6a78-418b-ab95-ed1139dc936f','','2017-01-31 14:21:48','bigfoot@chosun.com','C');
+/*!40000 ALTER TABLE `approve_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -52,12 +80,10 @@ DROP TABLE IF EXISTS `approve_line`;
 CREATE TABLE `approve_line` (
   `lineId` varchar(128) DEFAULT NULL,
   `appId` varchar(128) DEFAULT NULL,
-  `formId` varchar(128) DEFAULT NULL,
   `userId` varchar(128) DEFAULT NULL,
   `status` char(1) DEFAULT 'P',
   `modified` datetime DEFAULT NULL,
-  `comment` varchar(256) DEFAULT NULL,
-  `order` int(10) NOT NULL DEFAULT '0'
+  `seq` int(10) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -67,6 +93,7 @@ CREATE TABLE `approve_line` (
 
 LOCK TABLES `approve_line` WRITE;
 /*!40000 ALTER TABLE `approve_line` DISABLE KEYS */;
+INSERT INTO `approve_line` VALUES ('762d6eed-31f0-4c49-affd-50bc91137f74','a96bde1a-6a78-418b-ab95-ed1139dc936f','andrew@chosun.com','P','2017-01-24 10:11:32',0),('acc90f36-6001-472b-8553-3952149e85d5','a96bde1a-6a78-418b-ab95-ed1139dc936f','bigfoot@chosun.com','P',NULL,1),('43da38a6-3861-4e78-959a-3e77d1faee7e','a96bde1a-6a78-418b-ab95-ed1139dc936f','yunju@chosun.com','P',NULL,2);
 /*!40000 ALTER TABLE `approve_line` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -83,7 +110,7 @@ CREATE TABLE `approve_summary` (
   `userId` varchar(128) DEFAULT NULL,
   `created` datetime DEFAULT NULL,
   `modified` datetime DEFAULT NULL,
-  `status` char(1) DEFAULT 'P',
+  `status` char(1) DEFAULT 'P' COMMENT 'S : 저장 (Saved)\r\nP : 결재중 (Processing)\r\nR : 반려 (Reject)\r\nD : 보류 (Defer)',
   `formId` varchar(128) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -94,8 +121,34 @@ CREATE TABLE `approve_summary` (
 
 LOCK TABLES `approve_summary` WRITE;
 /*!40000 ALTER TABLE `approve_summary` DISABLE KEYS */;
-INSERT INTO `approve_summary` VALUES ('2fe29b55-b1b0-4379-b5e3-8a017debcbc1','휴가원','andrew@chosun.com','2017-01-10 15:22:02','2017-01-10 15:22:02','S','9a43387a-b7c4-4976-a608-a18bd8a296b1');
+INSERT INTO `approve_summary` VALUES ('a96bde1a-6a78-418b-ab95-ed1139dc936f','휴가원','andrew@chosun.com','2017-01-23 16:00:12','2017-01-24 10:11:31','P','9a43387a-b7c4-4976-a608-a18bd8a296b1');
 /*!40000 ALTER TABLE `approve_summary` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `approve_tray`
+--
+
+DROP TABLE IF EXISTS `approve_tray`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `approve_tray` (
+  `appId` varchar(128) NOT NULL COMMENT '결재 문서 ID',
+  `userId` varchar(128) NOT NULL COMMENT '사용자 ID',
+  `modified` datetime NOT NULL COMMENT '결재 문서 저장 일시',
+  `type` char(1) NOT NULL DEFAULT 'U' COMMENT 'U : 미결 (Undecide)\r\nC : 기결 (Completed)\r\nR : 반려 (Reject)\r\nD : 보류 (Defer)\r\nE : 예정 (Expected)',
+  PRIMARY KEY (`appId`,`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='사용자의 결재 미결함.\r\n사용자가 결재할 문서를 저장한다.\r\n사용자가 결재를 완료하면 결재함에서 삭제한다.';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `approve_tray`
+--
+
+LOCK TABLES `approve_tray` WRITE;
+/*!40000 ALTER TABLE `approve_tray` DISABLE KEYS */;
+INSERT INTO `approve_tray` VALUES ('a96bde1a-6a78-418b-ab95-ed1139dc936f','bigfoot@chosun.com','2017-01-24 10:11:31','U'),('a96bde1a-6a78-418b-ab95-ed1139dc936f','yunju@chosun.com','2017-01-25 17:11:03','E');
+/*!40000 ALTER TABLE `approve_tray` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -167,7 +220,6 @@ CREATE TABLE `custom_approve_line` (
 
 LOCK TABLES `custom_approve_line` WRITE;
 /*!40000 ALTER TABLE `custom_approve_line` DISABLE KEYS */;
-INSERT INTO `custom_approve_line` VALUES ('9a43387a-b7c4-4976-a608-a18bd8a296b1','andrew@chosun.com','bigfoot@chosun.com',0),('9a43387a-b7c4-4976-a608-a18bd8a296b1','andrew@chosun.com','yunju@chosun.com',1);
 /*!40000 ALTER TABLE `custom_approve_line` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -352,7 +404,7 @@ CREATE TABLE `position` (
 
 LOCK TABLES `position` WRITE;
 /*!40000 ALTER TABLE `position` DISABLE KEYS */;
-INSERT INTO `position` VALUES ('1e2032f2-deba-49ed-82de-a70fd241734b','사장','P',10000),('cb37711b-aaec-11e6-8cda-d067e51fd414','사원','P',10),('cb37711b-aaec-11e6-8cda-d067e51fd415','대리','P',20),('cb37711b-aaec-11e6-8cda-d067e51fd416','과장대우','P',30),('cb37711b-aaec-11e6-8cda-d067e51fd417','과장','P',40),('cb37711b-aaec-11e6-8cda-d067e51fd418','차장대우','P',50),('cb37711b-aaec-11e6-8cda-d067e51fd419','차장','P',60),('cb37711b-aaec-11e6-8cda-d067e51fd420','부장대우','P',70),('cb37711b-aaec-11e6-8cda-d067e51fd421','부장','P',80),('cb37711b-aaec-11e6-8cda-d067e51fd422','부국장대우','P',90),('cb37711b-aaec-11e6-8cda-d067e51fd423','부국장','P',100),('cb37711b-aaec-11e6-8cda-d067e51fd424','국장대우','P',110),('cb37711b-aaec-11e6-8cda-d067e51fd425','국장','P',120),('cb37711b-aaec-11e6-8cda-d067e51fd427','이사','P',130),('cb37711b-aaec-11e6-8cda-d067e51fd428','팀장','R',1000),('cb37711b-aaec-11e6-8cda-d067e51fd429','부장','R',2000),('cb37711b-aaec-11e6-8cda-d067e51fd430','본부장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd431','소장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd432','국장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd433','실장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd434','원장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd435','부원장','R',3500),('cb37711b-aaec-11e6-8cda-d067e51fd436','계약직원','P',5);
+INSERT INTO `position` VALUES ('1e2032f2-deba-49ed-82de-a70fd241734b','사장','R',10000),('cb37711b-aaec-11e6-8cda-d067e51fd414','사원','P',10),('cb37711b-aaec-11e6-8cda-d067e51fd415','대리','P',20),('cb37711b-aaec-11e6-8cda-d067e51fd416','과장대우','P',30),('cb37711b-aaec-11e6-8cda-d067e51fd417','과장','P',40),('cb37711b-aaec-11e6-8cda-d067e51fd418','차장대우','P',50),('cb37711b-aaec-11e6-8cda-d067e51fd419','차장','P',60),('cb37711b-aaec-11e6-8cda-d067e51fd420','부장대우','P',70),('cb37711b-aaec-11e6-8cda-d067e51fd421','부장','P',80),('cb37711b-aaec-11e6-8cda-d067e51fd422','부국장대우','P',90),('cb37711b-aaec-11e6-8cda-d067e51fd423','부국장','P',100),('cb37711b-aaec-11e6-8cda-d067e51fd424','국장대우','P',110),('cb37711b-aaec-11e6-8cda-d067e51fd425','국장','P',120),('cb37711b-aaec-11e6-8cda-d067e51fd427','이사','P',130),('cb37711b-aaec-11e6-8cda-d067e51fd428','팀장','R',1000),('cb37711b-aaec-11e6-8cda-d067e51fd429','부장','R',2000),('cb37711b-aaec-11e6-8cda-d067e51fd430','본부장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd431','소장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd432','국장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd433','실장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd434','원장','R',4000),('cb37711b-aaec-11e6-8cda-d067e51fd435','부원장','R',3500),('cb37711b-aaec-11e6-8cda-d067e51fd436','계약직원','P',5),('3cd235ac-5390-4b6c-8db1-7299bea560d1','대표이사','P',11000);
 /*!40000 ALTER TABLE `position` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -435,7 +487,7 @@ CREATE TABLE `user_authority` (
 
 LOCK TABLES `user_authority` WRITE;
 /*!40000 ALTER TABLE `user_authority` DISABLE KEYS */;
-INSERT INTO `user_authority` VALUES ('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd415'),('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd416'),('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419'),('yongkum@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('goindol@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('goindol@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd417'),('goindol@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419'),('rainy@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('myungwons@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yuzibosu@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yuzibosu@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd417'),('shlee@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yds0903@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('chan@chopsun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yunju@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yunju@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419'),('bigfoot@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('bigfoot@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419');
+INSERT INTO `user_authority` VALUES ('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd415'),('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd416'),('andrew@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419'),('yongkum@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('goindol@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('goindol@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd417'),('goindol@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419'),('rainy@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('myungwons@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yuzibosu@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yuzibosu@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd417'),('shlee@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yds0903@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yunju@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('yunju@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419'),('bigfoot@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd414'),('bigfoot@chosun.com','45338ea5-aaea-11e6-8cda-d067e51fd419'),('chan@chopsun.com','45338ea5-aaea-11e6-8cda-d067e51fd414');
 /*!40000 ALTER TABLE `user_authority` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -459,7 +511,7 @@ CREATE TABLE `user_dept_position` (
 
 LOCK TABLES `user_dept_position` WRITE;
 /*!40000 ALTER TABLE `user_dept_position` DISABLE KEYS */;
-INSERT INTO `user_dept_position` VALUES ('yongkum@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd421'),('goindol@chosun.com','9c247a2d-77b1-457a-ba9b-43c972125ab6','cb37711b-aaec-11e6-8cda-d067e51fd421'),('goindol@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd428'),('rainy@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd419'),('myungwons@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd416'),('yuzibosu@chosun.com','361a569f-34c3-4520-baf7-f0d32abae6a0','cb37711b-aaec-11e6-8cda-d067e51fd428'),('shlee@chosun.com','361a569f-34c3-4520-baf7-f0d32abae6a0','cb37711b-aaec-11e6-8cda-d067e51fd419'),('yds0903@chosun.com','361a569f-34c3-4520-baf7-f0d32abae6a0','cb37711b-aaec-11e6-8cda-d067e51fd415'),('andrew@chosun.com','d35c8fa9-7fe9-4820-accb-5dfa26b56689','cb37711b-aaec-11e6-8cda-d067e51fd429'),('chan@chopsun.com','digital_chosunilbo','1e2032f2-deba-49ed-82de-a70fd241734b'),('yunju@chosun.com','aaaadfdfd','cb37711b-aaec-11e6-8cda-d067e51fd431'),('yunju@chosun.com','aaaadfdfd','cb37711b-aaec-11e6-8cda-d067e51fd425'),('bigfoot@chosun.com','36000a74-9c12-4061-9cce-86642f18a09b','cb37711b-aaec-11e6-8cda-d067e51fd432'),('bigfoot@chosun.com','b7bceead-35f2-465c-8b0d-e3819b1d622f','cb37711b-aaec-11e6-8cda-d067e51fd429'),('bigfoot@chosun.com','36000a74-9c12-4061-9cce-86642f18a09b','cb37711b-aaec-11e6-8cda-d067e51fd425');
+INSERT INTO `user_dept_position` VALUES ('yongkum@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd421'),('goindol@chosun.com','9c247a2d-77b1-457a-ba9b-43c972125ab6','cb37711b-aaec-11e6-8cda-d067e51fd421'),('goindol@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd428'),('rainy@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd419'),('myungwons@chosun.com','0a3849ba-c180-47e7-8118-a037d6f3c4ba','cb37711b-aaec-11e6-8cda-d067e51fd416'),('yuzibosu@chosun.com','361a569f-34c3-4520-baf7-f0d32abae6a0','cb37711b-aaec-11e6-8cda-d067e51fd428'),('shlee@chosun.com','361a569f-34c3-4520-baf7-f0d32abae6a0','cb37711b-aaec-11e6-8cda-d067e51fd419'),('yds0903@chosun.com','361a569f-34c3-4520-baf7-f0d32abae6a0','cb37711b-aaec-11e6-8cda-d067e51fd415'),('andrew@chosun.com','d35c8fa9-7fe9-4820-accb-5dfa26b56689','cb37711b-aaec-11e6-8cda-d067e51fd429'),('yunju@chosun.com','aaaadfdfd','cb37711b-aaec-11e6-8cda-d067e51fd431'),('yunju@chosun.com','aaaadfdfd','cb37711b-aaec-11e6-8cda-d067e51fd425'),('bigfoot@chosun.com','36000a74-9c12-4061-9cce-86642f18a09b','cb37711b-aaec-11e6-8cda-d067e51fd432'),('bigfoot@chosun.com','b7bceead-35f2-465c-8b0d-e3819b1d622f','cb37711b-aaec-11e6-8cda-d067e51fd429'),('bigfoot@chosun.com','36000a74-9c12-4061-9cce-86642f18a09b','cb37711b-aaec-11e6-8cda-d067e51fd425'),('chan@chopsun.com','digital_chosunilbo','1e2032f2-deba-49ed-82de-a70fd241734b'),('chan@chopsun.com','digital_chosunilbo','3cd235ac-5390-4b6c-8db1-7299bea560d1');
 /*!40000 ALTER TABLE `user_dept_position` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -485,7 +537,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('andrew@chosun.com','현곤','김','hgkim1130','Y'),('bigfoot@chosun.com','대범','편','$2a$10$i17AY8ClCK5.y.i2gVhpru4DPvaVSs.7TWWTIVpAqfpLDv34CG.n.','Y'),('chan@chopsun.com','찬','김','$2a$10$/sE9W28AnxwGDb34hCFFE.ZT4MESubh.2tnrLYq1XUcucgFP12WyG','Y'),('goindol@chosun.com','웅찬','길','1234','Y'),('myungwons@chosun.com','명원','이','$2a$10$hoq6AEuVdODXFHljcfGstOicD3jSY1emzi7UtJpZDxk0Z2egIlN3i','Y'),('rainy@chosun.com','은영','조','$2a$10$jmmqJopx65IGIdHaLgx9HuTeJ45/OmcpOyNB7SMnyul86asPCwQqe','Y'),('shlee@chosun.com','상혁','이','$2a$10$keiybgdrlUVcDCBDGm8U4uPC05W78mupC7E9Tyh1iawIaGH71k3RG','Y'),('yds0903@chosun.com','동식','윤','$2a$10$miAnvnA/qoICzGAkD0h2iusrxFQzeBIfHcAWDnbbYBB8a6NNZJA0u','Y'),('yongkum@chosun.com','세원','김','$2a$10$B3SVyBeEPR/aInw4BR9breCFCiixOguqEhv/NKUSwvbxM.bV/WqxS','Y'),('yunju@chosun.com','윤주','안','$2a$10$vKCB/aqgKLSGBf/AJDWBB.UomEXaEx8ShpMXlWLhp60L8huoQ1Zyu','Y'),('yuzibosu@chosun.com','원기','배','$2a$10$b5EEKD3aXa2XsF08t5hfneaJe8HLYMIr1Wb1bOuLs/oHw9ySIFSjO','Y');
+INSERT INTO `users` VALUES ('andrew@chosun.com','현곤','김','hgkim1130','Y'),('bigfoot@chosun.com','대범','편','1234','Y'),('chan@chopsun.com','찬','김','$2a$10$TFr7u1uuw3SmEyKqwWs7rOS8MRw//iV6aPPUYq0.1ZqhqgfjVElUi','Y'),('goindol@chosun.com','웅찬','길','1234','Y'),('myungwons@chosun.com','명원','이','$2a$10$hoq6AEuVdODXFHljcfGstOicD3jSY1emzi7UtJpZDxk0Z2egIlN3i','Y'),('rainy@chosun.com','은영','조','$2a$10$jmmqJopx65IGIdHaLgx9HuTeJ45/OmcpOyNB7SMnyul86asPCwQqe','Y'),('shlee@chosun.com','상혁','이','$2a$10$keiybgdrlUVcDCBDGm8U4uPC05W78mupC7E9Tyh1iawIaGH71k3RG','Y'),('yds0903@chosun.com','동식','윤','$2a$10$miAnvnA/qoICzGAkD0h2iusrxFQzeBIfHcAWDnbbYBB8a6NNZJA0u','Y'),('yongkum@chosun.com','세원','김','$2a$10$B3SVyBeEPR/aInw4BR9breCFCiixOguqEhv/NKUSwvbxM.bV/WqxS','Y'),('yunju@chosun.com','윤주','안','1234','Y'),('yuzibosu@chosun.com','원기','배','$2a$10$b5EEKD3aXa2XsF08t5hfneaJe8HLYMIr1Wb1bOuLs/oHw9ySIFSjO','Y');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -498,4 +550,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-13 19:06:25
+-- Dump completed on 2017-02-02 19:11:31
