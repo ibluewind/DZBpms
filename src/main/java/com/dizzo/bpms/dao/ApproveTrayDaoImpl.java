@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.taglibs.standard.tag.el.sql.UpdateTag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -199,36 +198,17 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 				if (tray.getUserId().equals(line.getApprovalId())) {
 					tray.setType(ApproveTrayType.UNDECIDE.getType());
 					tray = this.update(tray);
+					
+					trays.set(trays.indexOf(tray), tray);
 				}
 			}
+		} else {
+			return null;
 		}
-		return null;
+		
+		return trays;
 	}
 	
-	private ApproveTray findNextApproveTray(String userId, String appId, List<ApproveTray> trays) {
-		Iterator	it = null;
-		ApproveTray			tray = null;
-		List<ApproveLine>	appLines = appLineService.getByAppId(appId);
-		ApproveLine			line = null;
-		
-		it = appLines.iterator();
-		while (it.hasNext()) {
-			line = (ApproveLine)it.next();
-			
-			if (userId.equals(line.getApprovalId()))	break;
-		}
-		// next approvalId
-		int	idx = appLines.indexOf(line);
-		
-		if ((idx + 1) == appLines.size())	return null;
-		else {
-			it = trays.iterator();
-			
-		}
-		
-		return tray;
-	}
-
 	private List<ApproveTray>	getTray(String userId, String type) {
 		String query = "SELECT s.appId,"
 				 + " s.title 'appTitle',"

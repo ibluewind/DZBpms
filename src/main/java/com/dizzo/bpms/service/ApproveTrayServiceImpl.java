@@ -79,4 +79,9 @@ public class ApproveTrayServiceImpl implements ApproveTrayService {
 		return dao.expectedTray(userId);
 	}
 
+	@Override
+	public List<ApproveTray> submitTray(String userId, String appId) {
+		return dao.submitTray(userId, appId);
+	}
+
 }

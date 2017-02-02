@@ -3,6 +3,18 @@
 App.service('approveService', ['$http', '$q', '$filter',
                             function($http, $q, $filter) {
 	
+	this.submitApprove = function(line) {
+		return $http.post('/bpms/rest/approve', line)
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+	
 	this.getFormList = function() {
 		var deferred = $q.defer();
 		

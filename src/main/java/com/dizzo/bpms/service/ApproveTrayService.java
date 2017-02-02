@@ -22,4 +22,7 @@ public interface ApproveTrayService {
 	public List<ApproveTray>	completedTray(String userId);
 	public List<ApproveTray>	deferTray(String userId);
 	public List<ApproveTray>	expectedTray(String userId);
+	
+	// 결재 승인 처리
+	public List<ApproveTray>	submitTray(String userId, String appId);
 }

@@ -118,8 +118,8 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
 	@Override
 	public ApproveLine update(ApproveLine appLine) {
 		String	query = "UPDATE approve_line"
-					  + " SET status = ?, seq = ?"
- 			  + " WHERE lineId = '1c67ddfb-db8a-11e6-b937-d067e51fd414';";
+					  + " SET status = ?, seq = ?, modified=now()"
+ 			  + " WHERE lineId = ?";
 		new JdbcTemplate(dataSource).update(query, new Object[] {
 			appLine.getStatus(),
 			appLine.getSeq(),

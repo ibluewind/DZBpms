@@ -19,6 +19,7 @@ import com.dizzo.bpms.model.ApproveFormField;
 import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.ApproveStatus;
 import com.dizzo.bpms.model.ApproveSummary;
+import com.dizzo.bpms.model.ApproveTray;
 import com.dizzo.bpms.model.CustomApproveLine;
 import com.dizzo.bpms.model.Form;
 import com.dizzo.bpms.model.FormField;
@@ -26,6 +27,7 @@ import com.dizzo.bpms.model.User;
 import com.dizzo.bpms.service.ApproveFormFieldService;
 import com.dizzo.bpms.service.ApproveLineService;
 import com.dizzo.bpms.service.ApproveSummaryService;
+import com.dizzo.bpms.service.ApproveTrayService;
 import com.dizzo.bpms.service.CustomApproveLineService;
 import com.dizzo.bpms.service.FormService;
 import com.dizzo.bpms.service.UserService;
@@ -51,6 +53,9 @@ public class ApproveRestController {
 	ApproveLineService			appLineService;
 	
 	@Autowired
+	ApproveTrayService			appTrayService;
+	
+	@Autowired
 	UserService				userService;
 	
 	@RequestMapping(value="/save", method=RequestMethod.POST)
@@ -59,6 +64,38 @@ public class ApproveRestController {
 		return form;
 	}
 	
+	/**
+	 * 저장되어 있는 결재 문서 정보를 삭제한다.
+	 * 삭제할 결재 관련 테이블은 approve_form_field, approve_line, approve_summary 이다.
+	 * @param appId
+	 * @return
+	 */
+	@RequestMapping(value="/{appId}", method=RequestMethod.DELETE)
+	public ApproveSummary cancelApprove(@PathVariable String appId) {
+		formFieldService.delete(appId);
+		appLineService.deleteAll(appId);
+		return summaryService.delete(appId);
+	}
+	
+	/**
+	 * 결재 문서 승인 처리
+	 * 결재라인의 상태를 결재 완료로 업데이트하고, 결재함 정보를 수정한다.
+	 */
+	@RequestMapping(method=RequestMethod.POST)
+	public ApproveLine submitApprove(@RequestBody ApproveLine line) {
+		line.setStatus(ApproveStatus.FINISH.getStatus());
+		line = appLineService.update(line);
+		
+		List<ApproveTray> trays = appTrayService.submitTray(line.getApprovalId(), line.getAppId());
+		
+		if (trays == null) {
+			// 결재가 완료 됨.
+			// 다음 처리 부서가 있는지 확인해서 처리 부서로 결재 문서를 전달하거나, 모든 결재가 완료되었으면 해당 양식에 정의된 후 처리를 수행한다.
+			// 휴가원의 경우 사용자의 부재 일정을 부서 일정에 등록하거나, 결재 관리 시스템에 휴가 정보를 등록한다. 할 수 있다면...
+		}
+		return line;
+	}
+
 	@RequestMapping(value="/summary", method=RequestMethod.POST)
 	public ApproveSummary saveApproveSummary(@RequestBody ApproveSummary summary) {
 		System.out.println("saving summary: " + summary);
@@ -182,10 +219,6 @@ public class ApproveRestController {
 	}
 	
 	/**
-	 * 결재 문서 승인 처리
-	 */
-	
-	/**
 	 * 결재 라인을 수정한다. 결재 라인의 수정은 결재 문서가 저장 상태일 때만 가능하고, 상신 이후에는 절대 수정할 수 없다.
 	 * 따라서, 결재라인 수정은 기존의 결재라인을 삭제하고 새로운 결재 라인을 저장한다.
 	 */
@@ -195,18 +228,7 @@ public class ApproveRestController {
 		return appLineService.insert(appLines);
 	}
 	
-	/**
-	 * 저장되어 있는 결재 문서 정보를 삭제한다.
-	 * 삭제할 결재 관련 테이블은 approve_form_field, approve_line, approve_summary 이다.
-	 * @param appId
-	 * @return
-	 */
-	@RequestMapping(value="/{appId}", method=RequestMethod.DELETE)
-	public ApproveSummary cancelApprove(@PathVariable String appId) {
-		formFieldService.delete(appId);
-		appLineService.deleteAll(appId);
-		return summaryService.delete(appId);
-	}
+	@RequestMapping(value="")
 	/**
 	 * 사용자 지정 결재 라인을 시스템에 사용되는 ApproveLine으로 변환한다.
 	 * @param customLines

@@ -24,6 +24,6 @@ public interface ApproveTrayDao {
 	public List<ApproveTray>	deferTray(String userId);		// 보류함
 	public List<ApproveTray>	expectedTray(String userId);	// 예정함
 	
-	// 결재 완료 처리
+	// 결재 승인 처리
 	public List<ApproveTray>	submitTray(String userId, String appId);
 }
