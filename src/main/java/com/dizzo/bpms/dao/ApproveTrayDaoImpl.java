@@ -2,12 +2,14 @@ package com.dizzo.bpms.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -75,7 +77,16 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
   				 + " AND t.appId = s.appId"
   				 + " AND s.userId = u.userId";
 	
-	return new JdbcTemplate(dataSource).query(query, new Object[] {appId}, new ApproveTrayRowMapper());
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		List<ApproveTray>	trays = null;
+		
+		try {
+			trays = jdbcTemplate.query(query, new Object[] {appId}, new ApproveTrayRowMapper());
+		} catch (EmptyResultDataAccessException e) {
+			trays = new ArrayList<ApproveTray>();
+		}
+		
+		return trays;
 	}
 
 	@Override

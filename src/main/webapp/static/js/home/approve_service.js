@@ -3,6 +3,100 @@
 App.service('approveService', ['$http', '$q', '$filter',
                             function($http, $q, $filter) {
 	
+	/**
+	 * 결재 양식 정보를 조회한다. (결재 문서 신규 작성시)
+	 * 1. 결재 양식 정보
+	 * 2. 결재 양식 필드 정보
+	 * 3. 결재 라인 정보
+	 */
+	this.getDocumentInformation = function(formId) {
+		var deferred = $q.defer();
+		var func_form = $http.get('/bpms/rest/form/' + formId),
+			func_fields = $http.get('/bpms/rest/form/field/' + formId),
+			func_lines = $http.get('/bpms/rest/approve/line/' + formId);
+		
+		$q.all([func_form, func_fields, func_lines])
+		.then(
+			function(results) {
+				deferred.resolve(results);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+		
+		return deferred.promise;
+	};
+	
+	/**
+	 * 결재 문서 정보를 한번에 조회한다. (저장된 문서 수정 또는 결재시)
+	 * 1. 결재 요약 정보 (approve_summary)
+	 * 2. 양식 정보 (approve_form, approve_form_field)
+	 * 3. 결재함 정보???
+	 * 3. 저장된 결재 라인 정보 (approve_line)
+	 */
+	this.getSavedDocumentInformation = function(appId) {
+		var	deferred = $q.defer();
+		var func_summary = $http.get('/bpms/rest/approve/summary/get/' + appId),
+			func_form = $http.get('/bpms/rest/approve/form/' + appId),
+			func_fields = $http.get('/bpms/rest/approve/formFields/' + appId),
+			func_tray = $http.get('/bpms/rest/approve/tray/doc/' + appId),
+			func_lines = $http.get('/bpms/rest/approve/line/save/' + appId);
+		
+			$q.all([func_summary, func_form, func_fields, func_tray, func_lines])
+			.then(
+				function(results) {
+					deferred.resolve(results);
+				},
+				function(err) {
+					$q.reject();
+				}
+			);
+			
+			return deferred.promise;
+	};
+	
+	/**
+	 * 결재 문서 작성중 임시 저장
+	 * 저장 대상은
+	 * 1. 결재 요약 정보
+	 * 2. 양식 필드 데이터
+	 * 3. 결재 라인
+	 */
+	this.saveApproveDocument = function(document, approve, status) {
+		// 결재 요약 정보를 먼저 저장한다. 요약 정보를 저장하면 WAS로 부터 결재 아이디를 부여 받아 나머지 데이터를 저장할 수 있다.
+		
+		$http.post('/bpms/rest/approve/summary', document.summary)
+		.then(
+			function(response) {
+				document.summary = response.data;
+				document.form.appId = document.summary.appId;
+				
+				for (var i = 0; i < approve.lines.length; i++) {
+					approve.lines[i].appId = document.summary.appId;
+					approve.lines[i].status = status;
+				}
+				
+				console.log('document: ', document);
+				console.log('approve: ', approve);
+				
+				var func_fields = $http.post('/bpms/rest/approve/formField', document.form),
+					func_lines =$http.post('/bpms/rest/approve/line/save', approve.lines);
+				
+				$q.all([func_fields, func_lines]).
+				then(
+					function(results) {
+						console.log('Saved approve document successfully');
+						return;
+					},
+					function(err) {
+						$q.reject(err);
+					}
+				);
+			}
+		);
+	};
+	
 	this.submitApprove = function(line) {
 		return $http.post('/bpms/rest/approve', line)
 		.then(
@@ -263,56 +357,7 @@ App.service('approveService', ['$http', '$q', '$filter',
 		return deferred.promise;
 	};
 	
-	/**
-	 * 결재 양식 정보를 조회한다. (결재 문서 신규 작성시)
-	 * 1. 결재 양식 정보
-	 * 2. 결재 양식 필드 정보
-	 * 3. 결재 라인 정보
-	 */
-	this.getFormInformation = function(formId) {
-		var deferred = $q.defer();
-		var formInfo = $http.get('/bpms/rest/form/' + formId),
-			formFields = $http.get('/bpms/rest/form/field/' + formId),
-			appLines = $http.get('/bpms/rest/approve/line/' + formId);
-		
-		$q.all([formInfo, formFields, appLines])
-		.then(
-			function(results) {
-				deferred.resolve(results);
-			},
-			function(err) {
-				$q.reject(err);
-			}
-		);
-		
-		return deferred.promise;
-	};
 	
-	/**
-	 * 결재 문서 정보를 한번에 조회한다. (저장된 문서 수정 또는 결재시)
-	 * 1. 결재 요약 정보 (approve_summary)
-	 * 2. 양식 정보 (approve_form, approve_form_field)
-	 * 3. 저장된 결재 라인 정보 (approve_line)
-	 */
-	this.getApproveDocumentInformation = function(appId) {
-		var	deferred = $q.defer();
-		var summary = $http.get('/bpms/rest/approve/summary/get/' + appId),
-			formInfo = $http.get('/bpms/rest/approve/form/' + appId),
-			fieldInfo = $http.get('/bpms/rest/approve/formFields/' + appId),
-			appLine = $http.get('/bpms/rest/approve/line/save/' + appId);
-		
-			$q.all([summary, formInfo, fieldInfo, appLine])
-			.then(
-				function(results) {
-					deferred.resolve(results);
-				},
-				function(err) {
-					$q.reject();
-				}
-			);
-			
-			return deferred.promise;
-	};
 	
 	
 	/**
@@ -331,6 +376,8 @@ App.service('approveService', ['$http', '$q', '$filter',
 	};
 	
 	this.parseFormField = function(fields) {
+		console.log('fields: ', fields);
+		
 		var result = [];
 		var clause = [];
 		// category별, clause별로 구분한다.
@@ -364,7 +411,7 @@ App.service('approveService', ['$http', '$q', '$filter',
 						clause = ($filter('filter')(cats, {clause:currentClause}));
 					}
 					
-					// 분류된 claus를 resulst['fieldRows'][currentClause]에 넣는다.
+					// 분류된 clause를 results['fieldRows'][currentClause]에 넣는다.
 					var val = [];
 					for (var k = 0; k < clause.length; k++) {
 						val[clause[k].name] = clause[k].value;
@@ -381,6 +428,7 @@ App.service('approveService', ['$http', '$q', '$filter',
 			}
 		}
 		
+		console.log('result: ', result);
 		return result;
 	};
 	

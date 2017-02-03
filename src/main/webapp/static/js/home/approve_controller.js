@@ -1,21 +1,34 @@
 'use strict';
 
+/**
+ * 결재에 대한 자료 구조는 두 가지로 분리한다.
+ * 1. Document
+ * 	Document는 결재 양식에 대한 정보이면, 양식 모양(템플릿)과 양식 필드, 문서 요약 정보 (approve_summary)로 구성된다.
+ * 	전체적인 구조는 다음과 같다.
+ * 	document
+ * 	document.form : Form.java에 해당한다.
+ * 	document.form.fields : FormField.java에 해당하며 배열 형태이다.
+ * 	document.summary : ApproveSummary.java에 해당한다.
+ * 
+ * 2. Approve
+ * Approve는 실제 결재 진행에 필요한 정보이며, 결재라인(ApproveLine)과 결재함(ApproveTray) 정보로 구성된다.
+ * 전체적인 구조는 다음과 같다.
+ * approve
+ * approve.line : ApproveLine.java에 해당하며 배열 형태이다.
+ * approve.tray : ApproveTray.java에 해당하며 배열 형태 또는 단독 오브젝트이다.
+ */
 App
-.controller('registAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', '$rootScope', '$routeParams', '$location',
-	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, $rootScope, $routeParams, $location) {
+.controller('registAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', '$rootScope', '$routeParams', '$location',
+	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, $rootScope, $routeParams, $location) {
 
 	// 결재 문서 작성
 	var self = this;
 	var formId = '';
 	var appId = '';
 	var action = $routeParams.action;
+	var document = {}, approve = {};
 	var history = {};
-	
-	history.historyId = '';
-	history.appId = '';
-	history.comment = '';
-	history.created = '';
-	history.userId = self.user.userId;
+	var prevUrl = $rootScope.prevUrl || '/list_app';
 	
 	self.edit = false;
 	self.proc = false;
@@ -29,26 +42,41 @@ App
 		appId = $routeParams.id;
 	}
 	
+	console.log('action = ' + action + ', appId = ' + appId + ', formId = ' + formId);
+	
 	if (action == 'edit')	self.edit = true;		// 수정 가능
 	if (action == 'proc')	self.proc = true;		// 수정 불가, 결재 가능
 	
-	self.form = {};
-	self.form.fields = [];
-	self.user = {};
-	self.approveLine = [];
-	self.summary = {};
-	
 	self.user = userService.getLoggedInUser();
+	
+	history.historyId = '';
+	history.appId = '';
+	history.comment = '';
+	history.created = '';
+	history.userId = self.user.userId;
 	
 	if (action == 'regist') {
 		// 결재 양식 정보 조회
-		approveService.getFormInformation(formId)
+		approveService.getDocumentInformation(formId)
 		.then(
 			function(results) {
-				self.form = results[0].data;
-				self.form.fields = approveService.parseFormField(results[1].data);
-				self.approveLine = results[2].data;
+				document.form = results[0].data;
+				document.form.formId = formId;
+				document.form.fields = approveService.parseFormField(results[1].data);
+				document.summary = {};
 				
+				approve.lines = results[2].data;
+				
+				console.log('DEBUG: document: ', document);
+				console.log('DEBUG: approve: ', approve);
+				
+				self.form = document.form;
+				self.form.fields = document.form.fields;
+				self.approveLine = approve.lines;
+				
+				/**
+				 * 양식 기본 필드 설정
+				 */
 				self.form.fields['userName'] = self.user.lastName + self.user.firstName;
 				self.form.fields['deptName'] = self.user.deptPositions[0].deptName;
 				self.form.fields['positionName'] = self.user.deptPositions[0].positionName;
@@ -58,14 +86,25 @@ App
 			}
 		);
 	} else {
-		// 결재 문서 정보 조회
-		approveService.getApproveDocumentInformation(appId)
+		// 저장된 결재 문서 정보 조회
+		console.log('get saved document information');
+		approveService.getSavedDocumentInformation(appId)
 		.then(
 			function(results) {
-				self.summary = results[0].data;
-				self.form = results[1].data;
-				self.form.fields = approveService.parseFormField(results[2].data);
-				self.approveLine = results[3].data;
+				document.summary = results[0].data;
+				document.form = results[1].data;
+				document.form.formId = document.summary.appId;
+				document.form.fields = approveService.parseFormField(results[2].data);
+				
+				approve.trays = results[3].data;
+				approve.lines = results[4].data;
+				
+				self.summary = document.summary;
+				self.form = document.form;
+				self.form.fields = document.form.fields;
+				
+				self.approveTrays = approve.trays;
+				self.approveLine = approve.lines;
 			},
 			function(err) {
 				console.error('Error while fetching Approve Document Information');
@@ -131,13 +170,8 @@ App
 	 */
 	self.saveApprove = function(status) {
 		// 결재 임시 저장
-		
-		var formFields = approveService.makeFormField(self.form.fields);
-		var form = {};
-		
-		form.appId = '';
-		form.formId = formId;
-		form.formFields = formFields;
+		document.form.appId = '';
+		document.form.formFields = approveService.makeFormField(self.form.fields);
 		
 		// ApproveSummary 부터 저장한 후, FromFields를 저장한다.
 		var summary = {};
@@ -149,24 +183,13 @@ App
 		summary.title = getFormTitle();
 		summary.status = status;
 		
-		history.status = status;
+		document.summary = summary;
 		
 		if (action == 'regist') {
-			approveService.saveApproveSummary(summary)
-			.then(
-				function(result) {
-					form.appId = result.appId;
-					history.appId = result.appId;
-					
-					saveApproveFormField(form);
-					saveApproveLine(form.appId, status);
-					
-					saveHistory(history);
-				},
-				function(err) {
-					console.error('Error while saving Approve Summary information');
-				}
-			);
+			approveService.saveApproveDocument(document, approve, status);
+			$location.path(prevUrl);
+			
+			// 결재 이력 저장
 		} else if (action == 'edit') {
 			summary = self.summary;
 			summary.status = status;
@@ -188,6 +211,17 @@ App
 		}
 		
 		$location.path('/list_app');
+	};
+	
+	self.removeApprove = function() {
+		deleteConfirm.show()
+		.then(
+			function(answer) {
+				if (answer == 'yes') {
+					
+				}
+			}
+		);
 	};
 	
 	/**

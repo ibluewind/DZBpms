@@ -33,15 +33,15 @@ App
 	})
 	.when('/regist_app/:id', {
 		templateUrl: function(params) {
-			return '/bpms/app/regist/' + params.formId;
+			return '/bpms/app/regist/' + params.id;
 		},
 		controller: 'registAppController as ctrl'
 	})
-	.when('/edit_app/:appId', {
+	.when('/edit_app/:id', {
 		templateUrl: function(params) {
-			return '/bpms/app/edit/' + params.appId;
+			return '/bpms/app/edit/' + params.id;
 		},
-		controller: 'editAppController as ctrl'
+		controller: 'registAppController as ctrl'
 	})
 	.when('/proc_app/:appId', {
 		templateUrl: function(params) {

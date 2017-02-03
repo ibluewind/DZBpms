@@ -99,9 +99,9 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
 				ps.setString(1, line.getAppId());
 				ps.setString(2, line.getLineId());
 				ps.setString(3, line.getApprovalId());
-				ps.setTimestamp(5, line.getSeq() == 0 ? new Timestamp(new Date().getTime()): null);
-				ps.setString(6, line.getStatus());
-				ps.setInt(7, line.getSeq());
+				ps.setTimestamp(4, line.getSeq() == 0 ? new Timestamp(new Date().getTime()): null);
+				ps.setString(5, line.getStatus());
+				ps.setInt(6, line.getSeq());
 			}
 			
 			@Override

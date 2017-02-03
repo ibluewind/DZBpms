@@ -47,6 +47,7 @@ public class ApprovePageController {
 	 */
 	@RequestMapping(value="/regist/{formId}", method=RequestMethod.GET)
 	public String getFormTemplate(@PathVariable String formId, ModelMap model) {
+		System.out.println("formid = " + formId);
 		Form		form = formService.getById(formId);
 		List<FileAttach>	files = fileService.listByMainId(formId);
 		FileAttach	file = files.get(0);
