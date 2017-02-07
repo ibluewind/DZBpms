@@ -58,12 +58,11 @@ public class ApproveRestController {
 	@Autowired
 	UserService				userService;
 	
-	@RequestMapping(value="/save", method=RequestMethod.POST)
-	public Object saveApprove(@RequestBody ApproveFormField form) {
-		System.out.println("Save Approve: " + form);
-		return form;
+	@RequestMapping(value="/form/{appId}", method=RequestMethod.GET)
+	public Form getFormInformationByApproveId(@PathVariable String appId) {
+		return formService.getByAppId(appId);
 	}
-	
+
 	/**
 	 * 저장되어 있는 결재 문서 정보를 삭제한다.
 	 * 삭제할 결재 관련 테이블은 approve_form_field, approve_line, approve_summary 이다.
@@ -71,9 +70,10 @@ public class ApproveRestController {
 	 * @return
 	 */
 	@RequestMapping(value="/{appId}", method=RequestMethod.DELETE)
-	public ApproveSummary cancelApprove(@PathVariable String appId) {
+	public ApproveSummary deleteApprove(@PathVariable String appId) {
 		formFieldService.delete(appId);
 		appLineService.deleteAll(appId);
+		appTrayService.deleteAll(appId);
 		return summaryService.delete(appId);
 	}
 	
@@ -101,33 +101,24 @@ public class ApproveRestController {
 		System.out.println("saving summary: " + summary);
 		return summaryService.insert(summary);
 	}
-	
-	/**
-	 * 결재 요약 정보를 수정하는 경우는 사용자가 결재문서를 저장했다가 불러와서 상신하거나, 재 저장을 할 떄이다.
-	 * 기존 요약 정보의 내용을 수정하고, 기존의 양식 필드와 결재 라인 정보를 삭제한다.
-	 * 양식 필드와 결재 라인 정보는 스크립트에서 새로운 정보를 저장한다.
-	 * WAS에서 이렇게 처리함으로써 JS에서는 좀 더 단순한 프로세스 플로우를 작성할 수 있다.
-	 * 저장이던 수정이던, 항상 양식 필드 정보와 결재 라인은 저장만 한다.
-	 * @param summary
-	 * @return
-	 */
+
 	@RequestMapping(value="/summary", method=RequestMethod.PUT)
 	public ApproveSummary updateApproveSummary(@RequestBody ApproveSummary summary) {
-		/**
-		 * summary update의 경우, 반드시 이어서 수정된 form field를 저장해야 한다.
-		 * 그러면, 여기서 아예 기존 form field를 삭제하고 JS에서 save하는 것이 나을 듯...
-		 */
-		formFieldService.delete(summary.getAppId());
-		/**
-		 * 기존의 결재라인 정보를 삭제한다.
-		 * 새로운(또는 변경 없는) 결재라인은 JS에서 저장을 호출한다.
-		 */
-		appLineService.deleteAll(summary.getAppId());
-		
 		return summaryService.update(summary);
 	}
-	
-	@RequestMapping(value="/formField", method=RequestMethod.POST)
+
+	@RequestMapping(value="/summary/user/{userId}/", method=RequestMethod.GET)
+	public List<ApproveSummary> getApproveSummaryList(@PathVariable String userId) {
+		System.out.println("get approve summary list for " + userId);
+		return summaryService.list(userId);
+	}
+
+	@RequestMapping(value="/summary/doc/{appId}", method=RequestMethod.GET)
+	public ApproveSummary getApproveSummaryByAppId(@PathVariable String appId) {
+		return summaryService.getByAppId(appId);
+	}
+
+	@RequestMapping(value="/fields", method=RequestMethod.POST)
 	public ApproveFormField saveApproveFormField(@RequestBody ApproveFormField formField) {
 		/**
 		 * ApproveFormField 객체는 Restfule API를 위한 개체이면 DAO에 사용되는 개체는 ApproveFormField의
@@ -140,26 +131,32 @@ public class ApproveRestController {
 		formFieldService.insert(appId, formId, fields);
 		return formField;
 	}
+
+	@RequestMapping(value="/fields", method=RequestMethod.PUT)
+	public ApproveFormField updateApproveFormField(@RequestBody ApproveFormField formFields) {
+		// 기존의 form fields를 삭제하고 새로 저장한다.
+		String	appId = formFields.getAppId();
+		String	formId = formFields.getFormId();
+		List<FormField>	fields = formFields.getFormFields();
+		
+		formFieldService.delete(appId);
+		formFieldService.insert(appId, formId, fields);
+		return formFields;
+	}
 	
-	@RequestMapping(value="/formFields/{appId}", method=RequestMethod.GET)
+	@RequestMapping(value="/fields/{appId}", method=RequestMethod.DELETE)
+	public String deleteFormFields(@PathVariable String appId) {
+		return formFieldService.delete(appId);
+	}
+	
+	@RequestMapping(value="/fields/{appId}", method=RequestMethod.GET)
 	public List<FormField> getApproveFormFields(@PathVariable String appId) {
 		return formFieldService.getFormFields(appId);
 	}
-	
-	@RequestMapping(value="/summary/{userId}/", method=RequestMethod.GET)
-	public List<ApproveSummary> getApproveSummaryList(@PathVariable String userId) {
-		System.out.println("get approve summary list for " + userId);
-		return summaryService.list(userId);
-	}
-	
-	@RequestMapping(value="/summary/get/{appId}", method=RequestMethod.GET)
-	public ApproveSummary getApproveSummaryByAppId(@PathVariable String appId) {
-		return summaryService.getByAppId(appId);
-	}
-	
-	@RequestMapping(value="/form/{appId}", method=RequestMethod.GET)
-	public Form getFormInformationByApproveId(@PathVariable String appId) {
-		return formService.getByAppId(appId);
+
+	@RequestMapping(value="/lines/{appId}", method=RequestMethod.DELETE)
+	public List<ApproveLine> deleteApproveLines(@PathVariable String appId) {
+		return appLineService.deleteAll(appId);
 	}
 	
 	/**
@@ -168,7 +165,7 @@ public class ApproveRestController {
 	 * @param formId
 	 * @return 사용자 정의 결재 라인
 	 */
-	@RequestMapping(value="/line/{formId}", method=RequestMethod.GET)
+	@RequestMapping(value="/lines/{formId}", method=RequestMethod.GET)
 	public List<ApproveLine> getAppoveLines(@PathVariable String formId) {
 		String	userId = getPrincipal();
 		List<ApproveLine>	lines = null;
@@ -204,7 +201,7 @@ public class ApproveRestController {
 	 * 저장된 결재 문서를 불러 오거나, 상신 결재 문서를 결재하기 위해 불러 올 때 정의된 결재 라인을 조회한다.
 	 * @return
 	 */
-	@RequestMapping(value="/line/save/{appId}", method=RequestMethod.GET)
+	@RequestMapping(value="/lines/save/{appId}", method=RequestMethod.GET)
 	public List<ApproveLine> getSavedApproveLine(@PathVariable String appId) {
 		return appLineService.getByAppId(appId);
 	}
@@ -213,7 +210,7 @@ public class ApproveRestController {
 	 * 결재 문서를 저장하거나 상신할 때, 결재 라인을 저장한다.
 	 * @return
 	 */
-	@RequestMapping(value="/line/save", method=RequestMethod.POST)
+	@RequestMapping(value="/lines/save", method=RequestMethod.POST)
 	public List<ApproveLine> saveApporveLine(@RequestBody List<ApproveLine> appLines) {
 		return appLineService.insert(appLines);
 	}
@@ -222,7 +219,7 @@ public class ApproveRestController {
 	 * 결재 라인을 수정한다. 결재 라인의 수정은 결재 문서가 저장 상태일 때만 가능하고, 상신 이후에는 절대 수정할 수 없다.
 	 * 따라서, 결재라인 수정은 기존의 결재라인을 삭제하고 새로운 결재 라인을 저장한다.
 	 */
-	@RequestMapping(value="/line/{appId}", method=RequestMethod.PUT)
+	@RequestMapping(value="/lines/{appId}", method=RequestMethod.PUT)
 	public List<ApproveLine> updateApproveLine(@PathVariable String appId, @RequestBody List<ApproveLine> appLines) {
 		appLineService.deleteAll(appId);
 		return appLineService.insert(appLines);

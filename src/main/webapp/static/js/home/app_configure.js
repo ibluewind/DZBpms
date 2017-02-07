@@ -35,19 +35,19 @@ App
 		templateUrl: function(params) {
 			return '/bpms/app/regist/' + params.id;
 		},
-		controller: 'registAppController as ctrl'
+		controller: 'editAppController as ctrl'
 	})
 	.when('/edit_app/:id', {
 		templateUrl: function(params) {
 			return '/bpms/app/edit/' + params.id;
 		},
-		controller: 'registAppController as ctrl'
+		controller: 'editAppController as ctrl'
 	})
 	.when('/proc_app/:appId', {
 		templateUrl: function(params) {
 			return '/bpms/app/edit/' + params.appId;
 		},
-		controller: 'procAppController as ctrl'
+		controller: 'editAppController as ctrl'
 	})
 	.when('/undecide_app', {
 		templateUrl: '/bpms/app/undecide',

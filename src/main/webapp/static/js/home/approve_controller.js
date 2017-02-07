@@ -18,8 +18,8 @@
  * approve.tray : ApproveTray.java에 해당하며 배열 형태 또는 단독 오브젝트이다.
  */
 App
-.controller('registAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', '$rootScope', '$routeParams', '$location',
-	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, $rootScope, $routeParams, $location) {
+.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', '$rootScope', '$routeParams', '$location',
+	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, $rootScope, $routeParams, $location) {
 
 	// 결재 문서 작성
 	var self = this;
@@ -32,6 +32,7 @@ App
 	
 	self.edit = false;
 	self.proc = false;
+	self.owner = true;
 	
 	if (action == 'regist') {
 		formId = $routeParams.id;
@@ -91,9 +92,12 @@ App
 		approveService.getSavedDocumentInformation(appId)
 		.then(
 			function(results) {
+				console.log('results: ', results);
+				
 				document.summary = results[0].data;
 				document.form = results[1].data;
-				document.form.formId = document.summary.appId;
+				document.form.appId = document.summary.appId;
+				document.form.formId = document.summary.formId;
 				document.form.fields = approveService.parseFormField(results[2].data);
 				
 				approve.trays = results[3].data;
@@ -105,6 +109,9 @@ App
 				
 				self.approveTrays = approve.trays;
 				self.approveLine = approve.lines;
+				
+				if (self.user.userId != self.summary.userId)	self.owner = false;
+				history.appId = self.summary.appId;
 			},
 			function(err) {
 				console.error('Error while fetching Approve Document Information');
@@ -164,74 +171,63 @@ App
 		self.approveLine.splice(index, 1);
 	};
 	
-	/**
-	 * 결재 저장은 작성자만 수행할 수 있는 기능이다.
-	 * 상신 이후에는 결재 저장을 수행할 수 있는 방법이나 플로우가 없다.
-	 */
-	self.saveApprove = function(status) {
-		// 결재 임시 저장
+	function saveApproveDocument(status) {
 		document.form.appId = '';
 		document.form.formFields = approveService.makeFormField(self.form.fields);
 		
 		// ApproveSummary 부터 저장한 후, FromFields를 저장한다.
-		var summary = {};
-		summary.appId= '';
-		summary.formId = formId;
-		summary.userId = self.user.userId;
-		summary.created = '';
-		summary.modified = '';
-		summary.title = getFormTitle();
-		summary.status = status;
-		
-		document.summary = summary;
+		history.status = status;
 		
 		if (action == 'regist') {
-			approveService.saveApproveDocument(document, approve, status);
-			$location.path(prevUrl);
-			
-			// 결재 이력 저장
-		} else if (action == 'edit') {
-			summary = self.summary;
+			var summary = {};
+			summary.appId= '';
+			summary.formId = formId;
+			summary.userId = self.user.userId;
+			summary.created = '';
+			summary.modified = '';
+			summary.title = getFormTitle();
 			summary.status = status;
 			
-			approveService.updateApproveSummary(summary)
-			.then(
-				function(result) {
-					// 요약을 수정하면, 양식 필드와 결재라인은 WAS에서 삭제된다.
-					// 따라서, 저장과 같이 양식 필드와 결재 라인은 저장만 호출한다.
-					form.appId = result.appId;
-					history.appId = result.appId;
-					
-					saveApproveFormField(form);
-					saveApproveLine(form.appId, status);
-					
-					saveHistory(history);
-				}
-			);
+			document.summary = summary;
+			
+			return approveService.saveApproveDocument(document, approve, history, status);
 		}
-		
-		$location.path('/list_app');
-	};
+		else if (action == 'edit')
+			return approveService.updateApproveDocument(document, approve, history, status);
+	}
 	
-	self.removeApprove = function() {
-		deleteConfirm.show()
+	/**
+	 * 결재 저장은 작성자만 수행할 수 있는 기능이다.
+	 * 상신 이후에는 결재 저장을 수행할 수 있는 방법이나 플로우가 없다.
+	 */
+	self.saveApprove = function() {
+		// 결재 임시 저장
+		saveApproveDocument(approveStatus.SAVED)
 		.then(
-			function(answer) {
-				if (answer == 'yes') {
-					
-				}
+			function(data) {
+				console.log('saved successfully: ', data);
+			},
+			function(err) {
+				console.error('Error while saving Approve document');
 			}
 		);
+		
+		$location.path(prevUrl);
 	};
 	
 	/**
 	 * 사용자의 결재라인 정보를 이용하여 결재함 목록을 생성한다.
 	 */
-	function makeApproveTray() {
+	function makeApproveTrays(appId) {
 		var trays = [];
 		
-		for (var i = 0; i < self.approveLine.length; i++) {
+		for (var i = 0; i < approve.lines.length; i++) {
 			var tray = {};
+			
+			tray.appId = appId
+			tray.userId = approve.lines[i].approvalId;
+			tray.modified = '';
+			
 			if (i == 0)
 				tray.type = approveTrayType.COMPLETED;		// 작성자 본인은 완료함
 			else if (i == 1)
@@ -239,26 +235,9 @@ App
 			else
 				tray.type = approveTrayType.EXPECTED;		// 그 외의 결재자는 예정함
 			
-			tray.appId = self.summary.appId;
-			tray.userId = self.approveLine[i].userId;
-			tray.modified = '';
-			
 			trays.push(tray);
 		}
 		return trays;
-	}
-	
-	function getUserApproveLine() {
-		var line = {};
-		for (var i = 0; i < self.approveLine.length; i++) {
-			if (self.approveLine[i].approvalId == self.user.userId) {
-				line = self.approveLine[i];
-				break;
-			}
-		}
-		
-		console.log('user line: ', line);
-		return line;
 	}
 	
 	/**
@@ -266,21 +245,25 @@ App
 	 */
 	self.submitApprove = function() {
 		var	trays = [];
-		
-		console.log('trays: ', trays);
-		
 		if (action == 'regist' || action == 'edit') {
-			// 작성된 결재 문서를 상신한다.
-			// 작성한 결재문서의 정보를 저장하고, 결재 라인에 있는 결재자들의 결재함에 결재 문서 정보를 수정한다.
-			trays = makeApproveTray();
-			self.saveApprove(approveStatus.PROCESSING);
-			approveService.saveTray(trays)
+			saveApproveDocument(approveStatus.PROCESSING)
 			.then(
 				function(data) {
-					console.log('Saved approve trays successfully');
+					// 결재함을 등록한다.
+					var trays = makeApproveTrays(data.appId);
+					approveService.saveTray(trays)
+					.then(
+						function(result) {
+							console.log('save approve trays successfully: ', result);
+						},
+						function(err) {
+							console.error('Error while saving approve trays');
+						}
+					);
 				},
 				function(err) {
-					console.error('Error while saving approve trays');
+					console.error('Error while submit approve document');
+					return;
 				}
 			);
 		} else {
@@ -300,7 +283,88 @@ App
 				}
 			);
 		}
+		
+		$location.path(prevUrl);
 	};
+	
+	/**
+	 * 결재 문서 삭제
+	 * 결재 문서 삭제는 사용자가 결재 문서 저장 후, 상신 전에 삭제할 수 있다.
+	 */
+	self.removeApprove = function() {
+		var appId = self.summary.appId;
+		
+		if (!appId) {
+			// 작성중이던 문서이므로 목록화면으로 이동한다.
+			$location.path(prevUrl);
+		} else {
+			deleteConfirm.show()
+			.then(
+				function(answer) {
+					if (answer == 'yes') {
+						approveService.removeApprove(appId)
+						.then(
+							function(summary) {
+								$location.path(prevUrl);
+							},
+							function(err) {
+								console.error('Error while deleting approve document');
+							}
+						);
+					}
+				}
+			);
+		}
+	};
+	
+	/**
+	 * 결재 문서 보류
+	 * 보류는 결재자가 결재를 미루는 명령으로, 기한은 정해지지 않는다.
+	 * 결재자의 보류함에 결재 문서가 노출된다.
+	 * 
+	 * 결재자가 결재 문서를 보류하면, 결재 요약 정보(approve_summary)와 결재함 정보 (approve_tray)에 보류로 상태를 업데이트한다.
+	 * 결재 이력 정보(approve_history)에 의견을 저장한다.
+	 */
+	self.deferApprove = function() {
+		document.form.formFields = approveService.makeFormField(self.form.fields);
+		
+		// 결재를 보류할 때는 반드시 의견을 입력해야 한다.
+		insertCommentModal.setTitle('결재 보류');
+		insertCommentModal.setContent('보류 의견을 입력하십시오.');
+		insertCommentModal.show()
+		.then(
+			function(comment) {
+				history.comment = comment;
+				
+				approveService.deferApprove(self.user.userId, document, approve, history)
+				.then(
+					function(results) {
+						console.log('Deferred document ' + results[0].appId + ' successfully');
+						$location.path(prevUrl);
+					},
+					function(err) {
+						console.error('Error while saving defered approve document');
+					}
+				);
+			},
+			function(err) {
+				console.error('Error while show comment modal window');
+			}
+		);
+	}
+	
+	function getUserApproveLine() {
+		var line = {};
+		for (var i = 0; i < self.approveLine.length; i++) {
+			if (self.approveLine[i].approvalId == self.user.userId) {
+				line = self.approveLine[i];
+				break;
+			}
+		}
+		
+		console.log('user line: ', line);
+		return line;
+	}
 	
 	self.cancelApprove = function() {
 		$location.path('/list_app');

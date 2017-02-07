@@ -13,6 +13,7 @@
 				</form>
 			</div>
 			<div class="modal-footer">
+				<!-- 의견이 입력되지 않으면, 확인 버튼은 활성화 되지 않는다. -->
 				<button type="button" class="btn btn-danger btn-sm" ng-click="answer(comment)" ng-disabled='form.$invalid'>확인</button>
 			</div>
 		</div>

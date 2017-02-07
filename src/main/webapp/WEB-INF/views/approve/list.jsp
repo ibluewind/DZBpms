@@ -61,7 +61,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="summary in ctrl.summaries |filter:ctrl.filterProcessing">
-							<td><a href="#/regist_app/{{summary.appId}}?action=proc">{{summary.title}}</a></td>
+							<td><a href="#/edit_app/{{summary.appId}}?action=proc">{{summary.title}}</a></td>
 							<td>{{summary.created|date:'yyyy-MM-dd'}}</td>
 						</tr>
 					</tbody>

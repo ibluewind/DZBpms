@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +24,9 @@ public class ApproveTrayRestController {
 	@Autowired
 	ApproveTrayService		trayService;
 	
-	@RequestMapping(value="/", method=RequestMethod.POST)
-	public List<ApproveTray> saveTray(@PathVariable List<ApproveTray>trays) {
+	@RequestMapping(method=RequestMethod.POST)
+	public List<ApproveTray> saveTray(@RequestBody List<ApproveTray>trays) {
+		System.out.println("DEBUG: saving approve trays : " + trays);
 		return trayService.insertAll(trays);
 	}
 	
@@ -76,6 +78,18 @@ public class ApproveTrayRestController {
 		return trayService.listByAppId(appId);
 	}
 	
+	/**
+	 * 특정 tray 정보 수정
+	 * 결재자가 결재시에 반려, 보류 등의 명령을 수행할 때 호출된다.
+	 * @param tray
+	 * @return
+	 */
+	@RequestMapping(method=RequestMethod.PUT)
+	public ApproveTray updateApproveTray(@RequestBody ApproveTray tray) {
+		return trayService.update(tray);
+	}
+	
+	@RequestMapping(value="")
 	private String getPrincipal() {
 		String	userName = null;
 		Object	principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
