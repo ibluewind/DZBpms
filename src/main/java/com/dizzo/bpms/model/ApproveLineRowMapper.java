@@ -19,6 +19,7 @@ public class ApproveLineRowMapper implements RowMapper<ApproveLine> {
 		appLine.setStatus(rs.getString("status"));
 		appLine.setModified(rs.getTimestamp("modified"));
 		appLine.setSeq(rowNum);
+		appLine.setType(rs.getString("type"));
 		return appLine;
 	}
 

@@ -195,11 +195,15 @@ App
 		);
 	};
 	
-	self.selectPosition = function(oldPositionId) {
-		console.log('oldPositionId = ' + oldPositionId);
+	self.selectPosition = function(index) {
+		console.log('index = ' + index);
+		console.log('deptPositions:', self.user.deptPositions);
 		selectPosition.show()
 		.then(
 			function(d) {
+				self.user.deptPositions[index].positionId = d.id;
+				self.user.deptPositions[index].positionName = d.name;
+				/**
 				for (var i = 0; i < self.user.deptPositions.length; i++) {
 					if (self.user.deptPositions[i].positionId == oldPositionId) {
 						self.user.deptPositions[i].positionId = d.id;
@@ -207,6 +211,7 @@ App
 						break;
 					}
 				}
+				**/
 			},
 			function(err) {
 				console.log('Error while show select Position Modal Window');
@@ -316,11 +321,15 @@ App
 		);
 	};
 	
-	self.selectPosition = function(oldPositionId) {
-		console.log('oldPositionId = ' + oldPositionId);
+	self.selectPosition = function(index) {
+		console.log('index = ' + index);
+		console.log('deptPostions: ', self.user.deptPositions);
 		selectPosition.show()
 		.then(
 			function(d) {
+				self.user.deptPositions[index].positionId = d.id;
+				self.user.deptPositions[index].positionName = d.name;
+				/**
 				for (var i = 0; i < self.user.deptPositions.length; i++) {
 					if (oldPositionId == '' || self.user.deptPositions[i].positionId == oldPositionId) {
 						self.user.deptPositions[i].positionId = d.id;
@@ -328,6 +337,7 @@ App
 						break;
 					}
 				}
+				*/
 			},
 			function(err) {
 				console.log('Error while show select Position Modal Window');

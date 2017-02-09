@@ -20,15 +20,20 @@ import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.ApproveStatus;
 import com.dizzo.bpms.model.ApproveSummary;
 import com.dizzo.bpms.model.ApproveTray;
+import com.dizzo.bpms.model.ApproveTrayType;
 import com.dizzo.bpms.model.CustomApproveLine;
+import com.dizzo.bpms.model.Department;
+import com.dizzo.bpms.model.DocumentManager;
 import com.dizzo.bpms.model.Form;
 import com.dizzo.bpms.model.FormField;
 import com.dizzo.bpms.model.User;
+import com.dizzo.bpms.model.UserDepartmentPosition;
 import com.dizzo.bpms.service.ApproveFormFieldService;
 import com.dizzo.bpms.service.ApproveLineService;
 import com.dizzo.bpms.service.ApproveSummaryService;
 import com.dizzo.bpms.service.ApproveTrayService;
 import com.dizzo.bpms.service.CustomApproveLineService;
+import com.dizzo.bpms.service.DepartmentService;
 import com.dizzo.bpms.service.FormService;
 import com.dizzo.bpms.service.UserService;
 
@@ -57,6 +62,9 @@ public class ApproveRestController {
 	
 	@Autowired
 	UserService				userService;
+	
+	@Autowired
+	DepartmentService		deptService;
 	
 	@RequestMapping(value="/form/{appId}", method=RequestMethod.GET)
 	public Form getFormInformationByApproveId(@PathVariable String appId) {
@@ -92,10 +100,80 @@ public class ApproveRestController {
 			// 결재가 완료 됨.
 			// 다음 처리 부서가 있는지 확인해서 처리 부서로 결재 문서를 전달하거나, 모든 결재가 완료되었으면 해당 양식에 정의된 후 처리를 수행한다.
 			// 휴가원의 경우 사용자의 부재 일정을 부서 일정에 등록하거나, 결재 관리 시스템에 휴가 정보를 등록한다. 할 수 있다면...
+			
+			String	appId = line.getAppId();
+			Form form = formService.getByAppId(appId);
+			
+			if (form.getProcDept() == null) {
+				// 모든 결재가 완료되었음.
+				return null;
+			} else {
+				/**
+				 * 문서 작성자의 부서가 처리부서와 같은지 확인한다.
+				 * 같은 부서라면 결재를 완료한다.
+				 * 다른 부서라면 처리 부서의 문서 담당자 결재함에 해당 결재 정보를 등록한다.
+				 */
+				ApproveSummary	summary = getApproveSummaryByAppId(appId);
+				DocumentManager docManager = getDocumentManager(summary, form.getProcDept());
+				if (docManager == null) {
+					System.out.println("Finished approve processing");
+					return null;
+				} else {
+					// 처리부서의 문서 담당자 결재함에 결재 정보를 등록한다.
+					ApproveTray	tray = new ApproveTray();
+					tray.setAppId(appId);
+					tray.setAppTitle(summary.getTitle());
+					tray.setUserId(docManager.getUserId());
+					tray.setType(ApproveTrayType.UNDECIDE.getType());
+					tray.setCreator(summary.getUserId());
+					tray.setCreatorName(summary.getUserId());
+					
+					appTrayService.insert(tray);
+				}
+			}
 		}
 		return line;
 	}
 
+	/**
+	 * 처리부서의 문서 담당자를 조회한다.
+	 * 결재 문서를 작성한 담당자가 처리부서이면, 처리부서를 null로 반환한다.
+	 */
+	private DocumentManager getDocumentManager(ApproveSummary summary, String procDept) {
+		User	charge = userService.getByUserId(summary.getUserId());
+		DocumentManager	docManager = null;
+		List<UserDepartmentPosition>	upds = charge.getDeptPositions();
+		Iterator<UserDepartmentPosition> it = upds.iterator();
+
+		/**
+		 * 결재문서 작성자가 처리부서 직원인지 검사한다.
+		 * 내재된 오류: 직원들은 겸직을 할 수 있다. 문서를 작성한 담당자가 처리부서와 아닌 부서로 등록되어 있는 경우에 처리부서가 아닌 부서로 결재를
+		 * 상신하면, 처리부서 결재를 받아야 함에도, 결재 완료 처리가 될 수 있다. (어떡하지??? ㅡㅡ;;)
+		 */
+		while (it.hasNext()) {
+			UserDepartmentPosition dp = it.next();
+			
+			if (dp.getDeptId().equals(procDept)) {
+				// 결재 작성자가 처리부서 직원이면, 결재 완료 처리
+				return null;
+			}
+		}
+		
+		/**
+		 * 문서 담당자는 정/부로 등록되는 것이 원칙이지만, '정'만 등록되는 경우도 있다.
+		 * 문서 담당자의 부재 처리를 위한 로직도 필요하다.
+		 * '정'이 부재시에는 '부'가 문서 담당자로 지정되어야 한다.
+		 */
+		List<DocumentManager>	docManagers = deptService.getDocumentManagersByDeptId(procDept);
+		
+		for (int i = 0; i < docManagers.size(); i++) {
+			docManager = docManagers.get(i);
+			if (docManager.getType().equals("M"))	break;
+		}
+		
+		return docManager;
+	}
+	
 	@RequestMapping(value="/summary", method=RequestMethod.POST)
 	public ApproveSummary saveApproveSummary(@RequestBody ApproveSummary summary) {
 		System.out.println("saving summary: " + summary);
@@ -138,6 +216,9 @@ public class ApproveRestController {
 		String	appId = formFields.getAppId();
 		String	formId = formFields.getFormId();
 		List<FormField>	fields = formFields.getFormFields();
+		
+		System.out.println("update form fields");
+		System.out.println("formFields: " + formFields);
 		
 		formFieldService.delete(appId);
 		formFieldService.insert(appId, formId, fields);

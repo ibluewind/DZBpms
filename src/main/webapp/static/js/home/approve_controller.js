@@ -30,6 +30,7 @@ App
 	var history = {};
 	var prevUrl = $rootScope.prevUrl || '/list_app';
 	
+	self.histories = [];
 	self.edit = false;
 	self.proc = false;
 	self.owner = true;
@@ -103,6 +104,7 @@ App
 				approve.trays = results[3].data;
 				approve.lines = results[4].data;
 				
+				self.histories = results[5].data;
 				self.summary = document.summary;
 				self.form = document.form;
 				self.form.fields = document.form.fields;
@@ -110,8 +112,38 @@ App
 				self.approveTrays = approve.trays;
 				self.approveLine = approve.lines;
 				
-				if (self.user.userId != self.summary.userId)	self.owner = false;
+				if (self.user.userId != self.summary.userId) {
+					// 결재자가 결재문서를 확인한 경우 결재 이력을 저장한다.
+					history.appId = self.summary.appId;
+					history.status = approveStatus.CHECKED;
+					approveService.saveApproveHistory(history);
+					
+					self.owner = false;
+				}
 				history.appId = self.summary.appId;
+				
+				// 처리부서로 전달된 경우, 결재라인 길이와 결재함 길이가 다르다.
+				console.log('tray: ', self.approveTrays);
+				console.log('lines: ', self.approveLine);
+				if (self.approveTrays.length > self.approveLine.length) {
+					// 문서 담당자의 결재라인을 조회하여 추가한다.
+					console.log('getApproveLine');
+					approveService.getApproveLine(document.form.formId)
+					.then(
+						function(lines) {
+							console.log('Process lines: ', lines);
+							// 조회된 결재라인을 기존 결재라인에 추가하되 type을 'P'로 변경한다.
+							// 또한, 추가된 결재라인은 수정할 수 있도록 해야한다.
+							for (var i = 0; i < lines.length; i++) {
+								lines[i].type = 'P';
+								self.approveLine.push(lines[i]);
+							}
+						},
+						function(err) {
+							console.error('Error while fetching approve lines of processing department');
+						}
+					);
+				}
 			},
 			function(err) {
 				console.error('Error while fetching Approve Document Information');
@@ -172,7 +204,6 @@ App
 	};
 	
 	function saveApproveDocument(status) {
-		document.form.appId = '';
 		document.form.formFields = approveService.makeFormField(self.form.fields);
 		
 		// ApproveSummary 부터 저장한 후, FromFields를 저장한다.
@@ -192,8 +223,14 @@ App
 			
 			return approveService.saveApproveDocument(document, approve, history, status);
 		}
-		else if (action == 'edit')
+		else if (action == 'edit') {
+			console.log('update approve document');
+			console.log('document: ', document);
+			console.log('approve: ', approve);
+			console.log('history: ', history);
+			console.log('status: ', status);
 			return approveService.updateApproveDocument(document, approve, history, status);
+		}
 	}
 	
 	/**
@@ -272,11 +309,11 @@ App
 			// 결재자의 결재함 정보를 수정하고, 결재라인 정보를 수정한다.
 			// 다음 결재자의 결재함 정보 수정과 결재 완료에 대한 후 처리는 WAS에서 처리한다.
 			var line = getUserApproveLine();
-			approveService.submitApprove(line)
+			var summary = document.summary;
+			approveService.submitApprove(summary, line, history)
 			.then(
 				function(data) {
-					var preUrl = $rootScope.prevUrl || '/list_app';
-					$location.path($rootScope.prevUrl);
+					$location.path(prevUrl);
 				},
 				function(err) {
 					console.error('Error while submit Approve');
@@ -370,53 +407,46 @@ App
 		$location.path('/list_app');
 	}
 	
-	function saveHistory(history) {
-		approveService.saveApproveHistory(history)
-		.then(
-			function(data) {
-				console.log('Saved approve history: ', data);
-			},
-			function(err) {
-				console.error('Error while saving approve history');
-			}
-		);
-	}
-	
-	function saveApproveLine(appId, status) {
+	self.statusName = function(history) {
+		var status = history.status;
+		var statusName = "Unknown";
 		
-		for (var i = 0; i < self.approveLine.length; i++) {
-			self.approveLine[i].appId = appId;
-			self.approveLine[i].status = status;
+		switch(status) {
+		case approveStatus.CHECKED:
+			statusName = "확인";
+			break;
+		case approveStatus.SAVED:
+			statusName = "저장";
+			break;
+		case approveStatus.DEFERRED:
+			statusName = "보류";
+			break;
+		case approveStatus.REJECT:
+			statusName = "반려";
+			break;
+		case approveStatus.PROCESSING:
+			if (history.userId == document.summary.userId)		// 작성자인경우
+				statusName = "상신";
+			else
+				statusName = "승인";
+			break;
+		case approveStatus.FINISH:
+			statusName = "결재완료";
+			break;
 		}
 		
-		console.log('approveLine: ', self.approveLine);
-		
-		approveService.saveApproveLine(self.approveLine)
-		.then(
-			function(lines) {
-				self.approveLine = lines;
-				console.log('Save Approve line successfully');
-				console.log('lines: ', lines);
-			},
-			function(err) {
-				console.error('Error while saving Approve Lines');
-			}
-		);
+		return statusName;
+	};
+	
+	/**
+	 * fileters
+	 */
+	self.onlyRequestApproveLine = function(line) {
+		return line.type == 'R';
 	}
 	
-	function saveApproveFormField(form) {
-		console.log('save form fields: ', form);
-		
-		// formField 저장
-		approveService.saveApproveFormFields(form)
-		.then(
-			function(result) {
-				console.log('saved successfully result: ', result);
-			},
-			function(err) {
-				console.error('Error while saving Approve Form Fields information');
-			}
-		);
+	self.onlyProcessingApproveLine = function(line) {
+		return line.type == 'P';
 	}
 	
 	function getFormTitle() {

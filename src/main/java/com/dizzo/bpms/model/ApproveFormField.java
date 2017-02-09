@@ -26,4 +26,8 @@ public class ApproveFormField {
 	public void setFormFields(List<FormField> formFields) {
 		this.formFields = formFields;
 	}
+	
+	public String toString() {
+		return "ApproveFormField: {appId: " + appId + ", formId: " + formId + ", formFields: [" + formFields + "]}";
+	}
 }

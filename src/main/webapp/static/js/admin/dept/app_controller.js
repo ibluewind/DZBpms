@@ -225,13 +225,13 @@ App
 		
 		if (type == 'M') {
 			self.masterManager.deptId = self.dept.deptId;
-			self.masterManager.userId = user.id;
+			self.masterManager.userId = user.userId;
 			self.masterManager.userName = user.lastName + user.firstName;
 			self.masterManager.type = type;
 			console.log('master: ', self.masterManager);
 		} else {
 			self.secondManager.deptId = self.dept.deptId;
-			self.secondManager.userId = user.id;
+			self.secondManager.userId = user.userId;
 			self.secondManager.userName = user.lastName + user.firstName;
 			self.secondManager.type = type;
 			console.log('second: ', self.secondManager);

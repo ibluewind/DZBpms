@@ -39,7 +39,7 @@ public class ApproveHistoryRestController {
 		return historyService.delete(historyId);
 	}
 	
-	@RequestMapping(value="/get/{historyId}", method=RequestMethod.GET)
+	@RequestMapping(value="/{historyId}", method=RequestMethod.GET)
 	public ApproveHistory getApproveHistoryById(@PathVariable String historyId) {
 		return historyService.getById(historyId);
 	}

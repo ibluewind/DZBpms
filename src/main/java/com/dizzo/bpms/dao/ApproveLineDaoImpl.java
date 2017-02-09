@@ -33,6 +33,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			  + " a.status,"
          			  + " a.modified,"
          			  + " a.seq,"
+         			  + " a.type,"
          			  + " p.name 'positionName',"
          			  + " concat(u.lastName, u.firstName) 'userName'"
     			  + " FROM approve_line a,"
@@ -56,6 +57,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			 + " a.status,"
          			 + " a.modified,"
          			 + " a.seq,"
+         			 + " a.type,"
          			 + " p.name 'positionName',"
          			 + " concat(u.lastName, u.firstName) 'userName'"
     			 + " FROM approve_line a,"
@@ -80,8 +82,10 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
                             				 + " userId,"
                             				 + " modified,"
                             				 + " status,"
-                            				 + " seq)"
+                            				 + " seq,"
+                            				 + " type)"
      				 + " VALUES (?,"
+                				 + " ?,"
                 				 + " ?,"
                 				 + " ?,"
                 				 + " ?,"
@@ -102,6 +106,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
 				ps.setTimestamp(4, line.getSeq() == 0 ? new Timestamp(new Date().getTime()): null);
 				ps.setString(5, line.getStatus());
 				ps.setInt(6, line.getSeq());
+				ps.setString(7, line.getType());
 			}
 			
 			@Override
@@ -158,6 +163,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			 + " a.status,"
          			 + " a.modified,"
          			 + " a.seq,"
+         			 + " a.type,"
          			 + " p.name 'positionName',"
          			 + " concat(u.lastName, u.firstName) 'userName'"
     			 + " FROM approve_line a,"
@@ -184,6 +190,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
     			 + " a.status,"
     			 + " a.modified,"
     			 + " a.seq,"
+    			 + " a.type,"
     			 + " p.name 'positionName',"
     			 + " concat(u.lastName, u.firstName) 'userName'"
 			 + " FROM approve_line a,"
@@ -216,7 +223,8 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			 + " concat(u.lastName, u.firstName) userName,"
          			 + " p.name positionName,"
          			 + " 'P' status,"
-         			 + " now() modified"
+         			 + " now() modified,"
+         			 + "'R' type"
 					 + " FROM (SELECT d.deptid,"
                  			 + " @pv := d.pid,"
                  			 + " d.name,"

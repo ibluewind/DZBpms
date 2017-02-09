@@ -56,7 +56,7 @@
 							<div class="form-group">
 								<label class="col-md-4 control-label">{{depos.positionType == 'P' ? '직급' : (depos.positionType == 'R' ? '직책' : '직급/직책')}}</label>
 								<div class="col-md-8">
-									<input type="text" class="form-control" name="positionName" ng-model="depos.positionName" ng-click="ctrl.selectPosition(depos.positionId)" readonly required/>
+									<input type="text" class="form-control" name="positionName" ng-model="depos.positionName" ng-click="ctrl.selectPosition($index)" readonly required/>
 									<input type="hidden" name="positionId" ng-model="depos.positionId"/>
 								</div>
 							</div>

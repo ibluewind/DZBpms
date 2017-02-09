@@ -41,9 +41,10 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus',
 			func_form = $http.get('/bpms/rest/approve/form/' + appId),
 			func_fields = $http.get('/bpms/rest/approve/fields/' + appId),
 			func_tray = $http.get('/bpms/rest/approve/tray/doc/' + appId),
-			func_lines = $http.get('/bpms/rest/approve/lines/save/' + appId);
+			func_lines = $http.get('/bpms/rest/approve/lines/save/' + appId),
+			func_histories = $http.get('/bpms/rest/approve/history/list/' + appId);
 		
-			$q.all([func_summary, func_form, func_fields, func_tray, func_lines])
+			$q.all([func_summary, func_form, func_fields, func_tray, func_lines, func_histories])
 			.then(
 				function(results) {
 					deferred.resolve(results);
@@ -186,8 +187,6 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus',
 		
 		document.summary.status = history.status = tray.status = approveStatus.DEFERRED;
 		
-		console.log('history: ', history);
-		
 		var func_summary = $http.put('/bpms/rest/approve/summary', document.summary),
 			func_tray = $http.put('/bpms/rest/approve/tray', tray),
 			func_history = $http.post('/bpms/rest/approve/history', history);
@@ -207,16 +206,28 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus',
 		return deferred.promise;
 	};
 	
-	this.submitApprove = function(line) {
-		return $http.post('/bpms/rest/approve', line)
+	/**
+	 * 결재 승인 처리
+	 */
+	this.submitApprove = function(summary, line, history) {
+		summary.status = history.status = approveStatus.PROCESSING;
+		
+		var func_submit = $http.post('/bpms/rest/approve', line),
+			func_history = $http.post('/bpms/rest/approve/history', history),
+			func_summary = $http.put('/bpms/rest/approve/summary', summary)
+			deferred = $q.defer();
+		
+		$q.all([func_submit, func_history, func_summary])
 		.then(
-			function(response) {
-				return response.data;
+			function(results) {
+				deferred.resolve(results[0].data);
 			},
 			function(err) {
 				$q.reject(err);
 			}
 		);
+		
+		return deferred.promise;
 	};
 	
 	this.getFormList = function() {

@@ -101,7 +101,8 @@ public class ApproveHistoryDaoImpl implements ApproveHistoryDao {
 				 + " WHERE     h.appId = ?"
 				 + " AND s.appid = h.appId"
 				 + " AND u.userid = h.userId"
-				 + " AND s.userId = c.userid";
+				 + " AND s.userId = c.userid"
+				 + " ORDER BY h.created";
 		
 		return new JdbcTemplate(dataSource).query(query, new Object[] {appId}, new ApproveHistoryRowMapper());
 	}

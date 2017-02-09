@@ -96,3 +96,4 @@
 		<%@ include file="approve_command.jsp" %>
 	</div>
 </div>
+<%@ include file="approve_history.jsp" %>

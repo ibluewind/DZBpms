@@ -6,7 +6,8 @@ App
 	FINISH: 'F',
 	PROCESSING: 'P',
 	DEFERRED: 'D',
-	REJECT: 'R'
+	REJECT: 'R',
+	CHECKED: 'C'
 })
 .constant('approveTrayType', {
 	UNDECIDE: 'U',
