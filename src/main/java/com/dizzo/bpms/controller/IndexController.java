@@ -1,5 +1,7 @@
 package com.dizzo.bpms.controller;
 
+import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.dizzo.bpms.model.User;
 import com.dizzo.bpms.service.UserService;
@@ -31,6 +35,19 @@ public class IndexController {
 	
 	@RequestMapping(value="/login", method=RequestMethod.GET)
 	public String getLoginPage() {
+		HttpServletRequest	req = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+
+		Enumeration<String> names = req.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			System.out.println("HEADER[" + name + "] : " + req.getHeader(name));
+		}
+		
+		String	ip = req.getHeader("X-FORWARDED-FOR");
+		if (ip == null)
+			ip = req.getRemoteAddr();
+		
+		System.out.println("Connect IP : " + ip);
 		return "/login";
 	}
 	

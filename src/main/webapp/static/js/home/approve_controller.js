@@ -18,8 +18,8 @@
  * approve.tray : ApproveTray.java에 해당하며 배열 형태 또는 단독 오브젝트이다.
  */
 App
-.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', '$rootScope', '$routeParams', '$location',
-	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, $rootScope, $routeParams, $location) {
+.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', '$rootScope', '$routeParams', '$filter', '$location',
+	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, $rootScope, $routeParams, $filter, $location) {
 
 	// 결재 문서 작성
 	var self = this;
@@ -34,6 +34,7 @@ App
 	self.edit = false;
 	self.proc = false;
 	self.owner = true;
+	self.canEditLine = false;
 	
 	if (action == 'regist') {
 		formId = $routeParams.id;
@@ -127,17 +128,19 @@ App
 				console.log('lines: ', self.approveLine);
 				if (self.approveTrays.length > self.approveLine.length) {
 					// 문서 담당자의 결재라인을 조회하여 추가한다.
-					console.log('getApproveLine');
 					approveService.getApproveLine(document.form.formId)
 					.then(
 						function(lines) {
 							console.log('Process lines: ', lines);
 							// 조회된 결재라인을 기존 결재라인에 추가하되 type을 'P'로 변경한다.
-							// 또한, 추가된 결재라인은 수정할 수 있도록 해야한다.
+							// 또한, 추가된 결재라인의 결재 문서 아이디를 설정한다.
 							for (var i = 0; i < lines.length; i++) {
 								lines[i].type = 'P';
+								lines[i].appId = document.summary.appId;
 								self.approveLine.push(lines[i]);
 							}
+							
+							self.canEditLine = true;
 						},
 						function(err) {
 							console.error('Error while fetching approve lines of processing department');
@@ -176,7 +179,7 @@ App
 		$location.path($rootScope.prevUrl);
 	};
 	
-	self.addApproveLine = function(index) {
+	self.addApproveLine = function(index, type) {
 		var line = {};
 		
 		selectUserModal.show()
@@ -185,7 +188,7 @@ App
 				console.log('user: ', user);
 				if (user.id == -9999)	return false;
 				
-				line.appId = '';
+				line.appId = document.summary.appId;
 				line.lineId = '';
 				line.approvalId = user.userId;
 				line.approvalName = user.lastName + user.firstName;
@@ -193,13 +196,18 @@ App
 				line.modified = '';
 				line.seq = index;
 				line.status = 'P';
+				line.type = type;
 				
+				// 처리부서 결재라인을 변경하는 경우라면, 의뢰부서 결재라인 길이에 더해야한다.
+				if (type == 'P')	index = $filter('filter')(self.approveLine, {type: 'R'}).length + index;
 				self.approveLine.splice(index, 0, line);
 			}
 		);
 	};
 	
-	self.deleteApproveLine = function(index) {
+	self.deleteApproveLine = function(index, type) {
+		// 처리부서 결재라인을 변경하는 경우라면, 의뢰부서 결재라인 길이에 더해야한다.
+		if (type == 'P')	index = $filter('filter')(self.approveLine, {type: 'R'}).length + index;
 		self.approveLine.splice(index, 1);
 	};
 	
@@ -208,6 +216,40 @@ App
 		
 		// ApproveSummary 부터 저장한 후, FromFields를 저장한다.
 		history.status = status;
+		
+		// 결재라인이 추가되었거나 삭제되었을 수 있으므로 결재라인 순번을 재정리한다.
+		// 결재라인은 의뢰부서와 처리부서를 분리하여 정리하여야 함.
+		if (self.canEditLine) {
+			// 처리부서 결재 라인을 정리
+			var idx = 0;
+			for (var i = 0; i < approve.lines.length; i++) {
+				if (approve.lines[i].type == 'P') {
+					idx = i;
+					break;
+				}
+			}
+			
+			var seq = 0;
+			for (var i = idx; i < approve.lines.length; i++) {
+				approve.lines[i].seq = seq;
+				if (seq == 0)
+					approve.lines[i].status = approveStatus.FINISH;
+				else
+					approve.lines[i].status = status;
+				seq++;
+			}
+		} else {
+			// 의뢰부서 결재 라인을 정리하는 것이지만, 작성자가 저장이나 상신하는 경우이므로 전체 결재라인을 정리해도 됨.
+			for (var i = 0; i < approve.lines.length; i++) {
+				approve.lines[i].seq = i;
+				
+				// 작성자가 상신하는 경우, 작성자의 결재 상태는 완료이다.
+				if (satus == approveStatus.PROCESSING && i == 0)
+					approve.lines[i].status = approveStatus.FINISH;
+				else
+					approve.lines[i].status = status;
+			}
+		}
 		
 		if (action == 'regist') {
 			var summary = {};
@@ -230,6 +272,10 @@ App
 			console.log('history: ', history);
 			console.log('status: ', status);
 			return approveService.updateApproveDocument(document, approve, history, status);
+		} else {
+			// 처리부서에서 승인 하는 경우이다.
+			// 처리부서에서의 승인 처리는 결재라인을 추가하여 등록하고, 결재함을 처리한다.
+			return;
 		}
 	}
 	
@@ -255,14 +301,14 @@ App
 	/**
 	 * 사용자의 결재라인 정보를 이용하여 결재함 목록을 생성한다.
 	 */
-	function makeApproveTrays(appId) {
+	function makeApproveTrays(appId, lines) {
 		var trays = [];
 		
-		for (var i = 0; i < approve.lines.length; i++) {
+		for (var i = 0; i < lines.length; i++) {
 			var tray = {};
 			
 			tray.appId = appId
-			tray.userId = approve.lines[i].approvalId;
+			tray.userId = lines[i].approvalId;
 			tray.modified = '';
 			
 			if (i == 0)
@@ -287,7 +333,7 @@ App
 			.then(
 				function(data) {
 					// 결재함을 등록한다.
-					var trays = makeApproveTrays(data.appId);
+					var trays = makeApproveTrays(data.appId, approve.lines);
 					approveService.saveTray(trays)
 					.then(
 						function(result) {
@@ -305,20 +351,42 @@ App
 			);
 		} else {
 			// action == 'proc'
-			// 결재자가 결재하는 경우
+			// 결재자가 결재하는 경우. 또는 처리부서에서 문서 담당자가 결재 문서를 승인하는 경우.
 			// 결재자의 결재함 정보를 수정하고, 결재라인 정보를 수정한다.
 			// 다음 결재자의 결재함 정보 수정과 결재 완료에 대한 후 처리는 WAS에서 처리한다.
-			var line = getUserApproveLine();
-			var summary = document.summary;
-			approveService.submitApprove(summary, line, history)
-			.then(
-				function(data) {
-					$location.path(prevUrl);
-				},
-				function(err) {
-					console.error('Error while submit Approve');
-				}
-			);
+			
+			if (self.canEditLine) {
+				// 처리부서 문서 담당자가 승인하는 경우에는 결재 라인과 결재함 만 추가로 등록하면 된다.
+				saveApproveDocument(approveStatus.PROCESSING);	// 결재라인만 정리한다.
+				var lines = $filter('filter')(approve.lines, {type: 'P'});
+				console.log('process lines: ', lines);
+				
+				var trays = makeApproveTrays(document.summary.appId, lines);
+
+				// 처리부서의 결재라인과 결재함을 등록한다.
+				approveService.processApproveDocument(lines, trays, history)
+				.then(
+					function(result) {
+						console.log('Save processing department document successfully');
+					},
+					function(err) {
+						console.error('Error while saving process department document');
+					}
+				);
+			} else {
+				var line = getUserApproveLine();
+				var summary = document.summary;
+				
+				approveService.submitApprove(summary, line, history)
+				.then(
+					function(data) {
+						$location.path(prevUrl);
+					},
+					function(err) {
+						console.error('Error while submit Approve');
+					}
+				);
+			}
 		}
 		
 		$location.path(prevUrl);

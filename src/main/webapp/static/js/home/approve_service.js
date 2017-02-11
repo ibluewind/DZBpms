@@ -1,7 +1,7 @@
 'use strict';
 
-App.service('approveService', ['$http', '$q', '$filter', 'approveStatus',
-                            function($http, $q, $filter, approveStatus) {
+App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'approveTrayType',
+                            function($http, $q, $filter, approveStatus, approveTrayType) {
 	
 	/**
 	 * 결재 양식 정보를 조회한다. (결재 문서 신규 작성시)
@@ -98,7 +98,6 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus',
 				
 				for (var i = 0; i < approve.lines.length; i++) {
 					approve.lines[i].appId = document.summary.appId;
-					approve.lines[i].status = status;
 				}
 				
 				saveApproveInformation(document.form, approve.lines, history)
@@ -130,10 +129,6 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus',
 		
 		document.summary.status = history.status = status;
 		
-		for (var i = 0; i < approve.lines.length; i++) {
-			approve.lines[i].status = status;
-		}
-
 		console.log('document: ', document);
 		console.log('approve: ', approve);
 		console.log('history: ', history);
@@ -163,6 +158,31 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus',
 			}
 		);
 			
+		return deferred.promise;
+	};
+	
+	/**
+	 * 처리부서의 문서 담당자가 결재 문서를 승인한다.
+	 * 승인시 저장할 데이터는 추가된 결재라인과, 결재라인에 따른 결재함을 저장하여야 한다.
+	 */
+	this.processApproveDocument = function(lines, trays, history) {
+		trays[0].status = approveTrayType.COMPLETED;
+		history.status = approveStatus.PROCESSING;
+		
+		var deferred = $q.defer();
+		var func_tray = $http.put('/bpms/rest/approve/tray', trays[0]),
+			func_trays = $http.post('/bpms/rest/approve/tray', trays.splice(0, 1)),
+			func_lines = $http.post('/bpms/rest/approve/lines/save', lines),
+			func_history = $http.post('/bpms/rest/approve/history', history);
+		
+		console.log('lines: ', lines);
+		console.log('trays: ', trays);
+		console.log('history: ', history);
+		
+		$q.all([func_tray, func_trays, func_lines, func_history])
+		
+		// 문서 담당자의 결재함은 등록하지 않고, 완료로 수정되어야 한다.
+		deferred.resolve(lines);
 		return deferred.promise;
 	};
 	

@@ -269,7 +269,7 @@ public class ApproveRestController {
 			line.setApprovalName(user.getLastName() + user.getFirstName());
 			line.setApprovalPosition(user.getDeptPositions().get(0).getPositionName());
 			line.setModified(new Date());
-			line.setSeq(0);
+			line.setSeq(-1);
 			line.setStatus(ApproveStatus.PROCESSING.getStatus());
 			
 			lines = appLineService.getByOrganize(userId);

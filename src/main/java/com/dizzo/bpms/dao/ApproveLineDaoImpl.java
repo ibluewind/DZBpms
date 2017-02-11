@@ -223,7 +223,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			 + " concat(u.lastName, u.firstName) userName,"
          			 + " p.name positionName,"
          			 + " 'P' status,"
-         			 + " now() modified,"
+         			 + " null modified,"			// 수정일자는 결재라인 생성시에 필요하지 않음.
          			 + "'R' type"
 					 + " FROM (SELECT d.deptid,"
                  			 + " @pv := d.pid,"

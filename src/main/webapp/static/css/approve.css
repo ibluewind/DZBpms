@@ -1,5 +1,5 @@
 /*
- * °áÀç ¹®¼­¸¦ À§ÇÑ CSS Á¤ÀÇ
+ * ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ CSS ï¿½ï¿½ï¿½ï¿½
  */
 ul.appline {
 	list-style: none;
@@ -25,20 +25,26 @@ ul.appline li {
 ul.sub-menu {
 	list-style: none;
 	background-color: #efefef;
-	width: 100%;
 	display: none;
 	position: absolute;
+	padding: 0;
 	top: 0;
+	z-index: 100;
 }
 
 ul.sub-menu li {
 	border: none;
-	display: inline;
+	display: block;
 	position: relative;
 	text-aling: center;
 	padding: 3px;
 }
-li:hover .sub-menu {
-	display: block;
-	z-index: 100;
+
+.approve_line th:hover .sub-menu {
+	display:block;
+	z-index:100;
+}
+.approve_line th {
+	text-align: center;
+	background-color: #eee;
 }
