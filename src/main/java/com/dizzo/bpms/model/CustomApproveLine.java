@@ -61,4 +61,8 @@ public class CustomApproveLine {
 	public void setOrder(int order) {
 		this.order = order;
 	}
+	
+	public String toString() {
+		return "CustomApproveLine: {formId: " + formId + ", userId: " + userId + ", approvalId: " + approvalId + ", order: " + order + "}";
+	}
 }

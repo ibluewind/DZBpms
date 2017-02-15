@@ -2,6 +2,7 @@ package com.dizzo.bpms.dao;
 
 import java.util.List;
 
+import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.ApproveTray;
 
 public interface ApproveTrayDao {
@@ -21,9 +22,10 @@ public interface ApproveTrayDao {
 	// user's own tray
 	public List<ApproveTray>	undecideTray(String userId);	// 미결함
 	public List<ApproveTray>	completedTray(String userId);	// 기결함
+	public List<ApproveTray>	finishedTray(String userId);	// 완료함
 	public List<ApproveTray>	deferTray(String userId);		// 보류함
 	public List<ApproveTray>	expectedTray(String userId);	// 예정함
 	
 	// 결재 승인 처리
-	public List<ApproveTray>	submitTray(String userId, String appId);
+	public List<ApproveTray>	submitTray(ApproveLine line);
 }

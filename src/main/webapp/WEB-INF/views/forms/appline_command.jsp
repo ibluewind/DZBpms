@@ -11,6 +11,9 @@
 						<tr>
 							<th ng-repeat="appLine in ctrl.approveLine|filter:ctrl.onlyRequestApproveLine">
 								{{$index == 0 ? "담당" : appLine.approvalPosition}}
+								<ul class="sub-menu" ng-if="$index == 0 && ctrl.changedLine">
+									<li><button type="button" class="btn btn-primary btn-xs" ng-click="ctrl.saveCustomApproveLine()"><span class="glyphicon glyphicon-save">&nbsp;결재라인저장</span></button>
+								</ul>
 								<ul class="sub-menu" ng-if="$index > 0 && ctrl.edit">
 									<li><button type="button" class="btn btn-default btn-xs" ng-click="ctrl.addApproveLine($index, 'R')"><span class="glyphicon glyphicon-plus">&nbsp;추가</span></button>
 									<li><button type="button" class="btn btn-danger btn-xs" ng-click="ctrl.deleteApproveLine($index, 'R')"><span class="glyphicon glyphicon-trash">&nbsp;삭제</span></button>

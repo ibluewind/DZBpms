@@ -1,51 +1,51 @@
 package com.dizzo.bpms.utils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import com.dizzo.bpms.model.ApproveTray;
-import com.dizzo.bpms.model.ApproveTrayType;
+import com.dizzo.bpms.model.ApproveLine;
 
 public class ArrayTest {
 
 	public static void main(String[] args) {
-		List<ApproveTray>	trays = new ArrayList<>();
-		ApproveTray	tray = new ApproveTray();
+		List<ApproveLine> lines = new ArrayList<ApproveLine>();
+		ApproveLine	line = new ApproveLine();
 		
-		tray.setAppId("a");
-		tray.setUserId("andrew");
-		tray.setType(ApproveTrayType.COMPLETED.getType());
+		line.setApprovalId("andrew");
+		line.setType("R");
 		
-		trays.add(tray);
+		lines.add(line);
 		
-		tray = new ApproveTray();
-		tray.setAppId("b");
-		tray.setUserId("bigfoot");
-		tray.setType(ApproveTrayType.UNDECIDE.getType());
-		trays.add(tray);
+		line = new ApproveLine();
+		line.setApprovalId("dylee");
+		line.setType("P");
 		
-		tray = new ApproveTray();
-		tray.setAppId("b");
-		tray.setUserId("bigfoot");
-		tray.setType(ApproveTrayType.UNDECIDE.getType());
+		lines.add(line);
 		
-		System.out.println("trays: " + trays);
-		System.out.println("tray: " + tray);
-
-		Iterator<ApproveTray> it = trays.iterator();
-		ApproveTray	t = null;
+		line = new ApproveLine();
+		line.setAppId("bigfoot");
+		line.setType("R");
 		
-		while (it.hasNext()) {
-			t = it.next();
-			
-			if (t.getUserId().equals(tray.getUserId())) {
-				System.out.println(t);
-				break;
-			}
-		}
+		lines.add(line);
 		
-		System.out.println("Found tray: " + t + ", indexOf: " + trays.indexOf(t));
+		line = new ApproveLine();
+		line.setApprovalId("kds");
+		line.setType("P");
+		
+		lines.add(line);
+		
+		line = new ApproveLine();
+		line.setApprovalId("yunju");
+		line.setType("R");
+		
+		lines.add(line);
+		
+		System.out.println("lines: " + lines);
+		
+		List<ApproveLine>	pls = lines.stream().filter(t -> t.getType().equals("P")).collect(Collectors.toList());
+		
+		System.out.println("pls: " + pls);
 	}
 
 }

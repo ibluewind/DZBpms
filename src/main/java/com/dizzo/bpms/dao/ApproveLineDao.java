@@ -16,5 +16,5 @@ public interface ApproveLineDao {
 	public ApproveLine			delete(String lineId);
 	public List<ApproveLine>	deleteAll(String appId);
 	
-	public ApproveLine			getNextOrder(String appId, String userId);
+	public ApproveLine			getNextOrder(ApproveLine line);
 }

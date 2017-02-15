@@ -43,23 +43,23 @@ App
 		},
 		controller: 'editAppController as ctrl'
 	})
-	.when('/proc_app/:appId', {
+	.when('/view_app/:appId', {
 		templateUrl: function(params) {
 			return '/bpms/app/edit/' + params.appId;
 		},
-		controller: 'editAppController as ctrl'
+		controller: 'viewAppController as ctrl'
 	})
-	.when('/undecide_app', {
+	.when('/undecide_app/:type', {
 		templateUrl: '/bpms/app/undecide',
-		controller: 'undecideAppController as ctrl'
+		controller: 'trayAppController as ctrl'
 	})
 	.when('/defer_app', {
 		templateUrl: '/bpms/app/defer',
 		controller: 'deferAppController as ctrl'
 	})
-	.when('/completed_app', {
+	.when('/finished_app/:type', {
 		templateUrl: '/bpms/app/completed',
-		controller: 'completedAppController as ctrl'
+		controller: 'trayAppController as ctrl'
 	})
 	.when('/decided_app', {
 		templateUrl: '/bpms/app/decided',

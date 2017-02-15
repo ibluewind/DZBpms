@@ -3,6 +3,7 @@ package com.dizzo.bpms.model;
 public enum ApproveTrayType {
 	UNDECIDE("U"),
 	COMPLETED("C"),
+	FINISHED("F"),
 	REJECT("R"),
 	DEFER("D"),
 	EXPECTED("E");

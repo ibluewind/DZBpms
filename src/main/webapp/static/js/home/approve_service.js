@@ -170,8 +170,8 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		history.status = approveStatus.PROCESSING;
 		
 		var deferred = $q.defer();
-		var func_tray = $http.put('/bpms/rest/approve/tray', trays[0]),
-			func_trays = $http.post('/bpms/rest/approve/tray', trays.splice(0, 1)),
+		var func_tray = $http.put('/bpms/rest/approve/tray', trays.shift()),
+			func_trays = $http.post('/bpms/rest/approve/tray', trays),
 			func_lines = $http.post('/bpms/rest/approve/lines/save', lines),
 			func_history = $http.post('/bpms/rest/approve/history', history);
 		
@@ -234,7 +234,7 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		
 		var func_submit = $http.post('/bpms/rest/approve', line),
 			func_history = $http.post('/bpms/rest/approve/history', history),
-			func_summary = $http.put('/bpms/rest/approve/summary', summary)
+			func_summary = $http.put('/bpms/rest/approve/summary', summary),
 			deferred = $q.defer();
 		
 		$q.all([func_submit, func_history, func_summary])
@@ -311,6 +311,21 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 			}
 		);
 	};
+	
+	this.saveCustomApproveLine = function(formId, lines) {
+		console.log('formId: ', formId);
+		console.log('lines: ', lines);
+		
+		return $http.post('/bpms/rest/approve/lines/custom/' + formId, lines)
+		.then(
+			function(response) {
+				return reponse.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	}
 	
 	this.updateApproveLine = function(appId, lines) {
 		return $http.put('/bpms/rest/approve/lines/' + appId, lines)

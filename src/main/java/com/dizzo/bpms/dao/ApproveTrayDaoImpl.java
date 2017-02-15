@@ -31,7 +31,7 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 
 	@Override
 	public ApproveTray insert(ApproveTray tray) {
-		String	query = "INSERT INTO approve_tray (appId, userId, type, modified) VALUES (?, ?, now())";
+		String	query = "INSERT INTO approve_tray (appId, userId, type, modified) VALUES (?, ?, ?, now())";
 		
 		new JdbcTemplate(dataSource).update(query, new Object[] {tray.getAppId(), tray.getUserId(), tray.getType()});
 		return tray;
@@ -177,6 +177,14 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 	}
 
 	@Override
+	public List<ApproveTray> finishedTray(String userId) {
+		System.out.println("DEBUG: getFinishedTray(" + userId + ")");
+		List<ApproveTray>	list = getFinishedTray(userId);
+		System.out.println("Finished list: " + list);
+		return list;
+	}
+
+	@Override
 	public List<ApproveTray> deferTray(String userId) {
 		return getTray(userId, ApproveTrayType.DEFER.getType());
 	}
@@ -192,21 +200,22 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 	 * 결재 완료에 대한 처리가 필요하다. 결재 완료에 대한 처리는 결재라인 처리에서 수행한다.
 	 */
 	@Override
-	public List<ApproveTray> submitTray(String userId, String appId) {
+	public List<ApproveTray> submitTray(ApproveLine line) {
+		String	userId = line.getApprovalId(), appId = line.getAppId();
 		ApproveTray	tray = getApproveTrayForUser(userId, appId);
 		List<ApproveTray> trays = listByAppId(appId);
-		ApproveLine		line = appLineService.getNextOrder(appId, userId);
+		ApproveLine		l = appLineService.getNextOrder(line);
 		
 		tray.setType(ApproveTrayType.COMPLETED.getType());
 		tray = update(tray); 
 		
-		if (line != null) {
+		if (l != null) {
 			// 다음 결재자를 결재함 목록에서 찾는다.
 			Iterator<ApproveTray>	it = trays.iterator();
 			
 			while (it.hasNext()) {
 				tray = it.next();
-				if (tray.getUserId().equals(line.getApprovalId())) {
+				if (tray.getUserId().equals(l.getApprovalId())) {
 					tray.setType(ApproveTrayType.UNDECIDE.getType());
 					tray = this.update(tray);
 					
@@ -238,4 +247,19 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		return new JdbcTemplate(dataSource).query(query, new Object[] {type, userId}, new ApproveTrayRowMapper());
 	}
 
+	private List<ApproveTray> getFinishedTray(String userId) {
+		String	query = "SELECT s.appId,"
+					  + " s.userId,"
+					  + " s.modified,"
+       				  + " s.status 'type',"
+       				  + " u.userId 'creator',"
+       				  + " concat(u.lastName, u.firstName) 'creatorName',"
+       				  + " s.created,"
+       				  + " s.title 'appTitle'"
+  				  + " FROM approve_summary s, users u"
+ 				  + " WHERE     s.userId = ?"
+       				  + " AND s.status = 'F'"
+       				  + " AND s.userId = u.userId";
+		return new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new ApproveTrayRowMapper());
+	}
 }

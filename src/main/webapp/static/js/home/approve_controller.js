@@ -18,8 +18,8 @@
  * approve.tray : ApproveTray.java에 해당하며 배열 형태 또는 단독 오브젝트이다.
  */
 App
-.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', '$rootScope', '$routeParams', '$filter', '$location',
-	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, $rootScope, $routeParams, $filter, $location) {
+.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', 'confirmModal', '$rootScope', '$routeParams', '$filter', '$location', '$alert',
+	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, confirmModal, $rootScope, $routeParams, $filter, $location, $alert) {
 
 	// 결재 문서 작성
 	var self = this;
@@ -35,6 +35,7 @@ App
 	self.proc = false;
 	self.owner = true;
 	self.canEditLine = false;
+	self.changedLine = false;
 	
 	if (action == 'regist') {
 		formId = $routeParams.id;
@@ -127,6 +128,7 @@ App
 				console.log('tray: ', self.approveTrays);
 				console.log('lines: ', self.approveLine);
 				if (self.approveTrays.length > self.approveLine.length) {
+					// 문서 담당자가 아닌 경우에는 아래 코드를 진행하지 않는다.
 					// 문서 담당자의 결재라인을 조회하여 추가한다.
 					approveService.getApproveLine(document.form.formId)
 					.then(
@@ -179,6 +181,17 @@ App
 		$location.path($rootScope.prevUrl);
 	};
 	
+	/**
+	 * 결재라인 추가/삭제 후에 seq를 재 정리한다.
+	 */
+	function resetApproveLine(type) {
+		var idx = 0;
+		for (var i = 0; i < self.approveLine.length; i++) {
+			if (self.approveLine[i].type != type)	continue;
+			self.approveLine[i].seq = idx++;
+		}
+	}
+	
 	self.addApproveLine = function(index, type) {
 		var line = {};
 		
@@ -187,6 +200,8 @@ App
 			function(user) {
 				console.log('user: ', user);
 				if (user.id == -9999)	return false;
+				
+				self.changedLine = true;
 				
 				line.appId = document.summary.appId;
 				line.lineId = '';
@@ -201,6 +216,8 @@ App
 				// 처리부서 결재라인을 변경하는 경우라면, 의뢰부서 결재라인 길이에 더해야한다.
 				if (type == 'P')	index = $filter('filter')(self.approveLine, {type: 'R'}).length + index;
 				self.approveLine.splice(index, 0, line);
+				
+				resetApproveLine(type);
 			}
 		);
 	};
@@ -209,6 +226,9 @@ App
 		// 처리부서 결재라인을 변경하는 경우라면, 의뢰부서 결재라인 길이에 더해야한다.
 		if (type == 'P')	index = $filter('filter')(self.approveLine, {type: 'R'}).length + index;
 		self.approveLine.splice(index, 1);
+		self.changedLine = true;
+		
+		resetApproveLine(type);
 	};
 	
 	function saveApproveDocument(status) {
@@ -244,7 +264,7 @@ App
 				approve.lines[i].seq = i;
 				
 				// 작성자가 상신하는 경우, 작성자의 결재 상태는 완료이다.
-				if (satus == approveStatus.PROCESSING && i == 0)
+				if (status == approveStatus.PROCESSING && i == 0)
 					approve.lines[i].status = approveStatus.FINISH;
 				else
 					approve.lines[i].status = status;
@@ -506,6 +526,37 @@ App
 		return statusName;
 	};
 	
+	// 현재 결재라인을 사용자 지정 결재라인으로 저장
+	self.saveCustomApproveLine = function() {
+		confirmModal.setTitle("결재라인저장");
+		confirmModal.setContent("현재 결재라인을 저장하시겠습니까?");
+		confirmModal.show()
+		.then(
+			function(answer) {
+				if (answer == "no")		return false;
+				approveService.saveCustomApproveLine(document.form.formId, approve.lines)
+				.then(
+					function(data) {
+						console.log('saved custom approve line: ', data);
+						$alert({
+							title: '저장 완료',
+							content: '현재 결재 라인을 사용자 지정 결재라인으로 저장하였습니다.',
+							placement: 'top',
+							type: 'info',
+							show: true
+						});
+					},
+					function(err) {
+						console.error('Error while saving custom approve lines');
+					}
+				);
+			},
+			function(err) {
+				console.error('Error while show confirm modal window');
+			}
+		);
+	}
+	
 	/**
 	 * fileters
 	 */
@@ -571,19 +622,82 @@ App
 		return (summary.status != approveStatus.SAVED && summary.status != approveStatus.FINISH);
 	};
 }])
-.controller('undecideAppController', ['approveService', 'approveStatus', 'approveTrayType', '$rootScope',
-                                       function(approveService, approveStatus, approveTrayType, $rootScope) {
+.controller('viewAppController', ['approveService', '$routeParams', '$rootScope', '$location',
+									function(approveService, $routeParams, $rootScope, $location) {
+	// 결재 문서의 단순 열람을 위한 콘트롤러
+	// 본인이 상신한 결재, 기결함, 예결함, 완료함에 있는 결재 문서는 단순 열람만 가능하다.
+	var self = this;
+	var appId = $routeParams.appId;
+	var document = {}, approve = {}, histories = [];
+	var prevUrl = $rootScope.prevUrl || '/list_app';
+	
+	console.log('prevUrl: ', prevUrl);
+	
+	/**
+	 * 모든 결재 명령에 대한 조겅늘 false로 하여, 취소만 가능하게 한다.
+	 */
+	self.edit = false;
+	self.proc = true;
+	self.owner = true;
+	self.canEditLine = false;
+	
+	approveService.getSavedDocumentInformation(appId)
+	.then(
+		function(results) {
+			console.log('results: ', results);
+			
+			document.summary = results[0].data;
+			document.form = results[1].data;
+			document.form.appId = document.summary.appId;
+			document.form.formId = document.summary.formId;
+			document.form.fields = approveService.parseFormField(results[2].data);
+			
+			approve.trays = results[3].data;
+			approve.lines = results[4].data;
+			
+			self.histories = results[5].data;
+			self.summary = document.summary;
+			self.form = document.form;
+			self.form.fields = document.form.fields;
+			
+			self.approveTrays = approve.trays;
+			self.approveLine = approve.lines;
+		},
+		function(err) {
+			console.error('Error while fetching Approve Document Information');
+		}
+	);
+	
+	self.cancelApprove = function() {
+		$location.path(prevUrl);
+	}
+	
+	/**
+	 * fileters
+	 */
+	self.onlyRequestApproveLine = function(line) {
+		return line.type == 'R';
+	}
+	
+	self.onlyProcessingApproveLine = function(line) {
+		return line.type == 'P';
+	}
+}])
+.controller('trayAppController', ['approveService', 'approveStatus', 'approveTrayType', '$routeParams', '$rootScope',
+                                       function(approveService, approveStatus, approveTrayType, $routeParams, $rootScope) {
 	var self = this;
 	var prevUrl = '';
+	var type = $routeParams.type;
 	
 	self.documents = [];
 	
 	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
 		prevUrl = oldUrl.substring(oldUrl.indexOf('#') + 1);
+		console.log('prevUrl: ' + prevUrl);
 		$rootScope.prevUrl = prevUrl;
 	});
 	
-	approveService.getTray(approveTrayType.UNDECIDE)
+	approveService.getTray(type)
 	.then(
 		function(list) {
 			console.log(list);
@@ -600,8 +714,11 @@ App
 .controller('decidedAppController', [function() {
 	
 }])
-.controller('completedAppController', [function() {
+.controller('completedAppController', ['approveService', '$routeParams', function(approveService, $routeParams) {
+	var self = this;
+	var appId = $routeParams.appId;
 	
+	console.log('appId: ' + appId);
 }])
 .controller('expectAppController', ['approveService', 'approveTrayType', '$rootScope',
                                     function(approveService, approveTrayType, $rootScope) {

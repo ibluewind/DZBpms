@@ -47,6 +47,8 @@ public class ApproveTrayRestController {
 			trays = trayService.undecideTray(userId);
 		} else if (type.equals(ApproveTrayType.COMPLETED.getType())) {
 			trays = trayService.completedTray(userId);
+		} else if (type.equals(ApproveTrayType.FINISHED.getType())) {
+			trays = trayService.finishedTray(userId);
 		} else if (type.equals(ApproveTrayType.DEFER.getType())) {
 			trays = trayService.deferTray(userId);
 		} else if (type.equals(ApproveTrayType.EXPECTED.getType())) {
@@ -86,6 +88,7 @@ public class ApproveTrayRestController {
 	 */
 	@RequestMapping(method=RequestMethod.PUT)
 	public ApproveTray updateApproveTray(@RequestBody ApproveTray tray) {
+		System.out.println("DEBUG: update tray: " + tray);
 		return trayService.update(tray);
 	}
 	

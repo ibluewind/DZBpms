@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dizzo.bpms.dao.ApproveTrayDao;
+import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.ApproveTray;
 
 @Service("approveTrayService")
@@ -70,6 +71,11 @@ public class ApproveTrayServiceImpl implements ApproveTrayService {
 	}
 
 	@Override
+	public List<ApproveTray> finishedTray(String userId) {
+		return dao.finishedTray(userId);
+	}
+
+	@Override
 	public List<ApproveTray> deferTray(String userId) {
 		return dao.deferTray(userId);
 	}
@@ -80,8 +86,8 @@ public class ApproveTrayServiceImpl implements ApproveTrayService {
 	}
 
 	@Override
-	public List<ApproveTray> submitTray(String userId, String appId) {
-		return dao.submitTray(userId, appId);
+	public List<ApproveTray> submitTray(ApproveLine line) {
+		return dao.submitTray(line);
 	}
 
 }

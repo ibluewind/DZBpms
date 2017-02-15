@@ -60,7 +60,7 @@ public class ApproveLineServiceImpl implements ApproveLineService {
 	}
 
 	@Override
-	public ApproveLine getNextOrder(String appId, String userId) {
-		return dao.getNextOrder(appId, userId);
+	public ApproveLine getNextOrder(ApproveLine line) {
+		return dao.getNextOrder(line);
 	}
 }

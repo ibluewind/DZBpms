@@ -2,6 +2,7 @@ package com.dizzo.bpms.service;
 
 import java.util.List;
 
+import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.ApproveTray;
 
 public interface ApproveTrayService {
@@ -20,9 +21,10 @@ public interface ApproveTrayService {
 	// user's own tray
 	public List<ApproveTray>	undecideTray(String userId);
 	public List<ApproveTray>	completedTray(String userId);
+	public List<ApproveTray>	finishedTray(String userId);
 	public List<ApproveTray>	deferTray(String userId);
 	public List<ApproveTray>	expectedTray(String userId);
 	
 	// 결재 승인 처리
-	public List<ApproveTray>	submitTray(String userId, String appId);
+	public List<ApproveTray>	submitTray(ApproveLine line);
 }

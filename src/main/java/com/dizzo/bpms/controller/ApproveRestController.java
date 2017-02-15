@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +23,6 @@ import com.dizzo.bpms.model.ApproveSummary;
 import com.dizzo.bpms.model.ApproveTray;
 import com.dizzo.bpms.model.ApproveTrayType;
 import com.dizzo.bpms.model.CustomApproveLine;
-import com.dizzo.bpms.model.Department;
 import com.dizzo.bpms.model.DocumentManager;
 import com.dizzo.bpms.model.Form;
 import com.dizzo.bpms.model.FormField;
@@ -91,10 +91,11 @@ public class ApproveRestController {
 	 */
 	@RequestMapping(method=RequestMethod.POST)
 	public ApproveLine submitApprove(@RequestBody ApproveLine line) {
+		System.out.println("DEBUG: Submit Approve Line: " + line);
 		line.setStatus(ApproveStatus.FINISH.getStatus());
 		line = appLineService.update(line);
 		
-		List<ApproveTray> trays = appTrayService.submitTray(line.getApprovalId(), line.getAppId());
+		List<ApproveTray> trays = appTrayService.submitTray(line);
 		
 		if (trays == null) {
 			// 결재가 완료 됨.
@@ -105,15 +106,28 @@ public class ApproveRestController {
 			Form form = formService.getByAppId(appId);
 			
 			if (form.getProcDept() == null) {
-				// 모든 결재가 완료되었음.
+				// 처리부서가 없으므로, 모든 결재가 완료되었음.
 				return null;
 			} else {
+				ApproveSummary	summary = getApproveSummaryByAppId(appId);
+				
+				/**
+				 * 의뢰부서와 처리부서의 모든 결재가 완료되었는지 확인한다.
+				 * 처리부서까지 결재가 완료된 상태면, 결재 요약 정보를 갱신하고 작성자의 완료함에 결재문서 정보를 보관한다.
+				 * 완료함은 개념적인 의미의 보관장소이고, 시스템에서는 결재 요약 정보의 상태가 완료인 것을 조회한다.
+				 */
+				if (isCompletedApprove(appId)) {
+					summary.setStatus(ApproveStatus.FINISH.getStatus());
+					summaryService.update(summary);
+					return null;
+				}
+				
 				/**
 				 * 문서 작성자의 부서가 처리부서와 같은지 확인한다.
 				 * 같은 부서라면 결재를 완료한다.
 				 * 다른 부서라면 처리 부서의 문서 담당자 결재함에 해당 결재 정보를 등록한다.
 				 */
-				ApproveSummary	summary = getApproveSummaryByAppId(appId);
+				
 				DocumentManager docManager = getDocumentManager(summary, form.getProcDept());
 				if (docManager == null) {
 					System.out.println("Finished approve processing");
@@ -135,6 +149,33 @@ public class ApproveRestController {
 		return line;
 	}
 
+	/**
+	 * 모든 결재가 완료되었는지 확인다.
+	 * 처리부서가 있는 경우이므로, 처리부서의 결재 상태가 모두 완료인지 확인한다.
+	 * @param appId
+	 * @return
+	 */
+	private boolean isCompletedApprove(String appId) {
+		List<ApproveLine>	lines = appLineService.getByAppId(appId);
+		List<ApproveLine>	procLines = lines.stream().filter(t -> t.getType().equals("P")).collect(Collectors.toList());	// 처리부서의 결재라인만 필터링.
+		boolean	completed = true;
+		
+		System.out.println("DEBUG: lines: " + lines);
+		System.out.println("DEBUG: procLines: " + procLines);
+		if (procLines.isEmpty()) {
+			System.out.println("Not yet assigned processing department");
+			return false;
+		}
+		
+		for (int i = 0; i < procLines.size(); i++) {
+			if (!procLines.get(i).getStatus().equals(ApproveStatus.FINISH.getStatus())) {
+				completed = false;
+				break;
+			}
+		}
+		
+		return completed;
+	}
 	/**
 	 * 처리부서의 문서 담당자를 조회한다.
 	 * 결재 문서를 작성한 담당자가 처리부서이면, 처리부서를 null로 반환한다.
@@ -269,12 +310,21 @@ public class ApproveRestController {
 			line.setApprovalName(user.getLastName() + user.getFirstName());
 			line.setApprovalPosition(user.getDeptPositions().get(0).getPositionName());
 			line.setModified(new Date());
-			line.setSeq(-1);
+			line.setSeq(0);
+			line.setType("R");
 			line.setStatus(ApproveStatus.PROCESSING.getStatus());
 			
 			lines = appLineService.getByOrganize(userId);
+			System.out.println("DEBUG: lines: " + lines);
 			lines.add(0, line);
 		}
+		
+		// 무슨 이유에서인지 조회 결과에 seq가 모두 0으로 세팅된다. 아무래도 rownum의 타입이 다른 것 같은데 별 수를 다 써도 안됨.
+		// 무식하게 seq를 재 저장함.
+		for (int i = 0; i < lines.size(); i++) {
+			lines.get(i).setSeq(i);
+		}
+		System.out.println("DEBUG: lines: " + lines);
 		return lines;
 	}
 	
@@ -294,6 +344,13 @@ public class ApproveRestController {
 	@RequestMapping(value="/lines/save", method=RequestMethod.POST)
 	public List<ApproveLine> saveApporveLine(@RequestBody List<ApproveLine> appLines) {
 		return appLineService.insert(appLines);
+	}
+	
+	@RequestMapping(value="/lines/custom/{formId}", method=RequestMethod.POST)
+	public List<ApproveLine> saveCustomApproveLine(@PathVariable String formId, @RequestBody List<ApproveLine> lines) {
+		List<CustomApproveLine>	customLines = convertApproveLineToCustomApproveLine(formId, lines);
+		customAppLineService.saveApproveLines(customLines);
+		return lines;
 	}
 	
 	/**
@@ -333,6 +390,29 @@ public class ApproveRestController {
 		}
 		
 		return appLines;
+	}
+	
+	private List<CustomApproveLine> convertApproveLineToCustomApproveLine(String formId, List<ApproveLine> lines) {
+		List<CustomApproveLine>	customLines = new ArrayList<CustomApproveLine>();
+		Iterator<ApproveLine>	it = lines.iterator();
+		String	userId = getPrincipal();
+		
+		System.out.println("DEBUG: lines: " + lines);
+		
+		while (it.hasNext()) {
+			ApproveLine l = it.next();
+			CustomApproveLine c = new CustomApproveLine();
+			
+			c.setFormId(formId);
+			c.setApprovalId(l.getApprovalId());
+			c.setOrder(l.getSeq());
+			c.setUserId(userId);
+			
+			customLines.add(c);
+		}
+		
+		System.out.println("DEBUG: customLines: " + customLines);
+		return customLines;
 	}
 	
 	private String getPrincipal() {

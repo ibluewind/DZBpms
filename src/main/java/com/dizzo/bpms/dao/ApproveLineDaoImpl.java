@@ -58,18 +58,17 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			 + " a.modified,"
          			 + " a.seq,"
          			 + " a.type,"
-         			 + " p.name 'positionName',"
+         			 + " pos.name 'positionName',"
          			 + " concat(u.lastName, u.firstName) 'userName'"
-    			 + " FROM approve_line a,"
-         			 + " users u,"
-         			 + " user_dept_position udp,"
-         			 + " position p"
+    			 + " FROM approve_line a"
+         			 + " LEFT JOIN (SELECT udp.userId, p.name"
+         			 + " 			FROM user_dept_position udp, position p"
+         			 + "			WHERE udp.positionId = p.id AND p.type = 'R') pos"
+         			 + " ON a.userId = pos.userId,"
+         			 + " users u"
    			 + " WHERE     a.appId = ?"
          			 + " AND a.userId = u.userid"
-         			 + " AND udp.userid = a.userId"
-         			 + " AND p.id = udp.positionid"
-         			 + " AND p.type = 'R'"
-			 + " GROUP BY a.userId"
+   			 + " GROUP BY userId"
 			 + " ORDER BY seq";
 		
 		return new JdbcTemplate(dataSource).query(query, new Object[] {appId}, new ApproveLineRowMapper());
@@ -224,11 +223,13 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			 + " p.name positionName,"
          			 + " 'P' status,"
          			 + " null modified,"			// 수정일자는 결재라인 생성시에 필요하지 않음.
-         			 + "'R' type"
+         			 + "'R' type,"
+         			 + " l.seq seq"
 					 + " FROM (SELECT d.deptid,"
                  			 + " @pv := d.pid,"
                  			 + " d.name,"
-                 			 + " d.depth"
+                 			 + " d.depth,"
+                 			 + " @rownum:=@rownum+1 'seq'"
             			 + " FROM (  SELECT deptid,"
                            			 + " pid,"
                            			 + " name,"
@@ -241,21 +242,26 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
                       			 + " FROM users u, user_dept_position d"
                      			 + " WHERE u.userid = ? AND d.userid = u.userid"
                   			 + " GROUP BY u.userid) tmp"
-           			 + " WHERE d.deptid = @pv) l,"
+           			 + " WHERE d.deptid = @pv AND (@rownum:=0)=0) l,"
          			 + " dept_docmanager dm, users u, user_dept_position up, position p"
    			 + " WHERE dm.type = 'M' AND dm.deptid = l.deptid and u.userid=dm.docmanager and up.deptid=l.deptid and up.userid = u.userid and p.id=up.positionid and p.type='R'"
    			 + " ORDER BY l.depth DESC";
+		
+		System.out.println("query: " + query);
 		return new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new ApproveLineRowMapper());
 	}
 
 	@Override
-	public ApproveLine getNextOrder(String appId, String userId) {
+	public ApproveLine getNextOrder(ApproveLine line) {
+		String appId = line.getAppId(), userId = line.getApprovalId(), type = line.getType();
+		
 		String query = "  SELECT l.lineId,"
 				     + "    l.appId,"
 				     + "    l.userId,"
 				     + "    l.status,"
 				     + "    l.modified,"
 				     + "    l.seq,"
+				     + " 	l.type,"
 				     + "    p.name 'positionName',"
 				     + "    concat(u.lastName, u.firstName) 'userName'"
 				     + " FROM approve_line l"
@@ -268,18 +274,21 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
 				     + "    user_dept_position udp,"
 				     + "    position p"
 				   + " WHERE     l.seq = @pv + 1"
+				   + "		AND l.type = ?"
 				   + "      AND u.userid = l.userId"
 				   + "      AND udp.userid = u.userid"
+				   + "		AND udp.positionId = p.id"
+				   + "		AND p.type='R'"
 				+ " GROUP BY u.userid";
-		ApproveLine	line = null;
+		ApproveLine	l = null;
 		
 		try {
-			line = new JdbcTemplate(dataSource).queryForObject(query, new Object[] {appId, userId}, new ApproveLineRowMapper());
+			l = new JdbcTemplate(dataSource).queryForObject(query, new Object[] {appId, userId, type}, new ApproveLineRowMapper());
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 		
-		return line;
+		return l;
 	}
 	
 	
