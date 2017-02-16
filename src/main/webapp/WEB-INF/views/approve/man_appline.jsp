@@ -59,12 +59,12 @@
 								<td>{{l.approvalName}}</td>
 								<td>{{l.approvalPosition}}</td>
 								<td>
-									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveUp()" ng-disabled="$first"><span class="glyphicon glyphicon-chevron-up small"></span></button>
-									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveDown()" ng-disabled="$last"><span class="glyphicon glyphicon-chevron-down small"></span></button>
+									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveUp(l)" ng-disabled="$first"><span class="glyphicon glyphicon-chevron-up small"></span></button>
+									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveDown(l)" ng-disabled="$last"><span class="glyphicon glyphicon-chevron-down small"></span></button>
 								</td>
 								<td>
-									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.addTo(l.seq)"><span class="glyphicon glyphicon-plus small"></span></button>
-									<button type="button" class="btn btn-danger btn-xs" ng-click="ctrl.remove(l.seq)"><span class="glyphicon glyphicon-trash small"></span></button>
+									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.addTo(l)" ng-disabled="$first"><span class="glyphicon glyphicon-plus small"></span></button>
+									<button type="button" class="btn btn-danger btn-xs" ng-click="ctrl.remove(l)" ng-disabled="$first"><span class="glyphicon glyphicon-trash small"></span></button>
 								</td>
 							</tr>
 						</tbody>

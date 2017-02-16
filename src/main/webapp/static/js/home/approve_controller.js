@@ -782,4 +782,39 @@ App
 			}
 		);
 	};
+	
+	function resetCustomAppLines() {
+		for (var i = 0; i < self.customAppLines.length; i++)
+			self.customAppLines[i].seq = i;
+	}
+	
+	self.moveUp = function(line) {
+		var targetIdx = line.seq - 1;
+		var targetLine = self.customAppLines[targetIdx];
+		
+		self.customAppLines[targetIdx] = line;
+		self.customAppLines[line.seq] = targetLine;
+		
+		resetCustomAppLines();
+	};
+	
+	self.moveDown = function(line) {
+		var targetIdx = line.seq + 1;
+		var targetLine = self.customAppLines[targetIdx];
+		
+		self.customAppLines[targetIdx] = line;
+		self.customAppLines[line.seq] = targetLine;
+		
+		resetCustomAppLines();
+	};
+	
+	self.addTo = function(line) {
+		console.log('target: ', line);
+	};
+	
+	self.remove = function(line) {
+		self.customAppLines.splice(line.seq, 1);
+		resetCustomAppLines();
+	};
+	
 }]);
