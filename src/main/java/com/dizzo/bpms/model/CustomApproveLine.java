@@ -2,40 +2,23 @@ package com.dizzo.bpms.model;
 
 public class CustomApproveLine {
 
-	private String	formId;
-	private String	formTitle;
-	private String	userId;
-	private String	userName;
+	/**
+	 * DB Table member
+	 */
+	private String	lineId;
 	private String	approvalId;
+	private int		seq;
+	
 	private String	approvalName;
 	private String	approvalPosition;
-	private int		seq;
 	
 	public CustomApproveLine() {}
 	
-	public String getFormId() {
-		return formId;
+	public String getLineId() {
+		return lineId;
 	}
-	public void setFormId(String formId) {
-		this.formId = formId;
-	}
-	public String getFormTitle() {
-		return formTitle;
-	}
-	public void setFormTitle(String formTitle) {
-		this.formTitle = formTitle;
-	}
-	public String getUserId() {
-		return userId;
-	}
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setLineId(String lineId) {
+		this.lineId = lineId;
 	}
 	public String getApprovalId() {
 		return approvalId;
@@ -63,6 +46,6 @@ public class CustomApproveLine {
 	}
 	
 	public String toString() {
-		return "CustomApproveLine: {formId: " + formId + ", userId: " + userId + ", approvalId: " + approvalId + ", seq: " + seq + "}";
+		return "CustomApproveLine: {lineId: " + lineId + ", approvalId: " + approvalId + ", seq: " + seq + "}";
 	}
 }

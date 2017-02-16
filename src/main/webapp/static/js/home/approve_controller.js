@@ -750,6 +750,36 @@ App
 		}
 	);
 }])
-.controller('manageAppLineController', [function() {
+.controller('manageAppLineController', ['approveService', function(approveService) {
+	var self = this;
 	
+	self.summaries = [];
+	self.summary = {};
+	self.customAppLines = [];
+	
+	approveService.getCustomApproveLineSummaryList()
+	.then(
+		function(data) {
+			self.summaries = data;
+			console.log('summaries: ', self.summaries);
+		},
+		function(err) {
+			console.error('Error while fetching custom approve line summary list');
+		}
+	);
+	
+	self.editSummaryInfo = function(lineId) {
+		approveService.getCustomApproveLineInfo(lineId)
+		.then(
+			function(results) {
+				self.summary = results[0].data;
+				console.log('summary: ', self.summary);
+				self.customAppLines = results[1].data;
+				console.log('lines: ', self.customAppLines);
+			},
+			function(err) {
+				console.error('Error while fetching custom approve line information'); 
+			}
+		);
+	};
 }]);

@@ -339,6 +339,36 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		);
 	};
 	
+	this.getCustomApproveLineSummaryList = function() {
+		return $http.get('/bpms/rest/approve/lines/custom/summary')
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+	
+	this.getCustomApproveLineInfo = function(lineId) {
+		var deferred = $q.defer();
+		var func_summary = $http.get('/bpms/rest/approve/lines/custom/summary/' + lineId),
+			func_lines = $http.get('/bpms/rest/approve/lines/custom/' + lineId);
+		
+		$q.all([func_summary, func_lines])
+		.then(
+			function(results) {
+				deferred.resolve(results);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+		
+		return deferred.promise;
+	};
+	
 	/**
 	 * 저장되었거나, 상신된 결재 문서의 결재 라인을 조회한다.
 	 */

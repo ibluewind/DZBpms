@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.dizzo.bpms.dao.CustomApproveLineDao;
 import com.dizzo.bpms.model.CustomApproveLine;
+import com.dizzo.bpms.model.CustomApproveLineSummary;
 
 @Service("customApproveLineService")
 public class CustomApproveLineServiceImpl implements CustomApproveLineService {
@@ -20,6 +21,11 @@ public class CustomApproveLineServiceImpl implements CustomApproveLineService {
 	}
 
 	@Override
+	public List<CustomApproveLine> getApproveLines(String lineId) {
+		return dao.getApproveLines(lineId);
+	}
+
+	@Override
 	public List<CustomApproveLine> saveApproveLines(List<CustomApproveLine> lines) {
 		return dao.saveApproveLines(lines);
 	}
@@ -30,13 +36,33 @@ public class CustomApproveLineServiceImpl implements CustomApproveLineService {
 	}
 
 	@Override
-	public CustomApproveLine deleteOneLine(String userId, String formId, String approvalId) {
-		return dao.deleteOneLine(userId, formId, approvalId);
+	public CustomApproveLine deleteOneLine(String lineId, int seq) {
+		return dao.deleteOneLine(lineId, seq);
 	}
 
 	@Override
-	public List<CustomApproveLine> deleteAll(String userId, String formId) {
-		return dao.deleteAll(userId, formId);
+	public List<CustomApproveLine> deleteAll(String lineId) {
+		return dao.deleteAll(lineId);
+	}
+
+	@Override
+	public List<CustomApproveLineSummary> listSummary(String userId) {
+		return dao.listSummary(userId);
+	}
+
+	@Override
+	public CustomApproveLineSummary getSummary(String lineId) {
+		return dao.getSummary(lineId);
+	}
+
+	@Override
+	public CustomApproveLineSummary deleteSummary(String lineId) {
+		return dao.deleteSummary(lineId);
+	}
+
+	@Override
+	public CustomApproveLineSummary updateSummary(CustomApproveLineSummary summary) {
+		return dao.updateSummary(summary);
 	}
 
 }

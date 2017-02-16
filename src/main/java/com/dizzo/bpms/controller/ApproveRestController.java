@@ -23,6 +23,7 @@ import com.dizzo.bpms.model.ApproveSummary;
 import com.dizzo.bpms.model.ApproveTray;
 import com.dizzo.bpms.model.ApproveTrayType;
 import com.dizzo.bpms.model.CustomApproveLine;
+import com.dizzo.bpms.model.CustomApproveLineSummary;
 import com.dizzo.bpms.model.DocumentManager;
 import com.dizzo.bpms.model.Form;
 import com.dizzo.bpms.model.FormField;
@@ -348,11 +349,39 @@ public class ApproveRestController {
 		return appLineService.insert(appLines);
 	}
 	
+	/**
+	 * 사용자 정의 결재라인을 저장한다.
+	 * 사용자 정의 결재 라인은 결재라인 요약정보를 먼저 저장하고, 결재 라인 정보를 저장한다.
+	 * @param formId
+	 * @param lines
+	 * @return
+	 */
 	@RequestMapping(value="/lines/custom/{formId}", method=RequestMethod.POST)
 	public List<ApproveLine> saveCustomApproveLine(@PathVariable String formId, @RequestBody List<ApproveLine> lines) {
-		List<CustomApproveLine>	customLines = convertApproveLineToCustomApproveLine(formId, lines);
+		CustomApproveLineSummary summary = new CustomApproveLineSummary();
+		List<CustomApproveLine>	customLines = convertApproveLineToCustomApproveLine(formId, lines);		
+		Form	form = formService.getById(formId);
+		
+		summary.setFormId(formId);
+		summary.setUserId(getPrincipal());
+		summary.setTitle(form.getTitle());
 		customAppLineService.saveApproveLines(customLines);
 		return lines;
+	}
+	
+	@RequestMapping(value="/lines/custom/summary", method=RequestMethod.GET)
+	public List<CustomApproveLineSummary> getCustomApproveLineSummaryList() {
+		return customAppLineService.listSummary(getPrincipal());
+	}
+	
+	@RequestMapping(value="/lines/custom/summary/{lineId}", method=RequestMethod.GET)
+	public CustomApproveLineSummary getCustomApproveLineSummary(@PathVariable String lineId) {
+		return customAppLineService.getSummary(lineId);
+	}
+	
+	@RequestMapping(value="/lines/custom/{lineId}", method=RequestMethod.GET)
+	public List<CustomApproveLine> getCustomApproveLineList(@PathVariable String lineId) {
+		return customAppLineService.getApproveLines(lineId);
 	}
 	
 	/**
@@ -396,7 +425,6 @@ public class ApproveRestController {
 	private List<CustomApproveLine> convertApproveLineToCustomApproveLine(String formId, List<ApproveLine> lines) {
 		List<CustomApproveLine>	customLines = new ArrayList<CustomApproveLine>();
 		Iterator<ApproveLine>	it = lines.iterator();
-		String	userId = getPrincipal();
 		
 		System.out.println("DEBUG: lines: " + lines);
 		
@@ -404,10 +432,8 @@ public class ApproveRestController {
 			ApproveLine l = it.next();
 			CustomApproveLine c = new CustomApproveLine();
 			
-			c.setFormId(formId);
 			c.setApprovalId(l.getApprovalId());
 			c.setSeq(l.getSeq());
-			c.setUserId(userId);
 			
 			customLines.add(c);
 		}
