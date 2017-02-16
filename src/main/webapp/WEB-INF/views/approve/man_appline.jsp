@@ -59,8 +59,8 @@
 								<td>{{l.approvalName}}</td>
 								<td>{{l.approvalPosition}}</td>
 								<td>
-									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveUp()" ng-hide="$first"><span class="glyphicon glyphicon-arrow-up small"></span></button>
-									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveDown()" ng-hide="$last"><span class="glyphicon glyphicon-arrow-down small"></span></button>
+									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveUp()" ng-disabled="$first"><span class="glyphicon glyphicon-chevron-up small"></span></button>
+									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveDown()" ng-disabled="$last"><span class="glyphicon glyphicon-chevron-down small"></span></button>
 								</td>
 								<td>
 									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.addTo(l.seq)"><span class="glyphicon glyphicon-plus small"></span></button>
