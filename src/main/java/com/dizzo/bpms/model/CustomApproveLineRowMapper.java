@@ -18,7 +18,7 @@ public class CustomApproveLineRowMapper implements RowMapper<CustomApproveLine> 
 		line.setApprovalId(rs.getString("approvalId"));
 		line.setApprovalName(rs.getString("approvalName"));
 		line.setApprovalPosition(rs.getString("approvalPosition"));
-		line.setOrder(rs.getInt("order"));
+		line.setSeq(rs.getInt("seq"));
 		
 		return line;
 	}

@@ -71,6 +71,8 @@ App
 				
 				approve.lines = results[2].data;
 				
+				setApproveLineType('R');
+				
 				console.log('DEBUG: document: ', document);
 				console.log('DEBUG: approve: ', approve);
 				
@@ -154,6 +156,11 @@ App
 				console.error('Error while fetching Approve Document Information');
 			}
 		);
+	}
+	
+	function setApproveLineType(type) {
+		for (var i = 0; i < approve.lines.length; i++)
+			approve.lines[i].type = type;
 	}
 	
 	self.dateDiff = function(start, end) {
@@ -527,14 +534,16 @@ App
 	};
 	
 	// 현재 결재라인을 사용자 지정 결재라인으로 저장
-	self.saveCustomApproveLine = function() {
+	self.saveCustomApproveLine = function(type) {
 		confirmModal.setTitle("결재라인저장");
 		confirmModal.setContent("현재 결재라인을 저장하시겠습니까?");
 		confirmModal.show()
 		.then(
 			function(answer) {
 				if (answer == "no")		return false;
-				approveService.saveCustomApproveLine(document.form.formId, approve.lines)
+				var lines = $filter('filter')(approve.lines, {type: type});
+				console.log('lines: ', lines);
+				approveService.saveCustomApproveLine(document.form.formId, lines)
 				.then(
 					function(data) {
 						console.log('saved custom approve line: ', data);
@@ -697,6 +706,7 @@ App
 		$rootScope.prevUrl = prevUrl;
 	});
 	
+	console.log('type: ', type);
 	approveService.getTray(type)
 	.then(
 		function(list) {

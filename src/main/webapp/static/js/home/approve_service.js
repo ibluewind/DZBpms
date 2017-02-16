@@ -319,7 +319,7 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		return $http.post('/bpms/rest/approve/lines/custom/' + formId, lines)
 		.then(
 			function(response) {
-				return reponse.data;
+				return response.data;
 			},
 			function(err) {
 				$q.reject(err);

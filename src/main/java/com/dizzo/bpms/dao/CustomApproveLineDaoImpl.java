@@ -32,24 +32,23 @@ public class CustomApproveLineDaoImpl implements CustomApproveLineDao {
          			 + " concat(u.lastName, u.firstName) 'userName',"
          			 + " c.approvalId,"
          			 + " concat(au.lastName, au.firstName) 'approvalName',"
-         			 + " p.name 'approvalPosition',"
-		 			 + " c.order"
+         			 + " pos.name 'approvalPosition',"
+		 			 + " c.seq"
     			 + " FROM form f,"
          			 + " custom_approve_line c,"
          			 + " users u,"
-         			 + " users au,"
-         			 + " user_dept_position udp,"
-         			 + " position p"
+         			 + " users au "
+         			 + " LEFT JOIN (SELECT udp.userId, p.name"
+         			 + "            FROM user_dept_position udp, position p"
+         			 + "		   WHERE udp.positionId = p.id AND p.type = 'R') pos"
+         			 + "	ON au.userId = pos.userId"
    			 + " WHERE     c.formId = ?"
    		 			 + " AND c.formId = f.id"
          			 + " AND c.userId = ?"
 		 			 + " AND u.userid = c.userId"
          			 + " AND au.userid = c.approvalId"
-         			 + " AND udp.userid = c.approvalId"
-         			 + " AND udp.positionid = p.id"
-         			 + " AND p.type = 'R'"
          	 + " GROUP BY au.userid"
-			 + " ORDER BY c.order";
+			 + " ORDER BY c.seq";
 		
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		
@@ -67,16 +66,18 @@ public class CustomApproveLineDaoImpl implements CustomApproveLineDao {
 
 	@Override
 	public List<CustomApproveLine> saveApproveLines(List<CustomApproveLine> lines) {
-		String	query = "INSERT INTO custom_approve_line (formId, userId, approvalId, order)"
+		String	query = "INSERT INTO custom_approve_line (formId, userId, approvalId, seq)"
 					  + " VALUES (?, ?, ?, ?)";
+		
 		new JdbcTemplate(dataSource).batchUpdate(query, new BatchPreparedStatementSetter() {
 			
 			@Override
 			public void setValues(PreparedStatement ps, int idx) throws SQLException {
+				System.out.println("customLine: " + lines.get(idx));
 				ps.setString(1, lines.get(idx).getFormId());
 				ps.setString(2, lines.get(idx).getUserId());
 				ps.setString(3, lines.get(idx).getApprovalId());
-				ps.setInt(4, lines.get(idx).getOrder());
+				ps.setInt(4, lines.get(idx).getSeq());
 			}
 			
 			@Override

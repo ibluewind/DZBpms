@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.dizzo.bpms.model.ApproveTrayType;
 import com.dizzo.bpms.model.FileAttach;
 import com.dizzo.bpms.model.Form;
 import com.dizzo.bpms.service.FileAttachService;
 import com.dizzo.bpms.service.FormService;
 
 @Controller
-@RequestMapping("/app")
+@RequestMapping("/approve")
 public class ApprovePageController {
 	
 	@Autowired
@@ -81,55 +82,24 @@ public class ApprovePageController {
 		return formPath;
 	}
 	
-	/**
-	 * 미결함.
-	 * 결재해야할 결재 문서 목록을 표시할 페이지를 반환한다.
-	 * @return
-	 */
-	@RequestMapping(value="/undecide", method=RequestMethod.GET)
-	public String getUndeciedApprovePage() {
-		return "/approve/undecide";
-	}
-	
-	/**
-	 * 보류함.
-	 * 결재 문서중 결재자가 보류 처리한 결재 문서 목록 페이지
-	 * @return
-	 */
-	@RequestMapping(value="/defer", method=RequestMethod.GET)
-	public String getDeferApprovePage() {
-		return "/approve/defer";
-	}
-	
-	/**
-	 * 완료함.
-	 * 로그인 사용자가 작성한 결재 문서중에 결재가 완료된 문서 보관함.
-	 * @return
-	 */
-	@RequestMapping(value="/completed", method=RequestMethod.GET)
-	public String getCompletedApprovePage() {
-		return "/approve/completed";
-	}
-	
-	/**
-	 * 기결함.
-	 * 결재자가 이미 결재한 문서 목록 페이지
-	 * @return
-	 */
-	@RequestMapping(value="/decided", method=RequestMethod.GET)
-	public String getDecidedApprovePage() {
-		return "/approve/decided";
-	}
-	
-	/**
-	 * 예결함.
-	 * 결재자가 결재해야할 문서 목록 페이지.
-	 * 아직 결재자의 결재 순서가 되지 않은 목록 페이지 이다.
-	 * @return
-	 */
-	@RequestMapping(value="/expect", method=RequestMethod.GET)
-	public String getExpectApprovePage() {
-		return "/approve/expect";
+	@RequestMapping(value="/tray/list/{type}", method=RequestMethod.GET)
+	public String getApproveTrayPage(@PathVariable String type) {
+		String	page = null;
+		
+		if (type.equals(ApproveTrayType.UNDECIDE.getType()))			// 미결함
+			page = "/approve/undecide";
+		else if (type.equals(ApproveTrayType.DEFER.getType()))			// 보류함
+			page = "/approve/defer";
+		else if (type.equals(ApproveTrayType.COMPLETED.getType()))		// 완료함
+			page = "/approve/completed";
+		else if (type.equals(ApproveTrayType.FINISHED.getType()))		// 기결함
+			page = "/approve/finished";
+		else if (type.equals(ApproveTrayType.EXPECTED.getType()))		// 예정함
+			page = "/approve/expected";
+		else if (type.equals(ApproveTrayType.REJECT.getType()))			// 반려함
+			page = "/approve/reject";
+		
+		return page;
 	}
 	
 	@RequestMapping(value="/manappline", method=RequestMethod.GET)

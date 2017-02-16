@@ -298,7 +298,9 @@ public class ApproveRestController {
 		 */
 		List<CustomApproveLine> customLines = customAppLineService.getApproveLines(userId, formId);
 		if (customLines != null && customLines.size() > 0) {
+			System.out.println("customLines: " + customLines);
 			lines = convertApproveLine(customLines);
+			System.out.println("lines: " + lines);
 		} else {
 			System.out.println("There is no custom approve line. Fetching organize");
 			// 본인이 제외됨으로 본인의 결재 라인을 맨 처음에 배치되도록 한다.
@@ -363,7 +365,6 @@ public class ApproveRestController {
 		return appLineService.insert(appLines);
 	}
 	
-	@RequestMapping(value="")
 	/**
 	 * 사용자 지정 결재 라인을 시스템에 사용되는 ApproveLine으로 변환한다.
 	 * @param customLines
@@ -384,7 +385,7 @@ public class ApproveRestController {
 			appLine.setLineId(null);
 			appLine.setModified(null);
 			appLine.setStatus(ApproveStatus.PROCESSING.getStatus());
-			appLine.setSeq(line.getOrder());
+			appLine.setSeq(line.getSeq());
 			
 			appLines.add(appLine);
 		}
@@ -405,7 +406,7 @@ public class ApproveRestController {
 			
 			c.setFormId(formId);
 			c.setApprovalId(l.getApprovalId());
-			c.setOrder(l.getSeq());
+			c.setSeq(l.getSeq());
 			c.setUserId(userId);
 			
 			customLines.add(c);

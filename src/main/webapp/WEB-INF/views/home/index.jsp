@@ -50,13 +50,13 @@
 		          <a href=#/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">결재함<span class="caret"></span></a>
 		          <ul class="dropdown-menu" role="menu">
 		            <li><a href="#/list_app">결재등록</a></li>
-		            <li><a href="#/undecide_app/U">미결함</a></li>
-		            <li><a href="#/defer_app/D">보류함</a></li>
-		            <li><a href="#/completed_app/C">기결함</a></li>
+		            <li><a href="#/approve_tray/U">미결함</a></li>
+		            <li><a href="#/approve_tray/D">보류함</a></li>
+		            <li><a href="#/approve_tray/F">기결함</a></li>
 		            <li class="divider"></li>
-		            <li><a href="#/finished_app/F">완료함</a></li>
+		            <li><a href="#/approve_tray/C">완료함</a></li>
 		            <li class="divider"></li>
-		            <li><a href="#/expect_app/E">예정함</a></li>
+		            <li><a href="#/approve_tray/E">예정함</a></li>
 		            <li class="divider"></li>
 		            <li><a href="#/man_appline">결재라인관리</a></li>
 		          </ul>

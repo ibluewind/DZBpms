@@ -9,7 +9,7 @@ public class CustomApproveLine {
 	private String	approvalId;
 	private String	approvalName;
 	private String	approvalPosition;
-	private int		order;
+	private int		seq;
 	
 	public CustomApproveLine() {}
 	
@@ -55,14 +55,14 @@ public class CustomApproveLine {
 	public void setApprovalPosition(String approvalPosition) {
 		this.approvalPosition = approvalPosition;
 	}
-	public int getOrder() {
-		return order;
+	public int getSeq() {
+		return seq;
 	}
-	public void setOrder(int order) {
-		this.order = order;
+	public void setSeq(int seq) {
+		this.seq = seq;
 	}
 	
 	public String toString() {
-		return "CustomApproveLine: {formId: " + formId + ", userId: " + userId + ", approvalId: " + approvalId + ", order: " + order + "}";
+		return "CustomApproveLine: {formId: " + formId + ", userId: " + userId + ", approvalId: " + approvalId + ", seq: " + seq + "}";
 	}
 }

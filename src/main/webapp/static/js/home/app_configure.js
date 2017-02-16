@@ -28,49 +28,35 @@ App
 		templateUrl: '/bpms/home/task/expect'
 	})
 	.when('/list_app', {	// 초기 결재 작성 화면
-		templateUrl: '/bpms/app/list',
+		templateUrl: '/bpms/approve/list',
 		controller: 'listAppController as ctrl'
 	})
 	.when('/regist_app/:id', {
 		templateUrl: function(params) {
-			return '/bpms/app/regist/' + params.id;
+			return '/bpms/approve/regist/' + params.id;
 		},
 		controller: 'editAppController as ctrl'
 	})
 	.when('/edit_app/:id', {
 		templateUrl: function(params) {
-			return '/bpms/app/edit/' + params.id;
+			return '/bpms/approve/edit/' + params.id;
 		},
 		controller: 'editAppController as ctrl'
 	})
 	.when('/view_app/:appId', {
 		templateUrl: function(params) {
-			return '/bpms/app/edit/' + params.appId;
+			return '/bpms/approve/edit/' + params.appId;
 		},
 		controller: 'viewAppController as ctrl'
 	})
-	.when('/undecide_app/:type', {
-		templateUrl: '/bpms/app/undecide',
+	.when('/approve_tray/:type', {
+		templateUrl: function(params) {
+			return '/bpms/approve/tray/list/' + params.type;
+		},
 		controller: 'trayAppController as ctrl'
-	})
-	.when('/defer_app', {
-		templateUrl: '/bpms/app/defer',
-		controller: 'deferAppController as ctrl'
-	})
-	.when('/finished_app/:type', {
-		templateUrl: '/bpms/app/completed',
-		controller: 'trayAppController as ctrl'
-	})
-	.when('/decided_app', {
-		templateUrl: '/bpms/app/decided',
-		controller: 'decidedAppControlelr as ctrl'
-	})
-	.when('/expect_app', {
-		templateUrl: '/bpms/app/expect',
-		controller: 'expectAppController as ctrl'
 	})
 	.when('/man_appline', {
-		templateUrl: '/bpms/app/manappline',
+		templateUrl: '/bpms/approve/manappline',
 		controller: 'manageAppLineController as ctrl'
 	})
 	.otherwise({redirectTo: '/'});

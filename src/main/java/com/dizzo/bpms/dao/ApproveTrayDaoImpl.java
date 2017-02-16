@@ -15,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.dizzo.bpms.model.ApproveLine;
+import com.dizzo.bpms.model.ApproveStatus;
 import com.dizzo.bpms.model.ApproveTray;
 import com.dizzo.bpms.model.ApproveTrayRowMapper;
 import com.dizzo.bpms.model.ApproveTrayType;
@@ -171,17 +172,22 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		return getTray(userId, ApproveTrayType.UNDECIDE.getType());
 	}
 
+	/**
+	 * 완료함은 개념적인 결재 문서 보관함이다.
+	 * 실제 approve_tray에는 완료라는 상태는 없다.
+	 * 완료함은 작성자의 결재 문서가 결재 완료된 상태의 문서를 조회하는 것이므로, approve_summary에서 작성자의 결재 문서중 완료된 문서를 찾는다.
+	 */
 	@Override
 	public List<ApproveTray> completedTray(String userId) {
-		return getTray(userId, ApproveTrayType.COMPLETED.getType());
+		System.out.println("DEBUG: getCompletedTray(" + userId + ")");
+		List<ApproveTray>	list = getCompletedTray(userId);
+		System.out.println("Finished list: " + list);
+		return list;
 	}
 
 	@Override
 	public List<ApproveTray> finishedTray(String userId) {
-		System.out.println("DEBUG: getFinishedTray(" + userId + ")");
-		List<ApproveTray>	list = getFinishedTray(userId);
-		System.out.println("Finished list: " + list);
-		return list;
+		return getTray(userId, ApproveTrayType.FINISHED.getType());
 	}
 
 	@Override
@@ -206,7 +212,7 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		List<ApproveTray> trays = listByAppId(appId);
 		ApproveLine		l = appLineService.getNextOrder(line);
 		
-		tray.setType(ApproveTrayType.COMPLETED.getType());
+		tray.setType(ApproveTrayType.FINISHED.getType());
 		tray = update(tray); 
 		
 		if (l != null) {
@@ -247,7 +253,7 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		return new JdbcTemplate(dataSource).query(query, new Object[] {type, userId}, new ApproveTrayRowMapper());
 	}
 
-	private List<ApproveTray> getFinishedTray(String userId) {
+	private List<ApproveTray> getCompletedTray(String userId) {
 		String	query = "SELECT s.appId,"
 					  + " s.userId,"
 					  + " s.modified,"
@@ -258,8 +264,8 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
        				  + " s.title 'appTitle'"
   				  + " FROM approve_summary s, users u"
  				  + " WHERE     s.userId = ?"
-       				  + " AND s.status = 'F'"
+       				  + " AND s.status = ?"
        				  + " AND s.userId = u.userId";
-		return new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new ApproveTrayRowMapper());
+		return new JdbcTemplate(dataSource).query(query, new Object[] {userId, ApproveStatus.FINISH.getStatus()}, new ApproveTrayRowMapper());
 	}
 }
