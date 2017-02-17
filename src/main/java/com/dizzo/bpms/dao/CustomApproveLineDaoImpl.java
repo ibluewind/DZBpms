@@ -3,6 +3,7 @@ package com.dizzo.bpms.dao;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -126,6 +127,23 @@ public class CustomApproveLineDaoImpl implements CustomApproveLineDao {
 		String	query = "DELETE FROM custom_approve_line WHERE lineId=?";
 		new JdbcTemplate(dataSource).update(query, new Object[] {lineId});
 		return null;
+	}
+
+	@Override
+	public CustomApproveLineSummary saveSummary(CustomApproveLineSummary summary) {
+		String	query = "INSERT INTO custom_approve_line_summary (lineId, formId, userId, title, modified) "
+					  + "VALUES (?, ?, ?, ?, now())";
+		
+		summary.setLineId(UUID.randomUUID().toString());
+		
+		new JdbcTemplate(dataSource).update(query, new Object[] {
+			summary.getLineId(),
+			summary.getFormId(),
+			summary.getUserId(),
+			summary.getTitle()
+		});
+		
+		return summary;
 	}
 
 	@Override

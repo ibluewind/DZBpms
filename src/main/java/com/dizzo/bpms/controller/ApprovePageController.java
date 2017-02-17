@@ -107,4 +107,9 @@ public class ApprovePageController {
 		System.out.println("return man_appline.jsp");
 		return "/approve/man_appline";
 	}
+	
+	@RequestMapping(value="/form/select", method=RequestMethod.GET)
+	public String getFormSelectPage() {
+		return "/approve/form_select_modal";
+	}
 }

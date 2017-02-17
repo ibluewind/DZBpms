@@ -750,35 +750,69 @@ App
 		}
 	);
 }])
-.controller('manageAppLineController', ['approveService', function(approveService) {
+.controller('manageAppLineController', ['approveService', 'userService', 'selectUserModal', 'selectFormModal', 'deleteConfirm', '$alert',
+										function(approveService, userService, selectUserModal, selectFormModal, deleteConfirm, $alert) {
 	var self = this;
 	
 	self.summaries = [];
 	self.summary = {};
 	self.customAppLines = [];
+	self.edit = false;
 	
-	approveService.getCustomApproveLineSummaryList()
-	.then(
-		function(data) {
-			self.summaries = data;
-			console.log('summaries: ', self.summaries);
-		},
-		function(err) {
-			console.error('Error while fetching custom approve line summary list');
-		}
-	);
+	function getSummaryList() {
+		approveService.getCustomApproveLineSummaryList()
+		.then(
+			function(data) {
+				self.summaries = data;
+			},
+			function(err) {
+				console.error('Error while fetching custom approve line summary list');
+			}
+		);
+	}
+	
+	getSummaryList();	
 	
 	self.editSummaryInfo = function(lineId) {
 		approveService.getCustomApproveLineInfo(lineId)
 		.then(
 			function(results) {
 				self.summary = results[0].data;
-				console.log('summary: ', self.summary);
 				self.customAppLines = results[1].data;
-				console.log('lines: ', self.customAppLines);
+				self.edit = true;
 			},
 			function(err) {
 				console.error('Error while fetching custom approve line information'); 
+			}
+		);
+	};
+	
+	self.selectForm = function() {
+		selectFormModal.show()
+		.then(
+			function(form) {
+				if (form.id != -9999) {
+					self.summary.lineId= '';
+					self.summary.formId = form.id;
+					self.summary.formTitle = form.title;
+					
+					// 본인을 결재라인에 추가한다.
+					var user = userService.getLoggedInUser();
+					var line = {
+						lineId: '',
+						approvalId: user.userId,
+						seq: 0,
+						approvalName:user.lastName + user.firstName,
+						approvalPosition: '담당'
+					};
+					self.summary.userId = user.userId;
+					self.summary.userName = user.lastName + user.firstName;
+					
+					self.customAppLines.push(line);
+				}
+			},
+			function(err) {
+				console.error('Error while showing select form modal window');
 			}
 		);
 	};
@@ -809,12 +843,137 @@ App
 	};
 	
 	self.addTo = function(line) {
-		console.log('target: ', line);
+		var approveUser = {};
+		
+		selectUserModal.show()
+		.then(
+			function(user) {
+				console.log('user: ', user);
+				if (user.id == -9999)	return false;
+				
+				approveUser.lineId = '';
+				approveUser.approvalId = user.userId;
+				approveUser.approvalName = user.lastName + user.firstName;
+				approveUser.approvalPosition = user.deptPositions[0].positionName;
+				approveUser.seq = -1;
+				
+				self.customAppLines.splice(line.seq + 1, 0, approveUser);
+				resetCustomAppLines();
+			}
+		);
 	};
 	
-	self.remove = function(line) {
+	self.removeFrom = function(line) {
 		self.customAppLines.splice(line.seq, 1);
 		resetCustomAppLines();
 	};
+	
+	self.cancel = function() {
+		self.summary = {};
+		self.customAppLines = [];
+		self.edit = false;
+	};
+	
+	self.save = function() {
+		if (self.edit) {
+			updateCustomApproveLineInformation();
+		} else {
+			saveCustomApproveLineInformation();
+		}
+		
+	}
+	
+	self.remove = function() {
+		deleteConfirm.show()
+		.then(
+			function(res) {
+				if (res == 'yes')
+					deleteCustomApproveLineInformation();
+				else
+					return false;
+			}
+		);
+	};
+	
+	function deleteCustomApproveLineInformation() {
+		approveService.deleteCustomApproveLineInformation(self.summary.lineId)
+		.then(
+			function(summary) {
+				$alert({
+					title: '삭제 완료',
+					content: summary.title + ' 사용자 지정 결재라인이 삭제되었습니다.',
+					placement: 'bottom',
+					type: 'info',
+					show: true
+				});
+				
+				getSummaryList();
+				self.cancel();
+			},
+			function(err) {
+				$alert({
+					title: '삭제 실패',
+					content: self.summary.title + ' 사용자 지정 결재라인 삭제를 실패하였습니다.',
+					placement: 'bottom',
+					type: 'warning',
+					show: true
+				});
+			}
+		);
+	}
+	
+	function updateCustomApproveLineInformation() {
+		approveService.updateCustomApproveLineInformation(self.summary, self.customAppLines)
+		.then(
+			function(result) {
+				$alert({
+					title: '수정 완료',
+					content: self.summary.title + ' 사용자 지정 결재라인을 수정하였습니다.',
+					placement: 'top',
+					type: 'info',
+					show: true
+				});
+				
+				getSummaryList();
+				self.cancel();
+			},
+			function(err) {
+				$alert({
+					title: '수정 실패',
+					content: self.summary.title + ' 사용자 지정 결재라인 수정을 실패하였습니다.',
+					placement: 'top',
+					type: 'warning',
+					show: true
+				});
+			}
+		);
+	}
+	
+	function saveCustomApproveLineInformation() {
+		approveService.saveCustomApproveLineInformation(self.summary, self.customAppLines)
+		.then(
+			function(result) {
+				$alert({
+					title: '저장 완료',
+					content: self.summary.title + ' 사용자 지정 결재라인을 저장하였습니다.',
+					placement: 'top',
+					type: 'info',
+					show: true
+				});
+				
+				getSummaryList();
+				self.cancel();
+			},
+			function(err) {
+				$alert({
+					title: '저장 실패',
+					content: self.summary.title + ' 사용자 지정 결재라인 저장을 실패하였습니다.',
+					placement: 'top',
+					type: 'warning',
+					show: true
+				});
+			}
+		);
+	}
 	
 }]);

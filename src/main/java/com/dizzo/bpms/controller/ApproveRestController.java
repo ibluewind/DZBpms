@@ -369,9 +369,36 @@ public class ApproveRestController {
 		return lines;
 	}
 	
+	@RequestMapping(value="/lines/custom/summary", method=RequestMethod.POST)
+	public CustomApproveLineSummary saveCustomApproveLineSummary(@RequestBody CustomApproveLineSummary summary) {
+		summary = customAppLineService.saveSummary(summary);
+		return summary;
+	}
+	
+	@RequestMapping(value="/lines/custom/summary", method=RequestMethod.PUT)
+	public CustomApproveLineSummary updateCustomApproveLineSummary(@RequestBody CustomApproveLineSummary summary) {
+		return customAppLineService.updateSummary(summary);
+	}
+	
 	@RequestMapping(value="/lines/custom/summary", method=RequestMethod.GET)
 	public List<CustomApproveLineSummary> getCustomApproveLineSummaryList() {
 		return customAppLineService.listSummary(getPrincipal());
+	}
+	
+	@RequestMapping(value="/lines/custom/summary/{lineId}", method=RequestMethod.DELETE)
+	public CustomApproveLineSummary deleteCustomApproveLineInformation(@PathVariable String lineId) {
+		return customAppLineService.deleteSummary(lineId);
+	}
+
+	@RequestMapping(value="/lines/custom/lines", method=RequestMethod.POST)
+	public List<CustomApproveLine> saveCustomApproveLines(@RequestBody List<CustomApproveLine> lines) {
+		lines = customAppLineService.saveApproveLines(lines);
+		return lines;
+	}
+	
+	@RequestMapping(value="/lines/custom/lines", method=RequestMethod.PUT)
+	public List<CustomApproveLine> updateCustomApproveLine(@RequestBody List<CustomApproveLine> lines) {
+		return customAppLineService.updateApproveLines(lines);
 	}
 	
 	@RequestMapping(value="/lines/custom/summary/{lineId}", method=RequestMethod.GET)

@@ -14,6 +14,7 @@ public interface CustomApproveLineDao {
 	public CustomApproveLine		deleteOneLine(String lineId, int seq);
 	public List<CustomApproveLine>	deleteAll(String lineId);
 	
+	public CustomApproveLineSummary			saveSummary(CustomApproveLineSummary summary);
 	public List<CustomApproveLineSummary>	listSummary(String userId);
 	public CustomApproveLineSummary			getSummary(String lineId);
 	public CustomApproveLineSummary 		deleteSummary(String lineId);

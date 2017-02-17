@@ -32,19 +32,19 @@
 				<div class="panel-title">결재 라인 상세 정보</div>
 			</div>
 			<div class="panel-body">
-				<form class="form-horizontal" name="summary_form">
+				<form class="form-horizontal" name="cutom_approve_line_form">
 					<div class="form-group">
 						<input type="hidden" ng-model="ctrl.summary.lineId">
 						<label class="col-md-4 control-label" for="title">결재라인제목</label>
 						<div class="col-md-8">
-							<input type="text" id="title" class="form-control" ng-model="ctrl.summary.title">
+							<input type="text" id="title" name="title" class="form-control" ng-model="ctrl.summary.title" ng-required="true">
 						</div>
 					</div>
 					<div class="form-group">
 						<input type="hidden" ng-model="ctrl.summary.formId">
 						<label class="col-md-4 control-label" for="formTitle">결재양식</label>
 						<div class="col-md-8">
-							<input type="text" id="formTitle" class="form-control" ng-model="ctrl.summary.formTitle" disabled required ng-click="ctrl.selectForm()" placeholder="양식을 선택하세요.">
+							<input type="text" id="formTitle" class="form-control" name="formTitle" ng-model="ctrl.summary.formTitle" readonly ng-required="true" ng-click="ctrl.selectForm()" placeholder="양식을 선택하세요.">
 						</div>
 					</div>
 					<table class="table table-hover">
@@ -63,15 +63,19 @@
 									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.moveDown(l)" ng-disabled="$last"><span class="glyphicon glyphicon-chevron-down small"></span></button>
 								</td>
 								<td>
-									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.addTo(l)" ng-disabled="$first"><span class="glyphicon glyphicon-plus small"></span></button>
-									<button type="button" class="btn btn-danger btn-xs" ng-click="ctrl.remove(l)" ng-disabled="$first"><span class="glyphicon glyphicon-trash small"></span></button>
+									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.addTo(l)"><span class="glyphicon glyphicon-plus small"></span></button>
+									<button type="button" class="btn btn-danger btn-xs" ng-click="ctrl.removeFrom(l)" ng-disabled="$first"><span class="glyphicon glyphicon-trash small"></span></button>
 								</td>
 							</tr>
 						</tbody>
 					</table>
 				</form>
 			</div>
-			<div class="panel-footer command-line"></div>
+			<div class="panel-footer command-line">
+				<button type="button" class="btn btn-primary btn-sm" ng-click="ctrl.save()" ng-disabled="cutom_approve_line_form.$invalid"><span class="glyphicon glyphicon-save"></span>&nbsp;저장</button>
+				<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.cancel()"><span class="glyphicon glyphicon-remove"></span>&nbsp;취소</button>
+				<button type="button" class="btn btn-danger btn-sm pull-right" ng-click="ctrl.remove()" ng-if="ctrl.edit"><span class="glyphicon glyphicon-trash"></span>&nbsp;삭제</button>
+			</div>
 		</div>
 	</div>
 </div>

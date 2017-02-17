@@ -369,6 +369,71 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		return deferred.promise;
 	};
 	
+	this.saveCustomApproveLineInformation = function(summary, lines) {
+		return $http.post('/bpms/rest/approve/lines/custom/summary', summary)
+		.then(
+			function (response) {
+				summary = response.data;
+				
+				// 결재 라인에 lineId 등록
+				for (var i  = 0; i < lines.length; i++)
+					lines[i].lineId = summary.lineId;
+				
+				console.log('summary: ', summary);
+				console.log('lines: ', lines);
+				$http.post('/bpms/rest/approve/lines/custom/lines', lines)
+				.then(
+					function(response) {
+						return response.data;
+					},
+					function(err) {
+						$q.reject(err);
+					}
+				);
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+	
+	this.updateCustomApproveLineInformation = function(summary, lines) {
+		return $http.put('/bpms/rest/approve/lines/custom/summary', summary)
+		.then(
+			function(response) {
+				summary = response.data;
+				
+				$http.put('/bpms/rest/approve/lines/custom/lines', lines)
+				.then(
+					function(response) {
+						return response.data;
+					},
+					function(err) {
+						$q.reject(err);
+					}
+				);
+				
+				return summary;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+	
+	this.deleteCustomApproveLineInformation = function(lineId) {
+		return $http.delete('/bpms/rest/approve/lines/custom/summary/' + lineId)
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
+	
 	/**
 	 * 저장되었거나, 상신된 결재 문서의 결재 라인을 조회한다.
 	 */
@@ -712,4 +777,47 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 			}
 		);
 	};
+}])
+.service('selectFormModal', ['$modal', '$rootScope', '$http', '$q', function($modal, $rootScope, $http, $q) {
+
+	var scope = $rootScope.$new();
+	var modal = $modal({templateUrl: '/bpms/approve/form/select',
+						scope: scope,
+						show: false});
+	var parentShow = modal.show;
+	var deferred;
+	
+	scope.formList = [];
+	scope.selectForm = function(form) {
+		scope.form = form;
+	};
+	
+	scope.answer = function(res) {
+		if (res == 'no') {
+			scope.form = {id:-9999, title:''};
+		}
+		
+		deferred.resolve(scope.form);
+		modal.hide();
+	};
+	
+	modal.show = function() {
+		deferred = $q.defer();
+		
+		$http.get('/bpms/rest/form')
+		.then(
+			function(response) {
+				console.log('form list: ', response.data);
+				scope.formList = response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+		
+		parentShow();
+		return deferred.promise;
+	};
+	
+	return modal;
 }]);

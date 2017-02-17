@@ -46,6 +46,11 @@ public class CustomApproveLineServiceImpl implements CustomApproveLineService {
 	}
 
 	@Override
+	public CustomApproveLineSummary saveSummary(CustomApproveLineSummary summary) {
+		return dao.saveSummary(summary);
+	}
+
+	@Override
 	public List<CustomApproveLineSummary> listSummary(String userId) {
 		return dao.listSummary(userId);
 	}
