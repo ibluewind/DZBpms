@@ -32,7 +32,7 @@
 				<div class="panel-title">결재 라인 상세 정보</div>
 			</div>
 			<div class="panel-body">
-				<form class="form-horizontal" name="cutom_approve_line_form">
+				<form class="form-horizontal" name="custom_approve_line_form">
 					<div class="form-group">
 						<input type="hidden" ng-model="ctrl.summary.lineId">
 						<label class="col-md-4 control-label" for="title">결재라인제목</label>
@@ -72,7 +72,8 @@
 				</form>
 			</div>
 			<div class="panel-footer command-line">
-				<button type="button" class="btn btn-primary btn-sm" ng-click="ctrl.save()" ng-disabled="cutom_approve_line_form.$invalid"><span class="glyphicon glyphicon-save"></span>&nbsp;저장</button>
+				<button type="button" class="btn btn-primary btn-sm" ng-click="ctrl.save()" ng-disabled="custom_approve_line_form.$invalid" ng-if="ctrl.edit"><span class="glyphicon glyphicon-save"></span>&nbsp;저장</button>
+				<button type="button" class="btn btn-primary btn-sm" ng-click="ctrl.save()" ng-disabled="custom_approve_line_form.$invalid" ng-hide="ctrl.edit"><sapn class="glyphicon glyphicon-plus"></sapn>&nbsp;추가</button>
 				<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.cancel()"><span class="glyphicon glyphicon-remove"></span>&nbsp;취소</button>
 				<button type="button" class="btn btn-danger btn-sm pull-right" ng-click="ctrl.remove()" ng-if="ctrl.edit"><span class="glyphicon glyphicon-trash"></span>&nbsp;삭제</button>
 			</div>
