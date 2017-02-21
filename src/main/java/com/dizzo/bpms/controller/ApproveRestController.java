@@ -365,6 +365,11 @@ public class ApproveRestController {
 		summary.setFormId(formId);
 		summary.setUserId(getPrincipal());
 		summary.setTitle(form.getTitle());
+		summary = customAppLineService.saveSummary(summary);
+		
+		for (int i = 0; i < customLines.size(); i++)
+			customLines.get(i).setLineId(summary.getLineId());
+		
 		customAppLineService.saveApproveLines(customLines);
 		return lines;
 	}

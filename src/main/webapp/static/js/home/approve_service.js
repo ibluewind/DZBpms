@@ -313,9 +313,6 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 	};
 	
 	this.saveCustomApproveLine = function(formId, lines) {
-		console.log('formId: ', formId);
-		console.log('lines: ', lines);
-		
 		return $http.post('/bpms/rest/approve/lines/custom/' + formId, lines)
 		.then(
 			function(response) {

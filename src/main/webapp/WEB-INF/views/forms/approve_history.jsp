@@ -7,15 +7,15 @@
 		<table class="table table-stripe">
 			<thead>
 				<tr>
-					<th>담당자</th><th>이력일시</th><th>상태</th><th>비고</th>
+					<th style="text-align:center;">담당자</th><th style="text-align:center;">이력일시</th><th style="text-align:center;">상태</th><th style="text-align:center;">비고</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr ng-repeat="history in ctrl.histories">
-					<td>{{history.userName}}</td>
-					<td>{{history.created|date:'yyyy-MM-dd HH:mm:ss'}}</td>
-					<td>{{ctrl.statusName(history)}}</td>
-					<td>{{history.comment}}</td>
+					<td width="20%" style="text-align:center;">{{history.userName}}</td>
+					<td width="20%" style="text-align:center;">{{history.created|date:'yyyy-MM-dd HH:mm:ss'}}</td>
+					<td width="20%" style="text-align:center;">{{ctrl.statusName(history)}}</td>
+					<td width="40%">{{history.comment}}</td>
 				</tr>
 			</tbody>
 		</table>

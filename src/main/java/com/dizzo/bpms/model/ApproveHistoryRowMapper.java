@@ -14,7 +14,7 @@ public class ApproveHistoryRowMapper implements RowMapper<ApproveHistory> {
 		history.setHistoryId(rs.getString("historyId"));
 		history.setAppId(rs.getString("appId"));
 		history.setComment(rs.getString("comment"));
-		history.setCreated(rs.getTime("created"));
+		history.setCreated(rs.getTimestamp("created"));
 		history.setUserId(rs.getString("userId"));
 		history.setStatus(rs.getString("status"));
 		

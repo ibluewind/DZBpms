@@ -506,6 +506,7 @@ App
 		var status = history.status;
 		var statusName = "Unknown";
 		
+		console.log('history: ', history);
 		switch(status) {
 		case approveStatus.CHECKED:
 			statusName = "확인";
@@ -529,6 +530,8 @@ App
 			statusName = "결재완료";
 			break;
 		}
+		
+		console.log('statusName: ', statusName);
 		
 		return statusName;
 	};
@@ -631,8 +634,8 @@ App
 		return (summary.status != approveStatus.SAVED && summary.status != approveStatus.FINISH);
 	};
 }])
-.controller('viewAppController', ['approveService', '$routeParams', '$rootScope', '$location',
-									function(approveService, $routeParams, $rootScope, $location) {
+.controller('viewAppController', ['approveService', 'approveStatus', '$routeParams', '$rootScope', '$location',
+									function(approveService, approveStatus, $routeParams, $rootScope, $location) {
 	// 결재 문서의 단순 열람을 위한 콘트롤러
 	// 본인이 상신한 결재, 기결함, 예결함, 완료함에 있는 결재 문서는 단순 열람만 가능하다.
 	var self = this;
@@ -649,6 +652,8 @@ App
 	self.proc = true;
 	self.owner = true;
 	self.canEditLine = false;
+	
+	self.histories = [];
 	
 	approveService.getSavedDocumentInformation(appId)
 	.then(
@@ -691,6 +696,37 @@ App
 	self.onlyProcessingApproveLine = function(line) {
 		return line.type == 'P';
 	}
+	
+	self.statusName = function(history) {
+		var status = history.status;
+		var statusName = "Unknown";
+		
+		switch(status) {
+		case approveStatus.CHECKED:
+			statusName = "확인";
+			break;
+		case approveStatus.SAVED:
+			statusName = "저장";
+			break;
+		case approveStatus.DEFERRED:
+			statusName = "보류";
+			break;
+		case approveStatus.REJECT:
+			statusName = "반려";
+			break;
+		case approveStatus.PROCESSING:
+			if (history.userId == document.summary.userId)		// 작성자인경우
+				statusName = "상신";
+			else
+				statusName = "승인";
+			break;
+		case approveStatus.FINISH:
+			statusName = "결재완료";
+			break;
+		}
+		
+		return statusName;
+	};
 }])
 .controller('trayAppController', ['approveService', 'approveStatus', 'approveTrayType', '$routeParams', '$rootScope',
                                        function(approveService, approveStatus, approveTrayType, $routeParams, $rootScope) {

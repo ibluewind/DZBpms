@@ -248,7 +248,9 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 				 + " WHERE     t.type = ?"
 				 + " AND t.userId=?"
 				 + " AND s.appId = t.appId"
-				 + " AND s.userId = u.userId";
+				 + " AND s.userId = u.userId"
+				 + " AND t.userId != s.userId"
+				 + " ORDER BY t.modified";
 
 		return new JdbcTemplate(dataSource).query(query, new Object[] {type, userId}, new ApproveTrayRowMapper());
 	}
