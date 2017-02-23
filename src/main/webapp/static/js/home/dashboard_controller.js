@@ -1,13 +1,18 @@
 'use strict';
 App
-.controller('dashboardController', ['taskService', 'taskStatus', 'userService', '$location',
-function(taskService, taskStatus, userService, $location) {
+.controller('dashboardController', ['taskService', 'taskStatus', 'userService', 'approveService', 'approveTrayType', '$location', '$rootScope',
+function(taskService, taskStatus, userService, approveService, approveTrayType, $location, $rootScope) {
 	var self = this;
 	
 	self.user = {};
 	self.tasks = [];
+	self.trays = [];
 	
 	self.user = userService.getLoggedInUser();
+	
+	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
+		$rootScope.prevUrl = oldUrl.substring(oldUrl.indexOf('#') + 1);
+	});
 	
 	taskService.listOfMyTask()
 	.then(
@@ -16,6 +21,16 @@ function(taskService, taskStatus, userService, $location) {
 		},
 		function(err) {
 			console.error('Error while fetching list of tasks');
+		}
+	);
+	
+	approveService.getUserApproveTrays()
+	.then(
+		function(trays) {
+			self.trays = trays;
+		},
+		function(err) {
+			console.error('Error while fetching list of approve tray');
 		}
 	);
 	
@@ -34,6 +49,19 @@ function(taskService, taskStatus, userService, $location) {
 	
 	self.filterOwnTask = function(task) {
 		return task.userId == self.user.userId;
+	};
+	
+	// Approve tray filters
+	self.undecideTrays = function(tray) {
+		return tray.type == approveTrayType.UNDECIDE;
+	};
+	
+	self.deferredTrays = function(tray) {
+		return tray.type == approveTrayType.DEFER;
+	};
+	
+	self.expectedTrays = function(tray) {
+		return tray.type == approveTrayType.EXPECTED;
 	};
 	
 	self.view = function(taskId) {

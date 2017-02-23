@@ -50,11 +50,6 @@ public class ApproveLineServiceImpl implements ApproveLineService {
 	}
 
 	@Override
-	public List<ApproveLine> getExpectedApprove(String userId) {
-		return dao.getExpectedApprove(userId);
-	}
-
-	@Override
 	public List<ApproveLine> getByOrganize(String userId) {
 		return dao.getByOrganize(userId);
 	}

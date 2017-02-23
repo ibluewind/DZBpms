@@ -98,6 +98,10 @@ public class ApprovePageController {
 			page = "/approve/expected";
 		else if (type.equals(ApproveTrayType.REJECT.getType()))			// 반려함
 			page = "/approve/reject";
+		else if (type.equals(ApproveTrayType.REFER.getType()))			// 참조함
+			page = "/approve/refer";
+		else if (type.equals(ApproveTrayType.AGREE.getType()))			// 합의함
+			page = "/approve/agree";
 		
 		return page;
 	}

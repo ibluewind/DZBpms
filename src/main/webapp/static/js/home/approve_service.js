@@ -2,7 +2,6 @@
 
 App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'approveTrayType',
                             function($http, $q, $filter, approveStatus, approveTrayType) {
-	
 	/**
 	 * 결재 양식 정보를 조회한다. (결재 문서 신규 작성시)
 	 * 1. 결재 양식 정보
@@ -56,6 +55,22 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 			
 			return deferred.promise;
 	};
+	
+	/**
+	 * 사용자의 모든 결재함 정보를 조회한다.
+	 * 대시보드에서 사용된다.
+	 */
+	this.getUserApproveTrays = function() {
+		return $http.get('/bpms/rest/approve/tray')
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	}
 	
 	function saveApproveInformation(form, lines, history) {
 		console.log('history: ', history);
@@ -126,6 +141,23 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 	 */
 	this.updateApproveDocument = function(document, approve, history, status) {
 		var deferred = $q.defer();
+		
+		// 상태 변경 전에, 반려 문서인 경우에 결재함 정보를 삭제한다.
+		// 그래야 결재 정보를 수정한 후, 결재함 정보를 controller에서 새로 입력할 수 있다.
+		if (document.summary.status == approveStatus.REJECT) {
+			var tray = approve.trays[0];
+			console.log('DELETE tray', tray);
+			$http.delete('/bpms/rest/approve/tray/' + tray.userId + '/' + tray.appId)
+			.then(
+				function(response) {
+					console.log('Delete approve tray information successfully');
+				},
+				function(err) {
+					$q.reject(err);
+					return;
+				}
+			);
+		}
 		
 		document.summary.status = history.status = status;
 		
@@ -198,22 +230,44 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		
 		return tray;
 	}
+	
+	function findUserLines(userId, lines) {
+		var line;
+		
+		for (var i = 0; i < lines.length; i++) {
+			if (lines[i].approvalId == userId) {
+				line = lines[i];
+				break;
+			}
+		}
+		
+		return line;
+	}
+	
 	/**
 	 * 결재 보류 처리
 	 * approve_summary의 상태와 approve_tray의 type을 변경한다.
 	 */
 	this.deferApprove = function(userId, document, approve, history) {
 		var	tray = findUserTray(userId, approve.trays);
+		var line = findUserLines(userId, approve.lines);
 		
-		document.summary.status = history.status = tray.status = approveStatus.DEFERRED;
+		document.summary.status = history.status = tray.type = line.status = approveStatus.DEFERRED;
+		
+		console.log('DEFERRED APPROVE DEBUG:');
+		console.log('document: ', document);
+		console.log('history: ', history);
+		console.log('approve: ', approve);
+		console.log('tray: ', tray);
 		
 		var func_summary = $http.put('/bpms/rest/approve/summary', document.summary),
 			func_tray = $http.put('/bpms/rest/approve/tray', tray),
+			func_line = $http.put('/bpms/rest/approve/lines/update', line),
 			func_history = $http.post('/bpms/rest/approve/history', history);
 		
 		var deferred = $q.defer();
 		
-		$q.all([func_summary, func_tray, func_history])
+		$q.all([func_summary, func_tray, func_line, func_history])
 		.then(
 			function(results) {
 				deferred.resolve(results);
@@ -224,6 +278,42 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		);
 		
 		return deferred.promise;
+	};
+	
+	/**
+	 * 결재 반려
+	 * 결재의 모든 상태를 반려로 변경한다.
+	 * 작성자가 수정할 수 있는 문서로 변경되어야 한다.
+	 */
+	this.rejectApprove = function(document, history) {
+		var summary = document.summary;
+		
+		summary.status = history.status = approveStatus.REJECT;
+		
+		console.log('rejectApprove: summary: ', summary);
+		console.log('rejectApprove: history: ', history);
+		
+		$http.post('/bpms/rest/approve/reject', summary)
+		.then(
+			function(response) {
+				summary = response.data;
+				$http.post('/bpms/rest/approve/history', history)
+				.then(
+					function(response) {
+						console.log('Saved history successfully');
+					},
+					function(err) {
+						$q.reject(err);
+					}
+				);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+			
+		);
+		
+		return summary;
 	};
 	
 	/**
@@ -774,6 +864,37 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 			}
 		);
 	};
+	
+	this.getStatusName = function(history) {
+		var status = history.status;
+		var statusName = "Unknown";
+		
+		switch(status) {
+		case approveStatus.CHECKED:
+			statusName = "확인";
+			break;
+		case approveStatus.SAVED:
+			statusName = "저장";
+			break;
+		case approveStatus.DEFERRED:
+			statusName = "보류";
+			break;
+		case approveStatus.REJECT:
+			statusName = "반려";
+			break;
+		case approveStatus.PROCESSING:
+			if (history.userId == history.creatorId)		// 작성자인경우
+				statusName = "상신";
+			else
+				statusName = "승인";
+			break;
+		case approveStatus.FINISH:
+			statusName = "결재완료";
+			break;
+		}
+		
+		return statusName;
+	}
 }])
 .service('selectFormModal', ['$modal', '$rootScope', '$http', '$q', function($modal, $rootScope, $http, $q) {
 

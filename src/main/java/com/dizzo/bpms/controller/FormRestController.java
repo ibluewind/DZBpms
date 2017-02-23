@@ -82,7 +82,9 @@ public class FormRestController {
 	 */
 	@RequestMapping(value="/field", method=RequestMethod.POST)
 	public List<FormField> saveFormField(@RequestBody String id) throws Exception {
+		System.out.println("saving form fields: " + id);
 		List<FileAttach> files = fileService.listByMainId(id);
+		System.out.println("files: " + files);
 		FileAttach	file = files.get(0);
 		List<FormField>	fields = parsingFormField(new File(file.getPath() + file.getName()));
 		

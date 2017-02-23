@@ -82,6 +82,6 @@ public class ApproveHistory {
 	}
 	
 	public String toString() {
-		return "ApproveHistory: {historyID: " + historyId + ", appId: " + appId + ", comment: " + comment + ", userId: " + userId + "}";
+		return "ApproveHistory: {historyID: " + historyId + ", appId: " + appId + ", comment: " + comment + ", userId: " + userId + ", status: " + status + "}";
 	}
 }

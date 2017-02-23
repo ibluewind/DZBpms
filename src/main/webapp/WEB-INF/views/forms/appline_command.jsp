@@ -30,6 +30,7 @@
 						<tr>
 							<td ng-repeat="appLine in ctrl.approveLine|filter:ctrl.onlyRequestApproveLine">
 								<small ng-if="appLine.modified">{{appLine.modified|date:'yyyy-MM-dd HH:mm:dd'}}</small>
+								<small ng-if="appLine.status == 'D'">(보류)</small>
 								<span ng-if="!appLine.modified">&nbsp;</span>
 							</td>
 						</tr>

@@ -25,6 +25,8 @@ public interface ApproveTrayDao {
 	public List<ApproveTray>	finishedTray(String userId);	// 완료함
 	public List<ApproveTray>	deferTray(String userId);		// 보류함
 	public List<ApproveTray>	expectedTray(String userId);	// 예정함
+	public List<ApproveTray>	referTray(String userId);		// 참조함
+	public List<ApproveTray>	agreeTray(String userId);		// 합의함
 	
 	// 결재 승인 처리
 	public List<ApproveTray>	submitTray(ApproveLine line);

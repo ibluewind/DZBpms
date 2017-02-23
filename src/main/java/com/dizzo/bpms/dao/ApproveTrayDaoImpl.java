@@ -200,6 +200,16 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		return getTray(userId, ApproveTrayType.EXPECTED.getType());
 	}
 	
+	@Override
+	public List<ApproveTray> referTray(String userId) {
+		return getTray(userId, ApproveTrayType.REFER.getType());
+	}
+
+	@Override
+	public List<ApproveTray> agreeTray(String userId) {
+		return getTray(userId, ApproveTrayType.AGREE.getType());
+	}
+
 	/**
 	 * 결재 완료하면 결재자의 결재함을 완료로 변경하고 다음 결재자의 결재함을 미결로 변경한다.
 	 * 최종 결재자라면 아무런 처리를 하지 않는다.
@@ -229,6 +239,7 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 				}
 			}
 		} else {
+			System.out.println("Finished approved: " + line.getAppId());
 			return null;
 		}
 		

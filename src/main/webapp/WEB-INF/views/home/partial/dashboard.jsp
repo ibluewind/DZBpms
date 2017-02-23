@@ -74,5 +74,80 @@
 	</div>
 </div>
 <div class="row">
-	<h4>결재 관련 영역</h4>
+	<div class="col-md-4">
+		<!-- 미결함 -->
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-title">미결함</div>
+			</div>
+			<div class="panel-body">
+				<table class="table table-hover table-condensed">
+					<thead>
+						<tr>
+							<th>문서명</th><th>작성자</th><th>수신일자</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="tray in ctrl.trays|filter:ctrl.undecideTrays">
+							<td><a href="#/edit_app/{{tray.appId}}?action=proc">{{tray.appTitle}}</a></td>
+							<td>{{tray.creatorName}}</td>
+							<td>{{tray.modified|date:'yyyy-MM-dd HH:mm:ss'}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<!-- 보류함 -->
+		<div class="panel panel-warning">
+			<div class="panel-heading">
+				<div class="panel-title">보류함</div>
+			</div>
+			<div class="panel-body">
+				<table class="table table-hover table-condensed">
+					<thead>
+						<tr>
+							<th>문서명</th><th>작성자</th><th>보류일자</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="tray in ctrl.trays|filter:ctrl.deferredTrays">
+							<td><a href="#/edit_app/{{tray.appId}}?action=proc">{{tray.appTitle}}</a></td>
+							<td>{{tray.creatorName}}</td>
+							<td>{{tray.modified|date:'yyyy-MM-dd HH:mm:ss'}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<!-- 예결함 -->
+		<div class="panel panel-info">
+			<div class="panel-heading">
+				<div class="panel-title">예정함</div>
+			</div>
+			<div class="panel-body">
+				<table class="table table-hover table-condensed">
+					<thead>
+						<tr>
+							<thead>
+								<th>문서명</th>
+								<th>작성자</th>
+								<th>작성일자</th>
+							</thead>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="tray in ctrl.trays|filter:ctrl.expectedTrays">
+							<td><a href="#/view_app/{{tray.appId}}?action=proc">{{tray.appTitle}}</a></td>
+							<td>{{tray.creatorName}}</td>
+							<td>{{tray.created|date:'yyyy-MM-dd HH:mm:ss'}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 </div>

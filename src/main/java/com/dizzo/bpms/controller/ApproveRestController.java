@@ -149,6 +149,47 @@ public class ApproveRestController {
 		}
 		return line;
 	}
+	
+	/**
+	 * 결재 문서를 반려한다.
+	 * 결재 문서 반려의 처리 순서는 다음과 같다.
+	 * 1. 요약 정보 상태 변경 ('R')
+	 * 2. 결재함 정보 변경 (모두 'U', 단 결재자 본인의 결재함은 'R')
+	 * 3. 결재라인 초기화 (모두 'P')
+	 * 4. 결재 이력 등록. 결재 이력은 approve_service.js에서 처리한다.
+	 * @param summary
+	 * @return
+	 */
+	@RequestMapping(value="/reject", method=RequestMethod.POST)
+	public ApproveSummary rejectApprove(@RequestBody ApproveSummary summary) {
+		System.out.println("DEBUG: rejectApprove " + summary);
+		ApproveTray	tray = appTrayService.getApproveTrayForUser(summary.getUserId(), summary.getAppId());	// 작성자 결재함 정보
+		List<ApproveLine>	lines = appLineService.getByAppId(summary.getAppId());
+		String	userId = getPrincipal();
+		
+		for (int i = 0; i < lines.size(); i++) {
+			String	approvalId = lines.get(i).getApprovalId();
+			if (summary.getUserId().equals(approvalId) || approvalId.equals(userId))	// 작성자와 결재자의 상태는 '반려'로 설정
+				lines.get(i).setStatus(ApproveStatus.REJECT.getStatus());
+			else
+				lines.get(i).setStatus(ApproveStatus.PROCESSING.getStatus());			// 나머지 결재자는 '결재중'으로 설정
+		}
+		
+		summaryService.update(summary);
+
+		/**
+		 * 결재함은 작성자의 결재함만 남기고 모두 삭제하고, 결재라인은 초기화한다.
+		 * 작성자의 결재함을 미결함으로 설정해야, 반려된 문서를 작성자가 미결함에서 확인할 수 있다.
+		 */
+		tray.setType(ApproveTrayType.UNDECIDE.getType());
+		appTrayService.deleteAll(summary.getAppId());
+		appTrayService.insert(tray);
+		
+		appLineService.deleteAll(summary.getAppId());
+		appLineService.insert(lines);
+		
+		return summary;
+	}
 
 	/**
 	 * 모든 결재가 완료되었는지 확인다.
@@ -347,6 +388,14 @@ public class ApproveRestController {
 	@RequestMapping(value="/lines/save", method=RequestMethod.POST)
 	public List<ApproveLine> saveApporveLine(@RequestBody List<ApproveLine> appLines) {
 		return appLineService.insert(appLines);
+	}
+	
+	/**
+	 * 결재를 보류하거나 반려시에 해당 결재라인의 상태만 변경한다.
+	 */
+	@RequestMapping(value="/lines/update", method=RequestMethod.PUT)
+	public ApproveLine updateApproveLine(@RequestBody ApproveLine line) {
+		return appLineService.update(line);
 	}
 	
 	/**

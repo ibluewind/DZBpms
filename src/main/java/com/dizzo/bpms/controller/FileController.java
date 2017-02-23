@@ -42,8 +42,8 @@ import com.dizzo.bpms.service.FileAttachService;
 @RequestMapping("/file")
 public class FileController {
 
-	public static String	UPLOAD_LOCATION = "d:/upload/";
-	public static String	FORMFILE_LOCATION = "D:/Google 드라이브/프로젝트/DZBpms/src/main/webapp/WEB-INF/views/forms/";
+	public static String	UPLOAD_LOCATION = "e:/upload/";
+	public static String	FORMFILE_LOCATION = "e:/workspace/DZBpms/src/main/webapp/WEB-INF/views/forms/";
 	
 	@Autowired
 	FileAttachService	service;

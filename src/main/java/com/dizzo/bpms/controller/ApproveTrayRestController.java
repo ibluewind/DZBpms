@@ -31,6 +31,29 @@ public class ApproveTrayRestController {
 	}
 	
 	/**
+	 * 결재함 정보를 삭제한다.
+	 * 반려된 문서를 재 상신하는 경우, 작성자의 결재함 정보를 삭제할 때 사용된다.
+	 * @param tray
+	 * @return
+	 */
+	@RequestMapping(value="/{userId}/{appId}", method=RequestMethod.DELETE)
+	public ApproveTray deleteTray(@PathVariable String userId, @PathVariable String appId) {
+		ApproveTray	tray = trayService.getApproveTrayForUser(userId, appId);
+		
+		System.out.println("DELETING tray: " + tray);
+		return trayService.delete(tray);
+	}
+	/**
+	 * 사용자의 모든 결재함 정보를 반환한다.
+	 * 대시보드에서 사용된다.
+	 * @return
+	 */
+	@RequestMapping(method=RequestMethod.GET)
+	public List<ApproveTray> getAllTray() {
+		return trayService.listByUserId(getPrincipal());
+	}
+	
+	/**
 	 * 결재함별 결재자의 결재문서 리스트 조회
 	 * @param type
 	 * @return
@@ -53,6 +76,10 @@ public class ApproveTrayRestController {
 			trays = trayService.deferTray(userId);
 		} else if (type.equals(ApproveTrayType.EXPECTED.getType())) {
 			trays = trayService.expectedTray(userId);
+		} else if (type.equals(ApproveTrayType.REFER.getType())) {
+			trays = trayService.referTray(userId);
+		} else if (type.equals(ApproveTrayType.AGREE.getType())) {
+			trays = trayService.agreeTray(userId);
 		}
 		
 		return trays;
@@ -92,7 +119,6 @@ public class ApproveTrayRestController {
 		return trayService.update(tray);
 	}
 	
-	@RequestMapping(value="")
 	private String getPrincipal() {
 		String	userName = null;
 		Object	principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

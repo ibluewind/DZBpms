@@ -53,6 +53,7 @@
 		            <li><a href="#/approve_tray/U">미결함</a></li>
 		            <li><a href="#/approve_tray/D">보류함</a></li>
 		            <li><a href="#/approve_tray/F">기결함</a></li>
+		            <li><a href="#/approve_tray/S">참조함</a></li>
 		            <li class="divider"></li>
 		            <li><a href="#/approve_tray/C">완료함</a></li>
 		            <li class="divider"></li>

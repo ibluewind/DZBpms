@@ -10,7 +10,6 @@ public interface ApproveLineService {
 	public List<ApproveLine>	getByAppId(String appId);
 	public List<ApproveLine>	getByUserId(String userId);
 	public List<ApproveLine>	getByOrganize(String userId);
-	public List<ApproveLine>	getExpectedApprove(String userId);
 	public List<ApproveLine>	insert(List<ApproveLine> appLines);
 	public ApproveLine			update(ApproveLine appLine);
 	public ApproveLine			delete(String lineId);

@@ -4,7 +4,7 @@
 	<div class="col-md-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<div class="panel-title">보류함 문서 목록</div>
+				<div class="panel-title">참조함 문서 목록</div>
 			</div>
 			<div class="panel-body">
 				<table class="table table-hover">
@@ -15,7 +15,7 @@
 					</thead>
 					<tbody>
 						<tr ng-repeat="doc in ctrl.documents">
-							<td></td><td><a href="#/edit_app/{{doc.appId}}?action=proc">{{doc.appTitle}}</a></td><td>{{doc.creatorName}}</td><td>{{doc.created|date:'yyyy-MM-dd HH:mm:ss'}}
+							<td></td><td><a href="#/edit_app/{{doc.appId}}?action=refer">{{doc.appTitle}}</a></td><td>{{doc.creatorName}}</td><td>{{doc.created|date:'yyyy-MM-dd HH:mm:ss'}}
 						</tr>
 					</tbody>
 				</table>

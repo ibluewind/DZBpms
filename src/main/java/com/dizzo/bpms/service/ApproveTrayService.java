@@ -24,6 +24,8 @@ public interface ApproveTrayService {
 	public List<ApproveTray>	finishedTray(String userId);
 	public List<ApproveTray>	deferTray(String userId);
 	public List<ApproveTray>	expectedTray(String userId);
+	public List<ApproveTray>	referTray(String userId);
+	public List<ApproveTray>	agreeTray(String userId);
 	
 	// 결재 승인 처리
 	public List<ApproveTray>	submitTray(ApproveLine line);

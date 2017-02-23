@@ -18,8 +18,8 @@
  * approve.tray : ApproveTray.java에 해당하며 배열 형태 또는 단독 오브젝트이다.
  */
 App
-.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', 'confirmModal', '$rootScope', '$routeParams', '$filter', '$location', '$alert',
-	function(approveStatus, approveTrayType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, confirmModal, $rootScope, $routeParams, $filter, $location, $alert) {
+.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveLineType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', 'confirmModal', '$rootScope', '$routeParams', '$filter', '$location', '$alert',
+	function(approveStatus, approveTrayType, approveLineType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, confirmModal, $rootScope, $routeParams, $filter, $location, $alert) {
 
 	// 결재 문서 작성
 	var self = this;
@@ -36,13 +36,14 @@ App
 	self.owner = true;
 	self.canEditLine = false;
 	self.changedLine = false;
+	self.formApproveLine = false;
 	
 	if (action == 'regist') {
 		formId = $routeParams.id;
 		appId = '';
 		self.edit = true;
-	} else if (action == 'edit' || action == 'proc') {
-		formId = '';
+	} else {
+		formId = '';	
 		appId = $routeParams.id;
 	}
 	
@@ -50,6 +51,13 @@ App
 	
 	if (action == 'edit')	self.edit = true;		// 수정 가능
 	if (action == 'proc')	self.proc = true;		// 수정 불가, 결재 가능
+	if (action == 'refer') {
+		// 참조함의 경우 내용 확인만 가능하며, 확인 즉시 완료 상태로 변경한다. 
+		self.edit = false;
+		self.proc = true;
+		self.owner = true;
+		self.canEditLine = false;
+	}
 	
 	self.user = userService.getLoggedInUser();
 	
@@ -116,15 +124,31 @@ App
 				self.approveTrays = approve.trays;
 				self.approveLine = approve.lines;
 				
+				history.appId = self.summary.appId;
+				
 				if (self.user.userId != self.summary.userId) {
 					// 결재자가 결재문서를 확인한 경우 결재 이력을 저장한다.
-					history.appId = self.summary.appId;
 					history.status = approveStatus.CHECKED;
 					approveService.saveApproveHistory(history);
 					
 					self.owner = false;
 				}
-				history.appId = self.summary.appId;
+				
+				// 반려 문서에 대한 처리
+				// 반려 문서인 경우에 작성자 본인이면, 수정 모드로 변경한다.
+				if (self.summary.status == approveStatus.REJECT && self.owner) {
+					$alert({
+						title: '주의',
+						content: '반려 처리된 결재 문서입니다. 결재 이력에서 반려 사유를 확인하고, 재 상신 또는 삭제하시기 바랍니다.',
+						placement: 'top',
+						animation: 'am-fade-and-slide-top',
+						type: 'danger',
+						show: true
+					});
+					self.edit = true;
+					self.proc = false;	// 결재중이 아님으로 변경
+					action = 'edit';
+				}
 				
 				// 처리부서로 전달된 경우, 결재라인 길이와 결재함 길이가 다르다.
 				console.log('tray: ', self.approveTrays);
@@ -151,6 +175,23 @@ App
 						}
 					);
 				}
+				
+				// 참조함의 문서를 확인하는 경우, 참조자는 내용 확인과 동시에 결재 완료 상태로 변경한다.
+				if (action == 'refer') {
+					var line = getUserApproveLine();
+					var summary = document.summary;
+					
+					approveService.submitApprove(summary, line, history)
+					.then(
+						function(data) {
+							console.log('Referer has complete approve');
+						},
+						function(err) {
+							console.error('Error while submit Approve');
+						}
+					);
+				}
+				
 			},
 			function(err) {
 				console.error('Error while fetching Approve Document Information');
@@ -243,6 +284,20 @@ App
 		
 		// ApproveSummary 부터 저장한 후, FromFields를 저장한다.
 		history.status = status;
+		
+		// 양식에 결재라인이 없고, 작성자가 수신자나 부서를 선택하는 경우에는 결재라인에 설정된 type을 재 설정해주어 저장하여야 한다.
+		if (self.formApproveLine) {
+			var approve_role = $('*[data-role=approve_line]');
+			
+			approve_role.each(function(index) {
+				var seq = index + 1;	// 결재라인에는 담당자가 기본으로 첫번째에 있기 때문에 양식에서 정의한 결재자의 순번은 인덱스보다 1 크다.
+				var type = getApproveType($(this));
+				
+				approve.lines[seq].type = type;
+			});
+			
+			console.log('formApproveLine: ', approve.lines);
+		}
 		
 		// 결재라인이 추가되었거나 삭제되었을 수 있으므로 결재라인 순번을 재정리한다.
 		// 결재라인은 의뢰부서와 처리부서를 분리하여 정리하여야 함.
@@ -339,11 +394,19 @@ App
 			tray.modified = '';
 			
 			if (i == 0)
-				tray.type = approveTrayType.COMPLETED;		// 작성자 본인은 완료함
-			else if (i == 1)
-				tray.type = approveTrayType.UNDECIDE;		// 다음 결재자는 미결함
-			else
-				tray.type = approveTrayType.EXPECTED;		// 그 외의 결재자는 예정함
+				tray.type = approveTrayType.FINISHED;		// 작성자 본인은 완료함
+			else if (lines[i].type == approveLineType.REFER)
+				tray.type = approveTrayType.REFER;		// 다음 결재자는 미결함
+			else if (lines[i].type == approveLineType.AGREE)
+				tray.type = approveTrayType.AGREE;
+			else {
+				var procTrays = $filter('filter')(trays, {type: approveTrayType.UNDECIDE});
+				
+				if (procTrays.length == 0)
+					tray.type = approveTrayType.UNDECIDE;
+				else
+					tray.type = approveTrayType.EXPECTED;		// 그 외의 결재자는 예정함
+			}
 			
 			trays.push(tray);
 		}
@@ -377,7 +440,6 @@ App
 				}
 			);
 		} else {
-			// action == 'proc'
 			// 결재자가 결재하는 경우. 또는 처리부서에서 문서 담당자가 결재 문서를 승인하는 경우.
 			// 결재자의 결재함 정보를 수정하고, 결재라인 정보를 수정한다.
 			// 다음 결재자의 결재함 정보 수정과 결재 완료에 대한 후 처리는 WAS에서 처리한다.
@@ -485,6 +547,37 @@ App
 		);
 	}
 	
+	/**
+	 * 결재 문서 반려
+	 * 결재가 반려되면 작성자가 재 작성하거나, 폐기할 수 있어야 한다.
+	 * 결재가 반려되면, 결재라인과 결재함을 초기화한다.
+	 */
+	self.rejectApprove = function() {
+		document.form.formFields = approveService.makeFormField(self.form.fields);
+		
+		// 반려 의견을 반드시 입력해야 한다.
+		insertCommentModal.setTitle("결재 반려");
+		insertCommentModal.setContent("번려 의견을 입력하십시오.");
+		insertCommentModal.show()
+		.then(
+			function(comment) {
+				history.comment = comment;
+				
+				var summary = approveService.rejectApprove(document, history)
+				$alert({
+					title:'결재 문서 반려',
+					content: '결재 문서 ' + summary.title + '을(를) 반려처리하였습니다.',
+					placement: 'bottom',
+					type: 'warning',
+					show: true
+				});
+			},
+			function(err) {
+				console.error('Error while show comment modal window');
+			}
+		);
+	};
+	
 	function getUserApproveLine() {
 		var line = {};
 		for (var i = 0; i < self.approveLine.length; i++) {
@@ -502,39 +595,7 @@ App
 		$location.path('/list_app');
 	}
 	
-	self.statusName = function(history) {
-		var status = history.status;
-		var statusName = "Unknown";
-		
-		console.log('history: ', history);
-		switch(status) {
-		case approveStatus.CHECKED:
-			statusName = "확인";
-			break;
-		case approveStatus.SAVED:
-			statusName = "저장";
-			break;
-		case approveStatus.DEFERRED:
-			statusName = "보류";
-			break;
-		case approveStatus.REJECT:
-			statusName = "반려";
-			break;
-		case approveStatus.PROCESSING:
-			if (history.userId == document.summary.userId)		// 작성자인경우
-				statusName = "상신";
-			else
-				statusName = "승인";
-			break;
-		case approveStatus.FINISH:
-			statusName = "결재완료";
-			break;
-		}
-		
-		console.log('statusName: ', statusName);
-		
-		return statusName;
-	};
+	self.statusName = approveService.getStatusName;
 	
 	// 현재 결재라인을 사용자 지정 결재라인으로 저장
 	self.saveCustomApproveLine = function(type) {
@@ -567,10 +628,95 @@ App
 				console.error('Error while show confirm modal window');
 			}
 		);
+	};
+	
+	/**
+	 * data-role='approve_line'이 정의된 곳에는 항상 data-approve-type이 정의되어야 한다.
+	 * data-approve-type이 없다면 기본은 PROCESS 이다.
+	 * data-role이 정의되어 있었다면, 결재라인이 정의에 따라 재 생성되었을테고, 재생성된 결재라인의 타입은 'A'이다.
+	 * 결재를 저장하거나, 상신선에 결재라인에 'A' 타입이 있다면, data-approve-type에 따라 재정의해줘야한다.
+	 */
+	function getApproveType(element) {
+		var type = element.data('approve-type');
+		
+		if (type == "process")		type = approveLineType.PROCESS;
+		else if (type == "refer")	type = approveLineType.REFER;
+		else if (type == "agree")	type = approveLineType.AGREE;
+		else if (type == "request")	type = approveLineType.REQUEST;
+		else type = type.REQUEST;
+		
+		return type;
+	}
+	
+	function initAndMakeApproveLine(element, user) {
+		var approve_data = $('*[data-role=approve_line]');
+		var seq = approve_data.index(element) + 1;	// 작성자 결재라인(담당)은 남기고 나머지를 선택한 사용자로 변경한다.
+		
+		approve.lines[seq] = {
+			'appId': '',
+			'approvalId': user.userId,
+			'approvalName': user.lastName + user.firstName,
+			'approvalPosition': user.deptPositions[0].positionName,
+			'lineId': '',
+			'modified': '',
+			'seq': seq,
+			'status': approveStatus.PROCESSING,
+			'type': 'A'
+		};
+		
+		// data-role에 의해 추가된 결재자가 모두 채워졌으면, 나머지 결재라인은 삭제한다.
+		var role_arr = $filter('filter')(approve.lines, {type: 'A'});
+		console.log('role_arr: ', role_arr);
+		
+		if (approve_data.length == role_arr.length) {
+			if (approve.lines.length > (role_arr.length + 1)) {
+				approve.lines.splice(approve_data.length + 1);
+			}
+		}
+		
+		console.log(approve.lines);
+		
+	}
+	/**
+	 * 결재 양식에서 사용자를 선택하는 필드에 대한 함수.
+	 * 결재 라인이 없는 양식의 경우에 선택된 사용자를 결재라인으로 이용하는 수가 있다.
+	 * 예를 들어, 업무 협조 양식의 경우에는 결재 라인은 없지만, 결재 라인이 있는 것처럼 결재가 진행되어야 한다.
+	 * 이런 경우 필드에 data-role="approve_line"이라고 명시하여 필드에서 선택된 사용자가 결재라인으로 지정된다고 선언해주어야 하고,
+	 * 아래 함수에서는 선택된 사용자를 결재라인에 추가하여야 한다.
+	 */
+	self.selectUser = function(event) {
+		var target = angular.element(event.currentTarget);
+		
+		if (target.data("role") == "approve_line")	self.formApproveLine = true;
+		
+		selectUserModal.show()
+		.then(
+			function(user) {
+				console.log(user);
+				if (user.id == -9999) return false;
+				target.val(user.lastName + user.firstName);
+				target.trigger('input');		// jQuery에서 입력한 내용을 angularjs가 바인딩할 수 있게 한다. 즉, ng-model에 값이 들어가게 한다. (썩 좋은 해답은 아니란다.)
+				/**
+				 * angularjs는 엘레멘트에 대한 input event를 기다리다가 input 이 발생하면, 해당 내용을 ng-model에 바인딩한다.
+				 * 아마도 angularjs의 watch, digest, apply 등과 관련이 있는 것 같기는 한데, 더 깊은 내요은 나중에 자세히 알아보자.
+				 */
+				
+				if (self.formApproveLine) { 
+					// 양식에 의해 생성되는 결재라인의 type은 'A'로 설정한다.
+					// 저장이나, 상신을 할 때 최종 결재라인 type을 설정한다.
+					initAndMakeApproveLine(target, user);
+				}
+			},
+			function(err) {
+				console.error('Error while display select user modal window');
+			}
+		);
+		
+		console.log('document: ', document);
 	}
 	
 	/**
-	 * fileters
+	 * filters
 	 */
 	self.onlyRequestApproveLine = function(line) {
 		return line.type == 'R';
@@ -646,7 +792,7 @@ App
 	console.log('prevUrl: ', prevUrl);
 	
 	/**
-	 * 모든 결재 명령에 대한 조겅늘 false로 하여, 취소만 가능하게 한다.
+	 * 모든 결재 명령에 대한 조건을 취소만 가능하게 한다.
 	 */
 	self.edit = false;
 	self.proc = true;
@@ -697,36 +843,7 @@ App
 		return line.type == 'P';
 	}
 	
-	self.statusName = function(history) {
-		var status = history.status;
-		var statusName = "Unknown";
-		
-		switch(status) {
-		case approveStatus.CHECKED:
-			statusName = "확인";
-			break;
-		case approveStatus.SAVED:
-			statusName = "저장";
-			break;
-		case approveStatus.DEFERRED:
-			statusName = "보류";
-			break;
-		case approveStatus.REJECT:
-			statusName = "반려";
-			break;
-		case approveStatus.PROCESSING:
-			if (history.userId == document.summary.userId)		// 작성자인경우
-				statusName = "상신";
-			else
-				statusName = "승인";
-			break;
-		case approveStatus.FINISH:
-			statusName = "결재완료";
-			break;
-		}
-		
-		return statusName;
-	};
+	self.statusName = approveService.getStatusName;
 }])
 .controller('trayAppController', ['approveService', 'approveStatus', 'approveTrayType', '$routeParams', '$rootScope',
                                        function(approveService, approveStatus, approveTrayType, $routeParams, $rootScope) {
@@ -751,38 +868,6 @@ App
 		},
 		function(err) {
 			console.error('Error while fetching undecide tray list;')
-		}
-	);
-}])
-.controller('deferAppController', [function() {
-	
-}])
-.controller('decidedAppController', [function() {
-	
-}])
-.controller('completedAppController', ['approveService', '$routeParams', function(approveService, $routeParams) {
-	var self = this;
-	var appId = $routeParams.appId;
-	
-	console.log('appId: ' + appId);
-}])
-.controller('expectAppController', ['approveService', 'approveTrayType', '$rootScope',
-                                    function(approveService, approveTrayType, $rootScope) {
-	var self = this;
-	
-	self.documents = [];
-	
-	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
-		$rootScope.prevUrl = oldUrl.substring(oldUrl.indexOf('#') + 1);
-	});
-	
-	approveService.getTray(approveTrayType.EXPECTED)
-	.then(
-		function(list) {
-			self.documents = list;
-		},
-		function(err) {
-			console.error('Error while fetching expected tray list');
 		}
 	);
 }])

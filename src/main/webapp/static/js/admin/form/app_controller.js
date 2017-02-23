@@ -135,7 +135,7 @@ App
 				// parsing form file and save form_field table
 				saveFormFieldTable();
 				
-				$window.location = '/bpms/admin/form';
+				//$window.location = '/bpms/admin/form';
 			},
 			function(err) {
 				console.error('Error while saving form');
@@ -157,6 +157,7 @@ App
 	}
 	
 	function deleteFormFile() {
+		console.log('formFile: ', self.formFile);
 		// 서버에서 첨부 파일을 삭제한다.
 		fileService.deleteFormFile(self.formFile[0].name)
 		.then(

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Repository;
 
 import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.ApproveLineRowMapper;
-import com.dizzo.bpms.model.ApproveStatus;
 
 @Repository("appLineDao")
 public class ApproveLineDaoImpl implements ApproveLineDao {
@@ -175,37 +174,6 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
          			 + " AND p.id = udp.positionid"
 			 + " GROUP BY a.userId";
 		return new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new ApproveLineRowMapper());
-	}
-
-	/**
-	 * 결재자가 아직 결재하지 않은 결재 예정 문서를 조회할 때 사용한다.
-	 */
-	@Override
-	public List<ApproveLine> getExpectedApprove(String userId) {
-		// TODO 결재라인에 있지만, 결재가 완료되지 않은 결재건을 리스트한다.
-		String query = "SELECT a.lineId,"
-				 + " a.appId,"
-    			 + " a.userId,"
-    			 + " a.status,"
-    			 + " a.modified,"
-    			 + " a.seq,"
-    			 + " a.type,"
-    			 + " p.name 'positionName',"
-    			 + " concat(u.lastName, u.firstName) 'userName'"
-			 + " FROM approve_line a,"
-    			 + " users u,"
-    			 + " user_dept_position udp,"
-    			 + " position p"
-			 + " WHERE     a.userId = ?"
-    			 + " AND u.userid = a.userid"
-    			 + " AND udp.userid = a.userId"
-    			 + " AND p.id = udp.positionid"
-    			 + " AND a.status = ?"
-		 + " GROUP BY a.userId";
-		return new JdbcTemplate(dataSource).query(query, new Object[] {
-				userId,
-				ApproveStatus.PROCESSING.getStatus()},
-				new ApproveLineRowMapper());
 	}
 
 	/**

@@ -44,7 +44,7 @@ public class DZBpmInitializer extends AbstractAnnotationConfigDispatcherServletI
 		return element;
 	}
 	
-	private static final String	LOCATION = "d:/temp";
+	private static final String	LOCATION = "e:/temp";
 	private static final long 	MAX_FILE_SIZE = 1024 * 1024 * 10;		// 10MB
 	private static final long 	MAX_REQUEST_SIZE = 1024 * 1024 * 20;
 	private static final int	FILE_SIZE_THRESHOLD = 0;

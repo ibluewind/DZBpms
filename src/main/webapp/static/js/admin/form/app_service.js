@@ -84,6 +84,8 @@ App
 	this.saveFormField = function(id) {
 		var deferred = $q.defer();
 		
+		console.log('saveFormField: ', id);
+		
 		$http.post('/bpms/rest/form/field/', id)
 		.then(
 			function(response) {
