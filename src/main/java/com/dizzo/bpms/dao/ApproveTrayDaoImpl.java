@@ -222,6 +222,7 @@ public class ApproveTrayDaoImpl implements ApproveTrayDao {
 		List<ApproveTray> trays = listByAppId(appId);
 		ApproveLine		l = appLineService.getNextOrder(line);
 		
+		System.out.println("DEBUG: Next order: " + l + " for appId=" + appId);
 		tray.setType(ApproveTrayType.FINISHED.getType());
 		tray = update(tray); 
 		

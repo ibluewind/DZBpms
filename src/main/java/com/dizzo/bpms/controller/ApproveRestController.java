@@ -96,22 +96,21 @@ public class ApproveRestController {
 		line.setStatus(ApproveStatus.FINISH.getStatus());
 		line = appLineService.update(line);
 		
+		String	appId = line.getAppId();
+		Form form = formService.getByAppId(appId);		
 		List<ApproveTray> trays = appTrayService.submitTray(line);
+		ApproveSummary	summary = getApproveSummaryByAppId(appId);
 		
 		if (trays == null) {
 			// 결재가 완료 됨.
 			// 다음 처리 부서가 있는지 확인해서 처리 부서로 결재 문서를 전달하거나, 모든 결재가 완료되었으면 해당 양식에 정의된 후 처리를 수행한다.
 			// 휴가원의 경우 사용자의 부재 일정을 부서 일정에 등록하거나, 결재 관리 시스템에 휴가 정보를 등록한다. 할 수 있다면...
-			
-			String	appId = line.getAppId();
-			Form form = formService.getByAppId(appId);
-			
 			if (form.getProcDept() == null) {
 				// 처리부서가 없으므로, 모든 결재가 완료되었음.
+				summary.setStatus(ApproveStatus.FINISH.getStatus());
+				summaryService.update(summary);
 				return null;
 			} else {
-				ApproveSummary	summary = getApproveSummaryByAppId(appId);
-				
 				/**
 				 * 의뢰부서와 처리부서의 모든 결재가 완료되었는지 확인한다.
 				 * 처리부서까지 결재가 완료된 상태면, 결재 요약 정보를 갱신하고 작성자의 완료함에 결재문서 정보를 보관한다.

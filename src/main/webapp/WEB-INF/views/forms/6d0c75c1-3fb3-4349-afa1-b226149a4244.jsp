@@ -22,7 +22,7 @@
 			<div class="form-group">
 				<label class="col-md-4 control-label" for="content">내용</label>
 				<div class="col-md-7">
-					<textarea id="content" class="form-control" rows="10" ng-model="ctrl.form.fields['content']" ng-required="true"></textarea>
+					<textarea id="content" class="form-control" rows="10" ng-model="ctrl.form.fields['content']" ng-required="true" ng-disabled="!ctrl.edit"></textarea>
 				</div>
 			</div>
 		</form>

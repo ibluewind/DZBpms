@@ -327,9 +327,10 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 			func_summary = $http.put('/bpms/rest/approve/summary', summary),
 			deferred = $q.defer();
 		
-		$q.all([func_submit, func_history, func_summary])
+		$q.all([func_submit, func_history])
 		.then(
 			function(results) {
+				if (results[0].data != "")		func_summary();
 				deferred.resolve(results[0].data);
 			},
 			function(err) {

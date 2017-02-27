@@ -1,4 +1,3 @@
-'use strict';
 
 /**
  * 결재에 대한 자료 구조는 두 가지로 분리한다.
@@ -177,7 +176,11 @@ App
 				}
 				
 				// 참조함의 문서를 확인하는 경우, 참조자는 내용 확인과 동시에 결재 완료 상태로 변경한다.
+				// 참조자는 결재 명령 버튼을 사용할 수 없다.
 				if (action == 'refer') {
+					self.edit = false;
+					self.proc = true;
+					self.owner = true;
 					var line = getUserApproveLine();
 					var summary = document.summary;
 					
@@ -288,12 +291,24 @@ App
 		// 양식에 결재라인이 없고, 작성자가 수신자나 부서를 선택하는 경우에는 결재라인에 설정된 type을 재 설정해주어 저장하여야 한다.
 		if (self.formApproveLine) {
 			var approve_role = $('*[data-role=approve_line]');
+			var types = [];		// type별 seq 저장
 			
 			approve_role.each(function(index) {
-				var seq = index + 1;	// 결재라인에는 담당자가 기본으로 첫번째에 있기 때문에 양식에서 정의한 결재자의 순번은 인덱스보다 1 크다.
+				var idx = index + 1;	// 결재라인에는 담당자가 기본으로 첫번째에 있기 때문에 양식에서 정의한 결재자의 순번은 인덱스보다 1 크다.
 				var type = getApproveType($(this));
+				var seq;
 				
-				approve.lines[seq].type = type;
+				approve.lines[idx].type = type;
+				if (angular.isUndefined(types[type])) {
+					console.log('type is undefined');
+					types[type] = 1;
+					seq = 1;
+				} else {
+					seq = types[type]  + 1;
+					types[type] = seq;
+				}
+				
+				approve.lines[idx].seq = seq;
 			});
 			
 			console.log('formApproveLine: ', approve.lines);
@@ -323,7 +338,7 @@ App
 		} else {
 			// 의뢰부서 결재 라인을 정리하는 것이지만, 작성자가 저장이나 상신하는 경우이므로 전체 결재라인을 정리해도 됨.
 			for (var i = 0; i < approve.lines.length; i++) {
-				approve.lines[i].seq = i;
+				if (!self.formApproveLine)	approve.lines[i].seq = i;	// 양식에 결재자가 있는 경우에는 위에서 순번을 처리했다.
 				
 				// 작성자가 상신하는 경우, 작성자의 결재 상태는 완료이다.
 				if (status == approveStatus.PROCESSING && i == 0)
@@ -650,7 +665,7 @@ App
 	
 	function initAndMakeApproveLine(element, user) {
 		var approve_data = $('*[data-role=approve_line]');
-		var seq = approve_data.index(element) + 1;	// 작성자 결재라인(담당)은 남기고 나머지를 선택한 사용자로 변경한다.
+		var seq = approve_data.index(element) + 1;	// 작성자 결재라인(담당)은 남기고 나머지를 선택한 사용자로 변경한다. 결재라인 순서는 양식에 보이는 순서가 된다.
 		
 		approve.lines[seq] = {
 			'appId': '',
@@ -670,6 +685,7 @@ App
 		
 		if (approve_data.length == role_arr.length) {
 			if (approve.lines.length > (role_arr.length + 1)) {
+				// 사용자 지정 또는 자동 결재 라인이 생성되어 있는 경우에 양식에 있는 결재라인만 설정되도록 초기에 지정된 결재라인은 삭제한다.
 				approve.lines.splice(approve_data.length + 1);
 			}
 		}
