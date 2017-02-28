@@ -1,0 +1,30 @@
+#calendar i {
+	cursor: pointer;
+	color: #999;
+}
+
+div.nav_bar {
+	line-height: 45px;
+}
+
+.mini-calendar {
+	width: 100%;
+	padding-left: 1%;
+	padding-right: 1%;
+}
+
+.calendar-row {
+	width: 100%;
+}
+.calendar-header {
+	text-align: center;
+	font-weight: bold;
+	display:inline-table;
+	color: #999;
+}
+
+.calendar-cell {
+	width: 12%;
+	text-align:center;
+	display:inline-table;
+}

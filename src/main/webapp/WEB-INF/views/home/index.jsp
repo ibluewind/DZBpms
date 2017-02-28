@@ -14,6 +14,7 @@
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/angularjs-slider/5.8.7/rzslider.min.css"/>
 <link rel="stylesheet" href="<c:url value='/static/css/'/>angular-motion.css"/>
 <link rel="stylesheet" href="<c:url value='/static/css/'/>approve.css"/>
+<link rel="stylesheet" href="<c:url value='/static/css/'/>calendar.css"/>
 </head>
 <body ng-app="bpmApp">
 	<div class="container-fluid">
@@ -33,8 +34,7 @@
 		    <!-- Collect the nav links, forms, and other content for toggling -->
 		    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 		      <ul class="nav navbar-nav">
-		        <li class="active"><a href="#/"/>Link <span class="sr-only">(current)</span></a></li>
-		        <li><a href="#/">Link</a></li>
+		        <li><a href="#/calendar"/>일정<span class="sr-only">(current)</span></a></li>
 		        <li class="dropdown">
 		          <a href="#/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">작업<span class="caret"></span></a>
 		          <ul class="dropdown-menu" role="menu">
