@@ -8,23 +8,52 @@ div.nav_bar {
 }
 
 .mini-calendar {
-	width: 100%;
-	padding-left: 1%;
-	padding-right: 1%;
+	width: 210px;
 }
 
 .calendar-row {
 	width: 100%;
+	padding: 0 1%;
+	display: inline-table
 }
 .calendar-header {
 	text-align: center;
 	font-weight: bold;
-	display:inline-table;
 	color: #999;
+}
+.calendar-week {
+	width: 14%;
+	text-align: center;
+	display:table-cell;
+	font-weight: bold;
+	color: #999;
+	padding: 0 5px;
 }
 
 .calendar-cell {
-	width: 12%;
-	text-align:center;
-	display:inline-table;
+	width: 14%;
+	text-align:right;
+	display:table-cell;
+	padding: 0 5px;
+}
+
+.current-month {
+	background-color: #DCECEF;
+}
+
+.not-current-month {
+	color: #ddd;
+}
+
+.top-border {
+	border-top:1px solid #aaa;
+}
+
+.top-border.not-current-month {
+	color: #aaa;
+}
+
+.today {
+	padding-top: 0;
+	border-top: 4px solid #0072CF;
 }

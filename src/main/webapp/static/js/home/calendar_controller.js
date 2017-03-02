@@ -2,26 +2,61 @@
  * Angular Calendar Controller
  */
 App
-.controller('calendarController', [function() {
+.controller('miniCalendarController', ['calendarService', function(calendarService) {
 	
 	var self = this;
-	var date = new Date();
-	var numOfWeeks = getNumOfWeeks();
-	var calendar;
+	var today = new Date();
 	
-	date.setDate(1);		// 1일로 설정
-	date.setDate(1-date.getDay());		// 1일이 있는 주의 첫번재 날짜 구하기
+	self.currentDate = new Date();
+	self.currentDate.setDate(1);
 	
+	self.calendar = calendarService.getCalendar(today);
+	self.isCurrentMonth = function(d) {
+		return d.getMonth() == self.currentDate.getMonth();
+	};
 	
-	function getNumOfWeeks() {
-		var date = new Date(), last;
+	self.gotoPrevMonth = function() {
+		self.currentDate.setMonth(self.currentDate.getMonth() - 1);
+		self.calendar = calendarService.getCalendar(self.currentDate);
+	};
+	
+	self.gotoNextMonth = function() {
+		self.currentDate.setMonth(self.currentDate.getMonth() + 1);
+		self.calendar = calendarService.getCalendar(self.currentDate);
+	};
+}])
+.controller('calendarController', ['calendarService', function(calendarService) {
+	var self = this;
+	var today = new Date();
+	
+	self.currentDate = new Date();
+	self.currentDate.setDate(1);
+	
+	self.calendar = calendarService.getCalendar(today);
+	self.isCurrentMonth = function(d) {
+		return d.getMonth() == self.currentDate.getMonth();
+	};
+	
+	self.gotoPrevMonth = function() {
+		self.currentDate.setMonth(self.currentDate.getMonth() - 1);
+		self.calendar = calendarService.getCalendar(self.currentDate);
+	};
+	
+	self.gotoNextMonth = function() {
+		self.currentDate.setMonth(self.currentDate.getMonth() + 1);
+		self.calendar = calendarService.getCalendar(self.currentDate);
+	};
+	
+	self.isToday = function(d) {
+		var today = new Date();
+		var res = false;
 		
-		date.setDate(1);
-		last = new Date();
-		last.setDate(1);
-		last.setMotn(last.getMonth() + 1);
-		last.setDate(0);		// 마직날 날짜로 설정
-		
-		return Math.ceil((date.getDay() + last.getDate()) / 7);
-	}
+		if (today.getDate() == d.getDate())		res = true;
+		console.log(res);
+		return res;
+	};
+	
+	self.isCurrentMonth = function(d) {
+		return d.getMonth() == self.currentDate.getMonth();
+	};
 }]);
