@@ -1,7 +1,7 @@
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <div class="container">
 	<div class="row" id="calendar">
-		<div class="col-md-3 hidden-xs hidden-sm" style="border-right:1px solid #ccc;" ng-controller="miniCalendarController as ctrl">
+		<div class="col-md-3 hidden-xs hidden-sm" ng-controller="miniCalendarController as ctrl">
 			<div class="row nav_bar">
 				<div class="col-md-2 text-left"><i class="glyphicon glyphicon-chevron-left" ng-click="ctrl.gotoPrevMonth()"></i></div>
 				<div class="col-md-8 text-center calendar-header">{{ctrl.currentDate.getFullYear()}}년 {{ctrl.currentDate.getMonth()+1}}월</div>
@@ -20,7 +20,7 @@
 							<span class="calendar-week">토</span>
 						</div>
 						<div class="calendar-row" ng-repeat="cell in ctrl.calendar">
-							<span class="calendar-cell" ng-repeat="d in cell track by $index" ng-class="[{'current-month':ctrl.isCurrentMonth(d)}, {'not-current-month':!ctrl.isCurrentMonth(d)}]"> {{d.getDate()}}</span>
+							<span class="calendar-cell" ng-repeat="d in cell track by $index" ng-class="[{'current-month':ctrl.isCurrentMonth(d)}, {'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]"> {{d.getDate()}}</span>
 						</div>
 						<!-- div class="calendar-row">
 							<span class="calendar-cell">29</span>
@@ -37,34 +37,30 @@
 		</div>
 		<div class="col-md-9" ng-controller="calendarController as ctrl">
 			<div class="row nav_bar">
-				<div class="col-md-6 col-xs-12">
-					<div class="row">
-						<div class="col-md-1 col-xs-1 text-center">
-							<h4><i class="glyphicon glyphicon-chevron-left"></i></h4>
-						</div>
-						<div class="col-md-1 col-xs-1 text-center">
-							<h4><i class="glyphicon glyphicon-chevron-right"></i></h4>
-						</div>
-						<div class="col-md-5 col-xs-8 text-center calendar-header">
-							<h4>{{ctrl.currentDate.getFullYear()}}년 {{ctrl.currentDate.getMonth() + 1}}월</h4>
-						</div>
-						<div class="col-md-1 col-xs-1 text-center">
-							<h4><i class="glyphicon glyphicon-chevron-down"></i></h4>
-						</div>
-					</div>
+				<div class="col-md-7 col-xs-12">
+					<span class="pull-left text-center" style="margin: 0 5px;">
+						<h4><i class="glyphicon glyphicon-chevron-left" ng-click="ctrl.gotoPrev()"></i></h4>
+					</span>
+					<span class="pull-left text-center" style="margin: 0 5px;">
+						<h4><i class="glyphicon glyphicon-chevron-right" ng-click="ctrl.gotoNext()"></i></h4>
+					</span>
+					<span class="pull-left calendar-header" style="margin: 0 5px;">
+						<h4>{{ctrl.calendarTitle}}</h4>
+					</span>
+					<span class="pull-left text-center" style="margin: 0 5px;">
+						<h4><i class="glyphicon glyphicon-chevron-down"></i></h4>
+					</span>
 				</div>
-				<div class="col-md-6 hidden-xs hidden-sm">
-					<div class="pull-right">
-						<button class="btn btn-default">일</button>
-						<button class="btn btn-default">주</button>
-						<button class="btn btn-default">월</button>
-					</div>
-					<div class="pull-left">
-						<button class="btn btn-info">오늘</button>
+				<div class="col-md-5 hidden-xs hidden-sm">
+					<div class="pull-right btn-group">
+						<button class="btn btn-default" ng-click="ctrl.calendarViewChange('#dayView')">일</button>
+						<button class="btn btn-default" ng-click="ctrl.calendarViewChange('#weekView')">주</button>
+						<button class="btn btn-default" ng-click="ctrl.calendarViewChange('#monthView')">월</button>
+						<button class="btn btn-info"ng-click="ctrl.goToday()">오늘</button>
 					</div>
 				</div>
 			</div>
-			<div class="row">
+			<div class="row calendar-view" id="monthView">
 				<div class="col-md-12">
 					<div class="calendar-row">
 						<span class="calendar-week">일요일</span>
@@ -80,6 +76,156 @@
 					</div>
 				</div>
 			</div>
+			<div class="row calendar-view" id="dayView">
+				<div class="scroll-container">
+					<div class="time-line">
+						<table style="width:100%;">
+							<tbody>
+								<tr>
+									<td class="times-header">
+										<div class="time-cell" style="height:42px;">오전12시</div>
+										<div class="time-cell" style="height:42px;">오전1시</div>
+										<div class="time-cell" style="height:42px;">오전2시</div>
+										<div class="time-cell" style="height:42px;">오전3시</div>
+										<div class="time-cell" style="height:42px;">오전4시</div>
+										<div class="time-cell" style="height:42px;">오전5시</div>
+										<div class="time-cell" style="height:42px;">오전6시</div>
+										<div class="time-cell" style="height:42px;">오전7시</div>
+										<div class="time-cell" style="height:42px;">오전8시</div>
+										<div class="time-cell" style="height:42px;">오전9시</div>
+										<div class="time-cell" style="height:42px;">오전10시</div>
+										<div class="time-cell" style="height:42px;">오전11시</div>
+										<div class="time-cell" style="height:42px;">오후12시</div>
+										<div class="time-cell" style="height:42px;">오후1시</div>
+										<div class="time-cell" style="height:42px;">오후2시</div>
+										<div class="time-cell" style="height:42px;">오후3시</div>
+										<div class="time-cell" style="height:42px;">오후4시</div>
+										<div class="time-cell" style="height:42px;">오후5시</div>
+										<div class="time-cell" style="height:42px;">오후6시</div>
+										<div class="time-cell" style="height:42px;">오후7시</div>
+										<div class="time-cell" style="height:42px;">오후8시</div>
+										<div class="time-cell" style="height:42px;">오후9시</div>
+										<div class="time-cell" style="height:42px;">오후10시</div>
+										<div class="time-cell" style="height:42px;">오후11시</div>
+									</td>
+									<td>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+										<div class="time-contents" style="height:42px;">
+											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" style="height:20px"></div>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="row calendar-view" id="weekView">
+				<div class="scroll-container">
+				
+				</div>
+			</div>
+			
 		</div>
 	</div>
 </div>
+<script>
+	$(document).ready(function() {
+		$(window).on('resize', function(e) {
+			var $container = $('.scroll-container:visible');
+			$container.height($(window).innerHeight() - $container.offset().top - 2);
+		})
+	});
+</script>

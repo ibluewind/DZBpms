@@ -38,11 +38,16 @@ div.nav_bar {
 }
 
 .current-month {
-	background-color: #DCECEF;
+	color: #555;
 }
 
 .not-current-month {
 	color: #ddd;
+}
+
+.calendar-cell.current-month.today {
+	background-color: #0072CF;
+	color: #eee;
 }
 
 .top-border {
@@ -56,4 +61,127 @@ div.nav_bar {
 .today {
 	padding-top: 0;
 	border-top: 4px solid #0072CF;
+}
+
+#weekView {
+	display: none;
+}
+
+#dayView {
+	display: none;
+}
+
+.scroll-container {
+	width: 100%;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	margin-left: -1px;
+}
+
+.times-header {
+	border-right: 1px solid #ddd;
+	text-align: right;
+	width: 70px;
+	font-size: 0.9em;
+}
+
+.time-cell {
+	color: #555;
+	font-size: 1em;
+	vertical-align: top;
+	border-bottom: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	padding: 4px;
+}
+
+.time-contents {
+	width: 100%;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    background-color: #f5f5f5;
+}
+
+.time-content {
+	border-bottom: 1px dotted #CCC;
+    margin-bottom: 2px;
+}
+
+::-webkit-scrollbar {
+    height: 16px;
+    overflow: visible;
+    width: 16px;
+}
+
+::-webkit-scrollbar-button {
+    height: 18px;
+    width: 18px;
+}
+
+::-webkit-scrollbar-track {
+    background-clip: padding-box;
+    border: solid transparent;
+    border-width: 0 0 0 7px
+}
+
+#calendars_fav::-webkit-scrollbar-track,#calendars_my::-webkit-scrollbar-track {
+    border-width: 0 5px 0 2px
+}
+
+::-webkit-scrollbar-track:horizontal {
+    border-width: 7px 0 0
+}
+
+::-webkit-scrollbar-track:hover {
+    background-color: rgba(0,0,0,.05);
+    box-shadow: inset 1px 1px 0 rgba(0,0,0,.1)
+}
+
+::-webkit-scrollbar-track:active {
+    background-color: rgba(0,0,0,.05);
+    box-shadow: inset 1px -1px 0 rgba(0,0,0,.14),inset -1px 1px 0 rgba(0,0,0,.07)
+}
+
+::-webkit-scrollbar-track:horizontal:hover {
+    box-shadow: inset -1px 1px 0 rgba(0,0,0,.14),inset 1px -1px 0 rgba(0,0,0,.07)
+}
+
+::-webkit-scrollbar-track:vertical:hover {
+    box-shadow: inset 1px 1px 0 rgba(0,0,0,.14),inset -1px -1px 0 rgba(0,0,0,.07)
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,.2);
+    background-clip: padding-box;
+    border: solid transparent;
+    border-width: 0 0 0 7px;
+    min-height: 28px;
+    padding: 100px 0 0;
+    box-shadow: inset 1px 1px 0 rgba(0,0,0,.1),inset -1px -1px 0 rgba(0,0,0,.07);
+}
+
+#calendars_fav::-webkit-scrollbar-thumb,#calendars_my::-webkit-scrollbar-thumb {
+    border-width: 0 5px 0 2px
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0,0,0,.4);
+    box-shadow: inset 1px 1px 1px rgba(0,0,0,.25)
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+    border-width: 7px 0 0;
+    padding: 0 0 0 100px;
+    box-shadow: inset -1px 1px 0 rgba(0,0,0,.1),inset 1px -1px 0 rgba(0,0,0,.07)
+}
+
+::-webkit-scrollbar-thumb:active {
+    background-color: rgba(0,0,0,0.5);
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.35)
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
 }
