@@ -31,4 +31,49 @@ App
 		
 		return Math.ceil((date.getDay() + next.getDate()) / 7);
 	}
-});
+})
+.service('peekCalendarPopover', ['$q', '$popover', '$rootScope', function($q, $popover, $rootScope) {
+
+	var today = new Date();
+	var scope = $rootScope.$new();
+	var peekCal = $popover($('#peekCalendar'), {
+												contentTemplate: '/bpms/home/peekcalendar',
+												trigger: 'manual',
+												scope:scope,
+												autoClose:true,
+												html: true,
+												placement:'bottom'
+							});
+	var deferred;
+	
+	scope.currentYear = today.getFullYear();
+	
+	scope.prevYear = function() {
+		scope.currentYear--;
+	};
+	
+	scope.nextYear = function() {
+		scope.currentYear++;
+	};
+	
+	scope.selectMonth = function(month) {
+		var date = new Date();
+		
+		date.setMonth(month);
+		date.setYear(scope.currentYear);
+		date.setDate(1);
+		
+		deferred.resolve(date);
+		peekCal.hide();
+	};
+	
+	var parentShow = peekCal.show;
+	peekCal.show = function(currentDate) {
+		scope.currentYear = currentDate.getFullYear();
+		deferred = $q.defer();
+		parentShow();
+		return deferred.promise;
+	};
+	
+	return peekCal;
+}]);

@@ -79,6 +79,11 @@ public class IndexController {
 		return "/admin/admin";
 	}
 	
+	@RequestMapping(value="/home/peekcalendar", method=RequestMethod.GET)
+	public String getPeekCalendarpage() {
+		return "/home/partial/peekcalendar";
+	}
+	
 	/*
 	 * MODAL Windows
 	 */

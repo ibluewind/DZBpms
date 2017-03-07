@@ -32,7 +32,7 @@ App
 		self.calendar = calendarService.getCalendar(self.currentDate);
 	};
 }])
-.controller('calendarController', ['calendarService', function(calendarService) {
+.controller('calendarController', ['calendarService', 'peekCalendarPopover', '$rootScope', function(calendarService, peekCalendarPopover, $rootScope) {
 	var self = this;
 	var today = new Date();
 	
@@ -45,6 +45,10 @@ App
 		return d.getMonth() == self.currentDate.getMonth();
 	};
 	
+	function getDestinationDate() {
+		
+	}
+	
 	/**
 	 * 이전 다음 버튼의 동작은 현재 캘린더의 모양에 따라 처리 내용이 달라져야 한다.
 	 * 월 단위 캘린더는 월별 이동
@@ -53,22 +57,45 @@ App
 	 */
 	self.gotoPrev = function() {
 		// .calendar-view에서 현재 캘린더 종류 찾기
-		var calType = $('.calendar-view:visible').attr('id');
+		var viewType = $('.calendar-view:visible').attr('id');
 		
-		if (calType == 'monthView') {
-			
-		} else if (calType == 'weekView') {
-			
-		} else if (calType == 'dayView') {
-			
+		switch (viewType) {
+		case 'monthView':
+			self.currentDate.setMonth(self.currentDate.getMonth() - 1);
+			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
+			break;
+		case 'weekView':
+			self.currentDate.setDate(self.currentDate.getDate() - 7);
+			self.calendarTitle = sunDay.getFullYear() + '년 ' + (sunDay.getMonth() + 1) + '월 ' + sunDay.getDate() + '일'
+			   + ' ~ ' + satDay.getFullYear() + '년 ' + (satDay.getMonth() + 1) + '월 ' + satDay.getDate() + '일';
+			break;
+		case 'dayView':
+			self.currentDate.setDate(self.currentDate.getDate() - 1);
+			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
+			break;
 		}
-		self.currentDate.setMonth(self.currentDate.getMonth() - 1);
+		
 		self.calendar = calendarService.getCalendar(self.currentDate);
-		self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
 	};
 	
 	self.gotoNext = function() {
-		self.currentDate.setMonth(self.currentDate.getMonth() + 1);
+		var viewType = $('.calendar-view:visible').attr('id');
+		
+		switch (viewType) {
+		case 'monthView':
+			self.currentDate.setMonth(self.currentDate.getMonth() - 1);
+			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
+			break;
+		case 'weekView':
+			self.currentDate.setDate(self.currentDate.getDate() - 7);
+			self.calendarTitle = sunDay.getFullYear() + '년 ' + (sunDay.getMonth() + 1) + '월 ' + sunDay.getDate() + '일'
+			   + ' ~ ' + satDay.getFullYear() + '년 ' + (satDay.getMonth() + 1) + '월 ' + satDay.getDate() + '일';
+			break;
+		case 'dayView':
+			self.currentDate.setDate(self.currentDate.getDate() - 1);
+			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
+			break;
+		}
 		self.calendar = calendarService.getCalendar(self.currentDate);
 		self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
 	};
@@ -91,8 +118,12 @@ App
 		return d.getMonth() == self.currentDate.getMonth();
 	};
 	
-	self.calendarViewChange = function(typeId) {
+	self.calendarViewChange = function($event, typeId) {
 		$('.calendar-view').hide();
+		
+		// 선택된 종류에 active 처리
+		$('.btn-group .btn-default').removeClass('active');
+		$($event.target).addClass("active");
 		
 		if (typeId == '#dayView') {
 			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
@@ -110,6 +141,24 @@ App
 		}
 		
 		$(typeId).show();
-		$(typeId).find('.scroll-container').height($(window).innerHeight() - $(typeId).offset().top - 2);
+		
+		if (typeId != '#monthView') {
+			var $container = $(typeId).find('.scroll-container');
+			$container.height($(window).innerHeight() - $container.offset().top - 2);	// 일정의 뷰의 높이 조정
+		}
 	};
+	
+	self.peekCalendar = function() {
+		peekCalendarPopover.show(self.currentDate)
+		.then(
+			function(date) {
+				self.currentDate = date;
+				self.calendar = calendarService.getCalendar(date);
+				self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
+			},
+			function(err) {
+				console.error('Error while display peek calendar popover');
+			}
+		);
+	}
 }]);
