@@ -22,15 +22,6 @@
 						<div class="calendar-row" ng-repeat="cell in ctrl.calendar">
 							<span class="calendar-cell" ng-repeat="d in cell track by $index" ng-class="[{'current-month':ctrl.isCurrentMonth(d)}, {'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]"> {{d.getDate()}}</span>
 						</div>
-						<!-- div class="calendar-row">
-							<span class="calendar-cell">29</span>
-							<span class="calendar-cell">30</span>
-							<span class="calendar-cell">31</span>
-							<span class="calendar-cell">1</span>
-							<span class="calendar-cell">2</span>
-							<span class="calendar-cell">3</span>
-							<span class="calendar-cell">4</span>
-						</div-->
 					</div>
 				</div>
 			</div>

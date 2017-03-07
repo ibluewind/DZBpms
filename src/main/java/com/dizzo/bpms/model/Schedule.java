@@ -19,6 +19,8 @@ public class Schedule {
 	private String	deptName;
 	private String	positionName;
 	
+	public Schedule() {}
+	
 	public String getId() {
 		return id;
 	}

@@ -109,6 +109,16 @@ div.nav_bar {
     margin-bottom: 2px;
 }
 
+.schedule_bar {
+	height: 18px;
+	text-align: center;
+	border: 1px solid #3c763d;
+	background-color: #77b778;
+	position: absolute;
+	margin-left: 2%;
+	margin-right: 3%;
+}
+
 ::-webkit-scrollbar {
     height: 16px;
     overflow: visible;

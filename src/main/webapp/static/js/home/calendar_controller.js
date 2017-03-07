@@ -36,8 +36,8 @@ App
 	var self = this;
 	var today = new Date();
 	
+	self.scheduleList = [];
 	self.currentDate = new Date();
-	self.currentDate.setDate(1);
 	
 	self.calendar = calendarService.getCalendar(today);
 	self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
@@ -45,8 +45,55 @@ App
 		return d.getMonth() == self.currentDate.getMonth();
 	};
 	
-	function getDestinationDate() {
+	var start = new Date();
+	var end = new Date();
+	start.setDate(1);
+	end.setMonth(end.getMonth() + 1);
+	end.setDate(0);
+	
+	getScheduleList(start, end);
+	
+	/**
+	 * 일정 목록 가져오기
+	 */
+	function getScheduleList(start, end) {
+		calendarService.getScheduleList(start, end)
+		.then(
+			function(list) {
+				console.log(list);
+				self.scheduleList = list;
+				renderingSchedule(list);
+			},
+			function(err) {
+				console.error('Error while fetching schedule list');
+			}
+		);
+	}
+	
+	/**
+	 * 달력 보기 종류에 따라 표시할 제목을 달리한다.
+	 */
+	function setCalendarTitle() {
+		var viewType = $('.calendar-view:visible').attr('id');
 		
+		switch (viewType) {
+		case 'monthView':
+			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
+			break;
+		case 'weekView':
+			var sunDay = angular.copy(self.currentDate);
+			var satDay = angular.copy(self.currentDate);
+			
+			sunDay.setDate(sunDay.getDate() - sunDay.getDay());
+			satDay.setDate(satDay.getDate() + (6 - satDay.getDay()));
+			
+			self.calendarTitle = sunDay.getFullYear() + '년 ' + (sunDay.getMonth() + 1) + '월 ' + sunDay.getDate() + '일'
+			   + ' ~ ' + satDay.getFullYear() + '년 ' + (satDay.getMonth() + 1) + '월 ' + satDay.getDate() + '일';
+			break;
+		case 'dayView':
+			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
+			break;
+		}
 	}
 	
 	/**
@@ -62,19 +109,16 @@ App
 		switch (viewType) {
 		case 'monthView':
 			self.currentDate.setMonth(self.currentDate.getMonth() - 1);
-			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
 			break;
 		case 'weekView':
 			self.currentDate.setDate(self.currentDate.getDate() - 7);
-			self.calendarTitle = sunDay.getFullYear() + '년 ' + (sunDay.getMonth() + 1) + '월 ' + sunDay.getDate() + '일'
-			   + ' ~ ' + satDay.getFullYear() + '년 ' + (satDay.getMonth() + 1) + '월 ' + satDay.getDate() + '일';
 			break;
 		case 'dayView':
 			self.currentDate.setDate(self.currentDate.getDate() - 1);
-			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
 			break;
 		}
 		
+		setCalendarTitle();
 		self.calendar = calendarService.getCalendar(self.currentDate);
 	};
 	
@@ -83,27 +127,24 @@ App
 		
 		switch (viewType) {
 		case 'monthView':
-			self.currentDate.setMonth(self.currentDate.getMonth() - 1);
-			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
+			self.currentDate.setMonth(self.currentDate.getMonth() + 1);
 			break;
 		case 'weekView':
-			self.currentDate.setDate(self.currentDate.getDate() - 7);
-			self.calendarTitle = sunDay.getFullYear() + '년 ' + (sunDay.getMonth() + 1) + '월 ' + sunDay.getDate() + '일'
-			   + ' ~ ' + satDay.getFullYear() + '년 ' + (satDay.getMonth() + 1) + '월 ' + satDay.getDate() + '일';
+			self.currentDate.setDate(self.currentDate.getDate() + 7);
 			break;
 		case 'dayView':
-			self.currentDate.setDate(self.currentDate.getDate() - 1);
-			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
+			self.currentDate.setDate(self.currentDate.getDate() + 1);
 			break;
 		}
+		
+		setCalendarTitle();
 		self.calendar = calendarService.getCalendar(self.currentDate);
-		self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
 	};
 	
 	self.goToday = function() {
 		self.currentDate = new Date();
+		setCalendarTitle();
 		self.calendar = calendarService.getCalendar(self.currentDate);
-		self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
 	};
 	
 	self.isToday = function(d) {
@@ -121,11 +162,11 @@ App
 	self.calendarViewChange = function($event, typeId) {
 		$('.calendar-view').hide();
 		
-		// 선택된 종류에 active 처리
+		// 선택된 버튼에 active 처리
 		$('.btn-group .btn-default').removeClass('active');
 		$($event.target).addClass("active");
 		
-		if (typeId == '#dayView') {
+		/*if (typeId == '#dayView') {
 			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
 		} else if (typeId == '#weekView') {
 			var sunDay = angular.copy(self.currentDate);
@@ -138,9 +179,10 @@ App
 							   + ' ~ ' + satDay.getFullYear() + '년 ' + (satDay.getMonth() + 1) + '월 ' + satDay.getDate() + '일';
 		} else {
 			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
-		}
+		}*/
 		
 		$(typeId).show();
+		setCalendarTitle();
 		
 		if (typeId != '#monthView') {
 			var $container = $(typeId).find('.scroll-container');

@@ -132,7 +132,7 @@ public class IndexController {
 		return "/task/task_history_modal";
 	}
 	
-	private String getPrincipal() {
+	public static String getPrincipal() {
 		String	userName = null;
 		Object	principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		

@@ -6,8 +6,7 @@ App
 		controller: 'dashboardController as ctrl'
 	})
 	.when('/calendar', {
-		templateUrl: '/bpms/home/calendar',
-		controller: 'calendarController as ctrl'
+		templateUrl: '/bpms/home/calendar'
 	})
 	.when('/task_list', {
 		templateUrl: '/bpms/home/task/list',

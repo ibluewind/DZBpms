@@ -1,5 +1,5 @@
 App
-.service('calendarService', function() {
+.service('calendarService', ['$http', '$q', function($http, $q) {
 	this.getCalendar = function(currentDate) {
 		var numOfWeeks = getNumberOfWeeks(currentDate);
 		var calendar = new Array(numOfWeeks);
@@ -21,6 +21,23 @@ App
 		return calendar;
 	};
 	
+	this.getScheduleList = function(start, end) {
+		var deferred = $q.defer();
+		
+		console.log('start = ', start + ', end = ', end);
+		$http.get('/bpms/rest/schedule', {params:{start: start, end: end}})
+		.then(
+			function(response) {
+				deferred.resolve(response.data);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+		
+		return deferred.promise;
+	};
+	
 	function getNumberOfWeeks(currentDate) {
 		var date = new Date(currentDate.getTime()), next;
 		date.setDate(1);
@@ -31,7 +48,7 @@ App
 		
 		return Math.ceil((date.getDay() + next.getDate()) / 7);
 	}
-})
+}])
 .service('peekCalendarPopover', ['$q', '$popover', '$rootScope', function($q, $popover, $rootScope) {
 
 	var today = new Date();
