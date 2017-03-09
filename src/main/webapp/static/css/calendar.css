@@ -63,6 +63,9 @@ div.nav_bar {
 	border-top: 4px solid #0072CF;
 }
 
+.calendar-view td {
+	width: 12%;
+}
 #weekView {
 	display: none;
 }
@@ -84,7 +87,6 @@ div.nav_bar {
 .times-header {
 	border-right: 1px solid #ddd;
 	text-align: right;
-	width: 70px;
 	font-size: 0.9em;
 }
 
@@ -109,16 +111,63 @@ div.nav_bar {
     margin-bottom: 2px;
 }
 
-.schedule_bar {
-	height: 18px;
+#monthView .schedule-bar {
+	height: 20px;
 	text-align: center;
-	border: 1px solid #3c763d;
-	background-color: #77b778;
 	position: absolute;
 	margin-left: 2%;
 	margin-right: 3%;
+	font-size: 0.9em;
+	color: #eee;
+	line-height: 1.5em;
 }
 
+#weekView .schedule-bar {
+	text-align: center;
+	position: relative;
+	font-size: 0.9em;
+	color: #eee;
+	line-height: 1.5em;
+	height: 18px;
+	float: left;
+}
+
+#dayView .schedule-bar {
+	text-align: center;
+	position: relative;
+	font-size: 0.9em;
+	color: #eee;
+	line-height: 1.5em;
+}
+
+#weekView .title-line {
+	height:44px;
+	border:1px solid #ccc;
+	margin-right:18px;
+	margin-left: -1px;
+}
+
+#dayView .title-line {
+	height:25px;
+	border:1px solid #ccc;
+	margin-right:18px;
+	margin-left: -1px;
+}
+
+.schedule-bar.V {
+	border: 2px solid #65149a;
+	background-color: #c67fec;
+}
+
+.schedule-bar.T {
+	border: 2px solid #3c763d;
+	background-color: #77b778;
+}
+
+.schedule-bar.P {
+	border: 2px solid #2a5f79;
+	background-color: #337ab7;
+}
 ::-webkit-scrollbar {
     height: 16px;
     overflow: visible;

@@ -1,13 +1,16 @@
 App
 .service('calendarService', ['$http', '$q', function($http, $q) {
-	this.getCalendar = function(currentDate) {
-		var numOfWeeks = getNumberOfWeeks(currentDate);
+	
+	this.getCalendar = function(currentDate, type) {
+		var numOfWeeks = getNumberOfWeeks(currentDate, type);
 		var calendar = new Array(numOfWeeks);
 		var date = new Date(currentDate.getTime());
 		
+		// type에 맞춰서 달력을 가져온다.
 		for (var i = 0; i < numOfWeeks; i++)
 			calendar[i] = new Array(7);
 		
+		// 월, 주에 따른 처리 필요.
 		date.setDate(1);
 		date.setDate(1 - date.getDay());
 		
@@ -38,8 +41,11 @@ App
 		return deferred.promise;
 	};
 	
-	function getNumberOfWeeks(currentDate) {
+	function getNumberOfWeeks(currentDate, type) {
 		var date = new Date(currentDate.getTime()), next;
+		
+		if (type != 'month')	return 1;
+		
 		date.setDate(1);
 		next = new Date(currentDate.getTime());
 		next.setDate(1);

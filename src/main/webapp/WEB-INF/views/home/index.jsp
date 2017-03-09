@@ -102,6 +102,7 @@
 <script src="<c:url value="/static/js/home/approve_constant.js"/>"></script>
 <script src="<c:url value="/static/js/home/approve_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/approve_controller.js"/>"></script>
+<script src="<c:url value="/static/js/home/calendar_constant.js"/>"></script>
 <script src="<c:url value="/static/js/home/calendar_controller.js"/>"></script>
 <script src="<c:url value="/static/js/home/calendar_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/calendar_render.js"/>"></script>

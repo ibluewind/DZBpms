@@ -44,9 +44,9 @@
 				</div>
 				<div class="col-md-5 hidden-xs hidden-sm">
 					<div class="pull-right btn-group">
-						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, '#dayView')">일</button>
-						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, '#weekView')">주</button>
-						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, '#monthView')">월</button>
+						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, 'dayView')">일</button>
+						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, 'weekView')">주</button>
+						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, 'monthView')">월</button>
 						<button class="btn btn-info"ng-click="ctrl.goToday()">오늘</button>
 					</div>
 				</div>
@@ -68,7 +68,7 @@
 				</div>
 			</div>
 			<div class="row calendar-view" id="dayView">
-				<div style="height:20px;border:1px solid #ccc;margin-right:18px;"></div>
+				<div class="title-line"></div>
 				<div class="scroll-container">
 					<div class="time-line">
 						<table style="width:100%;">
@@ -205,11 +205,11 @@
 				</div>
 			</div>
 			<div class="row calendar-view" id="weekView">
-				<div style="height:20px;border:1px solid #ccc;margin-right:18px;">
+				<div class="title-line">
 					<table style="width:100%; border-collapse:separate; text-align:center;">
 						<tbody>
 							<tr>
-								<td style="width:70px;"></td>
+								<td>&nbsp;</td>
 								<td>일요일</td>
 								<td>월요일</td>
 								<td>화요일</td>
@@ -952,7 +952,8 @@
 	$(document).ready(function() {
 		$(window).on('resize', function(e) {
 			var $container = $('.scroll-container:visible');
-			$container.height($(window).innerHeight() - $container.offset().top - 2);
+			if ($container.length > 0)
+				$container.height($(window).innerHeight() - $container.offset().top - 2);
 		})
 	});
 </script>

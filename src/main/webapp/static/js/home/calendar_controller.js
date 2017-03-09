@@ -2,7 +2,7 @@
  * Angular Calendar Controller
  */
 App
-.controller('miniCalendarController', ['calendarService', function(calendarService) {
+.controller('miniCalendarController', ['calendarService', 'calendarType', function(calendarService, calendarType) {
 	
 	var self = this;
 	var today = new Date();
@@ -10,7 +10,7 @@ App
 	self.currentDate = new Date();
 	self.currentDate.setDate(1);
 	
-	self.calendar = calendarService.getCalendar(today);
+	self.calendar = calendarService.getCalendar(today, calendarType.MONTH);
 	self.isCurrentMonth = function(d) {
 		return d.getMonth() == self.currentDate.getMonth();
 	};
@@ -24,22 +24,24 @@ App
 	
 	self.gotoPrevMonth = function() {
 		self.currentDate.setMonth(self.currentDate.getMonth() - 1);
-		self.calendar = calendarService.getCalendar(self.currentDate);
+		self.calendar = calendarService.getCalendar(self.currentDate, calendarType.MONTH);
 	};
 	
 	self.gotoNextMonth = function() {
 		self.currentDate.setMonth(self.currentDate.getMonth() + 1);
-		self.calendar = calendarService.getCalendar(self.currentDate);
+		self.calendar = calendarService.getCalendar(self.currentDate, calendarType.MONTH);
 	};
 }])
-.controller('calendarController', ['calendarService', 'peekCalendarPopover', '$rootScope', function(calendarService, peekCalendarPopover, $rootScope) {
+.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope',
+									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope) {
 	var self = this;
 	var today = new Date();
+	var calType = calendarType.MONTH;
 	
 	self.scheduleList = [];
 	self.currentDate = new Date();
 	
-	self.calendar = calendarService.getCalendar(today);
+	self.calendar = calendarService.getCalendar(today, calType);
 	self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
 	self.isCurrentMonth = function(d) {
 		return d.getMonth() == self.currentDate.getMonth();
@@ -60,7 +62,7 @@ App
 		calendarService.getScheduleList(start, end)
 		.then(
 			function(list) {
-				console.log(list);
+				console.log('scheduel list: ', list);
 				self.scheduleList = list;
 				renderingSchedule(list);
 			},
@@ -105,46 +107,46 @@ App
 	self.gotoPrev = function() {
 		// .calendar-view에서 현재 캘린더 종류 찾기
 		var viewType = $('.calendar-view:visible').attr('id');
+		var	start = new Date(), end = new Date();
 		
 		switch (viewType) {
-		case 'monthView':
+		case calendarType.MONTHVIEW:
+			self.currentDate.setDate(1);
 			self.currentDate.setMonth(self.currentDate.getMonth() - 1);
 			break;
-		case 'weekView':
+		case calendarType.WEEKVIEW:
 			self.currentDate.setDate(self.currentDate.getDate() - 7);
 			break;
-		case 'dayView':
+		case calendarType.DAYVIEW:
 			self.currentDate.setDate(self.currentDate.getDate() - 1);
 			break;
 		}
 		
-		setCalendarTitle();
-		self.calendar = calendarService.getCalendar(self.currentDate);
+		$scope.$broadcast('changeCalendarView');
 	};
 	
 	self.gotoNext = function() {
 		var viewType = $('.calendar-view:visible').attr('id');
 		
 		switch (viewType) {
-		case 'monthView':
+		case calendarType.MONTHVIEW:
+			self.currentDate.setDate(1);
 			self.currentDate.setMonth(self.currentDate.getMonth() + 1);
 			break;
-		case 'weekView':
+		case calendarType.WEEKVIEW:
 			self.currentDate.setDate(self.currentDate.getDate() + 7);
 			break;
-		case 'dayView':
+		case calendarType.DAYVIEW:
 			self.currentDate.setDate(self.currentDate.getDate() + 1);
 			break;
 		}
 		
-		setCalendarTitle();
-		self.calendar = calendarService.getCalendar(self.currentDate);
+		$scope.$broadcast('changeCalendarView');
 	};
 	
 	self.goToday = function() {
 		self.currentDate = new Date();
-		setCalendarTitle();
-		self.calendar = calendarService.getCalendar(self.currentDate);
+		$scope.$broadcast('changeCalendarView');
 	};
 	
 	self.isToday = function(d) {
@@ -160,32 +162,19 @@ App
 	};
 	
 	self.calendarViewChange = function($event, typeId) {
+		var start, end;
+		
 		$('.calendar-view').hide();
 		
 		// 선택된 버튼에 active 처리
 		$('.btn-group .btn-default').removeClass('active');
 		$($event.target).addClass("active");
 		
-		/*if (typeId == '#dayView') {
-			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ' + self.currentDate.getDate() + '일';
-		} else if (typeId == '#weekView') {
-			var sunDay = angular.copy(self.currentDate);
-			var satDay = angular.copy(self.currentDate);
-			
-			sunDay.setDate(sunDay.getDate() - sunDay.getDay());
-			satDay.setDate(satDay.getDate() + (6 - satDay.getDay()));
-			
-			self.calendarTitle = sunDay.getFullYear() + '년 ' + (sunDay.getMonth() + 1) + '월 ' + sunDay.getDate() + '일'
-							   + ' ~ ' + satDay.getFullYear() + '년 ' + (satDay.getMonth() + 1) + '월 ' + satDay.getDate() + '일';
-		} else {
-			self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
-		}*/
+		$('#'+typeId).show();
+		$scope.$broadcast('changeCalendarView');
 		
-		$(typeId).show();
-		setCalendarTitle();
-		
-		if (typeId != '#monthView') {
-			var $container = $(typeId).find('.scroll-container');
+		if (typeId != calendarType.MONTHVIEW) {
+			var $container = $('#'+typeId).find('.scroll-container');
 			$container.height($(window).innerHeight() - $container.offset().top - 2);	// 일정의 뷰의 높이 조정
 		}
 	};
@@ -195,12 +184,47 @@ App
 		.then(
 			function(date) {
 				self.currentDate = date;
-				self.calendar = calendarService.getCalendar(date);
-				self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
+				$scope.$broadcast('changeCalendarView');
 			},
 			function(err) {
 				console.error('Error while display peek calendar popover');
 			}
 		);
-	}
+	};
+	
+	/**
+	 * 캘린더 타입이 변하거나, 캘린더의 날짜 이동이 발생하면 처리하는 이벤트이다.
+	 * 시작, 종료 날짜를 캘린더 타입별로 구해서 self.calendar와 self.scheduleList를 반영한다.
+	 */
+	$scope.$on('changeCalendarView', function() {
+		var type = $('.calendar-view:visible').attr('id');
+		var start, end;
+		
+		$('.schedule-bar').remove();
+		
+		start = new Date(self.currentDate.getTime());
+		end = new Date(self.currentDate.getTime());
+		
+		switch(type) {
+		case calendarType.MONTHVIEW:
+			calType = calendarType.MONTH;
+			start.setDate(1);
+			end.setMonth(end.getMonth() + 1);
+			end.setDate(0);
+			break;
+		case calendarType.WEEKVIEW:
+			calType = calendarType.WEEK;
+			start.setDate(start.getDate() - start.getDay());
+			end.setDate(end.getDate() + (6 - end.getDay()));
+			break;
+		case calendarType.DAYVIEW:
+			calType = calendarType.DAY;
+			break;
+		}
+		
+		self.currentDate = start;
+		self.calendar = calendarService.getCalendar(self.currentDate, calType);
+		getScheduleList(start, end);
+		setCalendarTitle();
+	});
 }]);

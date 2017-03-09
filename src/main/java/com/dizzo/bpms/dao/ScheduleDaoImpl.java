@@ -66,12 +66,14 @@ public class ScheduleDaoImpl implements ScheduleDao {
 					 + " user_dept_position udp,"
 					 + " position p,"
 					 + " departments d"
-					 + " WHERE     s.userId = u.userid"
+					 + " WHERE"
+					 + " (s.start BETWEEN ? AND ?"
+					 + " OR ? BETWEEN s.start AND s.end)"
+				     + " AND s.userId = u.userid"
 					 + " AND udp.userid = s.userid"
 					 + " AND p.id = udp.positionid"
 					 + " AND d.deptid = udp.deptid"
 					 + " AND s.userId = ?"
-					 + " AND s.start BETWEEN ? AND ?"
 					 + " GROUP BY s.id"
 					 + " ORDER BY s.start";
 		Calendar	scal = Calendar.getInstance();
@@ -81,9 +83,10 @@ public class ScheduleDaoImpl implements ScheduleDao {
 		ecal.setTime(end);
 		
 		return new JdbcTemplate(dataSource).query(query, new Object[]{
-			userId,
 			String.format("%04d-%02d-%02d 00:00:00", scal.get(Calendar.YEAR), scal.get(Calendar.MONTH) + 1, scal.get(Calendar.DATE)),
 			String.format("%04d-%02d-%02d 23:59:59", ecal.get(Calendar.YEAR), ecal.get(Calendar.MONTH) + 1, ecal.get(Calendar.DATE)),
+			String.format("%04d-%02d-%02d 00:00:00", scal.get(Calendar.YEAR), scal.get(Calendar.MONTH) + 1, scal.get(Calendar.DATE)),
+			userId
 		}, new ScheduleRowMapper());
 	}
 
