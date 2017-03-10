@@ -63,6 +63,10 @@ div.nav_bar {
 	border-top: 4px solid #0072CF;
 }
 
+.calendar-view {
+	width: 100%;
+}
+
 .calendar-view td {
 	width: 12%;
 }
@@ -74,6 +78,14 @@ div.nav_bar {
 	display: none;
 }
 
+#schedule-bar-area {
+	background-color: #7ab5f1;
+}
+#schedule-bar-area span {
+	width: 12%;
+	display: inline-block;
+	height: 100%;
+}
 .scroll-container {
 	width: 100%;
 	left: 0px;
@@ -141,7 +153,7 @@ div.nav_bar {
 }
 
 #weekView .title-line {
-	height:44px;
+	/* height:44px; */
 	border:1px solid #ccc;
 	margin-right:18px;
 	margin-left: -1px;

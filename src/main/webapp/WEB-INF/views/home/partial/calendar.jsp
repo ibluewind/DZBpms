@@ -220,6 +220,16 @@
 							</tr>
 						</tbody>
 					</table>
+					<div id="schedule-bar-area">
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+						<span></span>
+					</div>
 				</div>
 				<div class="scroll-container">
 					<div class="time-line">

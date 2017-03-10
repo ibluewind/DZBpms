@@ -6,12 +6,13 @@
 var renderingSchedule = function(schedules) {
 	var type = $('.calendar-view:visible').attr('id');
 	var calendarType = angular.injector(['ng', 'bpmApp']).get('calendarType');		// calencarType constant 호출
+	var countWholeDay = 0;
 	
 	for (var i = 0; i < schedules.length; i++) {
 		var s = schedules[i];
 		var start = new Date(s.startDate);
 		var end = new Date(s.endDate);
-		var $scheduleBar = $('<p>').addClass('schedule-bar ' + s.type);
+		var $scheduleBar = $('<abbr>').addClass('schedule-bar ' + s.type);
 		var $target = findTargetElement(start);
 		var left, right, top, width, height, lineHeight, dateDiff = 0, hourDiff = 0;
 		var wholeDay = false;
@@ -30,6 +31,11 @@ var renderingSchedule = function(schedules) {
 			hourDiff = Math.ceil((end.getTime() - start.getTime()) / 1000 / 60 / 60 * 60) / 30
 			width = $target.width() * dateDiff;
 			
+			/**
+			 * 종일 일정인지를 확인한다.
+			 * 종일 일정인 경우에는 시간 구분에 표시않고, .schedule-bar-area에 표시한다.
+			 * 일정의 위치는 .schedule-bar-area의 <span> 위치이고 같은 요일에 중복되는 일정에 대한 top 값을 구한다.
+			 */
 			if (hourDiff < 48) {
 				height = 20 * hourDiff;
 				lineHeight = 1.5 * hourDiff;
@@ -37,14 +43,16 @@ var renderingSchedule = function(schedules) {
 			}
 			else {
 				height = 20;
-				left = (start.getDay() + 1) * 12;
 				wholeDay = true;
 				lineHeight = 1.5;
-				$target = $('#weekView .title-line');
-				top = numOfSchedules * 20 + numOfSchedules + "px";
+				// 종일 일정인 경우에는 타임라인이 아닌 schedule-bar-area에 표시한다.
+				$target = $($('#schedule-bar-area span')[start.getDay() + 1]);
+				//$target = $('#weekView .title-line');
+				top = (countWholeDay * 20) + numOfSchedules + "px";
+				countWholeDay++;
 			}
 			
-			$target.height(44 + (numOfSchedules * 20) + numOfSchedules + "px");
+			$('#schedule-bar-area').height((numOfSchedules + 1) * 20 + numOfSchedules + "px");
 			$scheduleBar.css({width: width + "px", height: height + "px", left:left + "%", "line-height":lineHeight + 'em', top:top, overflow:'hidden'});
 			break;
 		case calendarType.DAYVIEW:
@@ -67,7 +75,8 @@ var renderingSchedule = function(schedules) {
 			break;
 		}
 		
-		$scheduleBar.text(left + ":" + start.getDay() + ", "+ s.userName + ":" + s.title);
+		$scheduleBar.text(i + ":" + start.getDay() + ", "+ s.userName + ":" + s.title);
+		$scheduleBar.attr("title", s.userName + ":" + s.title);
 		
 		console.log($target);
 		$target.append($scheduleBar);
@@ -91,10 +100,14 @@ var getNumOfSchedulesAtDate = function(schedules, date, idx) {
 			number++;
 		}
 	}
-	
+
+	console.log('number: ' + number);
 	return number;
 }
 
+/**
+ * 시작 일정이 표시될 엘레먼트를 달력 종류별로 찾는다.
+ */
 var findTargetElement = function(start) {
 	var type = $('.calendar-view:visible').attr('id');
 	var firstDay = angular.copy(start);
@@ -107,12 +120,22 @@ var findTargetElement = function(start) {
 	
 	switch(type) {
 	case 'monthView':
-		$target = $($($('.calendar-view .calendar-row')[numOfWeeks]).find('span')[numOfDays]);
+		/*
+		 * 월별 일정은 몇번째 주 무슨 요일인지로 타멧을 찾는다.
+		 */
+		$target = $($($('#monthView .calendar-row')[numOfWeeks]).find('span')[numOfDays]);
 		break;
 	case 'weekView':
+		/*
+		 * .time-line은 주별, 일별 일정에서 사용하므로 현재 보여지는 .time-line에서 해당 요일을 찾는다.
+		 * 요일 구분은 <td>로 되어 있으므로 요일 순번의 <td>를 찾고, 일정 시작 시간의 위치를 찾는다.
+		 */
 		$target = $($($('.time-line:visible td')[numOfDays + 1]).find('.time-content')[numOfHours]);
 		break;
 	case 'dayView':
+		/*
+		 * 일별 일정은 시간만 표시하므로 시간을 구분하는 .time-content의 순번을 찾는다.
+		 */
 		$target = $($('.time-line:visible .time-content')[numOfHours]);
 		break;
 	}
