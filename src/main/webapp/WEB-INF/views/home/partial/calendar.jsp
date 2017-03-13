@@ -25,6 +25,34 @@
 					</div>
 				</div>
 			</div>
+			<div class="row">&nbsp;</div>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="panel-title">일정 필터</div>
+						</div>
+						<div class="panel-body">
+							<div class="input-group">
+								<input type="checkbox" ng-model="ctrl.filterOptions.own" ng-click="ctrl.filterSchedule()"/>
+								<label>내 일정만</label>
+							</div>
+							<div class="input-group">
+								<input type="checkbox" ng-model="ctrl.filterOptions.task" ng-click="ctrl.filterSchedule()"/>
+								<label>작업</label>
+							</div>
+							<div class="input-group">
+								<input type="checkbox" ng-model="ctrl.filterOptions.vocation" ng-click="ctrl.filterSchedule()"/>
+								<label>휴가</label>
+							</div>
+							<div class="input-group">
+								<input type="checkbox" ng-model="ctrl.filterOptions.personal" ng-click="ctrl.filterSchedule()"/>
+								<label>개인</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="col-md-9" ng-controller="calendarController as ctrl">
 			<div class="row nav_bar">
@@ -68,7 +96,9 @@
 				</div>
 			</div>
 			<div class="row calendar-view" id="dayView">
-				<div class="title-line"></div>
+				<div class="title-line">
+					<div class="schedule-bar-area"></div>
+				</div>
 				<div class="scroll-container">
 					<div class="time-line">
 						<table style="width:100%;">
@@ -100,7 +130,7 @@
 										<div class="time-cell" style="height:42px;">오후10시</div>
 										<div class="time-cell" style="height:42px;">오후11시</div>
 									</td>
-									<td>
+									<td style="width:88%;">
 										<div class="time-contents" style="height:42px;">
 											<div class="time-content" style="height:20px"></div>
 											<div class="time-content" style="height:20px"></div>
@@ -220,7 +250,7 @@
 							</tr>
 						</tbody>
 					</table>
-					<div id="schedule-bar-area">
+					<div class="schedule-bar-area">
 						<span></span>
 						<span></span>
 						<span></span>

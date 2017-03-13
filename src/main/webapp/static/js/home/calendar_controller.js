@@ -2,13 +2,14 @@
  * Angular Calendar Controller
  */
 App
-.controller('miniCalendarController', ['calendarService', 'calendarType', function(calendarService, calendarType) {
+.controller('miniCalendarController', ['calendarService', 'calendarType', '$rootScope', function(calendarService, calendarType, $rootScope) {
 	
 	var self = this;
 	var today = new Date();
 	
 	self.currentDate = new Date();
 	self.currentDate.setDate(1);
+	self.filterOptions = calendarService.filterOptions;
 	
 	self.calendar = calendarService.getCalendar(today, calendarType.MONTH);
 	self.isCurrentMonth = function(d) {
@@ -31,15 +32,21 @@ App
 		self.currentDate.setMonth(self.currentDate.getMonth() + 1);
 		self.calendar = calendarService.getCalendar(self.currentDate, calendarType.MONTH);
 	};
+	
+	// Filters
+	self.filterSchedule = function() {
+		console.log('options: ', self.filterOptions);
+		$rootScope.$broadcast('renderingCalendar');
+	};
 }])
-.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope',
-									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope) {
+.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope', '$filter',
+									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope, $filter) {
 	var self = this;
 	var today = new Date();
 	var calType = calendarType.MONTH;
 	
-	self.scheduleList = [];
 	self.currentDate = new Date();
+	self.scheduleList = [];
 	
 	self.calendar = calendarService.getCalendar(today, calType);
 	self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
@@ -62,9 +69,10 @@ App
 		calendarService.getScheduleList(start, end)
 		.then(
 			function(list) {
-				console.log('scheduel list: ', list);
-				self.scheduleList = list;
-				renderingSchedule(list);
+				calendarService.scheduleList = list;
+				calendarService.orgScheduleList = angular.copy(list);
+				filteringScheduleList();
+				renderingCalendar(self.scheduleList);
 			},
 			function(err) {
 				console.error('Error while fetching schedule list');
@@ -72,6 +80,32 @@ App
 		);
 	}
 	
+	/**
+	 * 선택되어진 필터값으로 목록을 재정렬한다.
+	 */
+	function filteringScheduleList() {
+		self.scheduleList = angular.copy(calendarService.orgScheduleList);
+		console.log('schedules: ', self.scheduleList);
+		if (calendarService.filterOptions.own) {
+			console.log('filtering owner: ', $rootScope.loggedInUser);
+			self.schduleList = $filter('filter')(self.scheduleList, {userId: $rootScope.loggedInUser.userId});
+		}
+		if (calendarService.filterOptions.task) {
+			console.log('filtering task');
+			console.log('filtered: ',  $filter('filter')(self.scheduleList, {type: 'T'}));
+			self.schduleList = $filter('filter')(self.scheduleList, {type: 'T'});
+		}
+		if (calendarService.filterOptions.vocation) {
+			console.log('filtering vocation');
+			self.schduleList = $filter('filter')(self.scheduleList, {type: 'V'});
+		}
+		if (calendarService.filterOptions.personal) {
+			console.log('filtering pesonal');
+			self.schduleList = $filter('filter')(self.scheduleList, {type: 'P'});
+		}
+		
+		console.log('schedules: ', self.scheduleList);
+	}
 	/**
 	 * 달력 보기 종류에 따라 표시할 제목을 달리한다.
 	 */
@@ -172,11 +206,6 @@ App
 		
 		$('#'+typeId).show();
 		$scope.$broadcast('changeCalendarView');
-		
-		if (typeId != calendarType.MONTHVIEW) {
-			var $container = $('#'+typeId).find('.scroll-container');
-			$container.height($(window).innerHeight() - $container.offset().top - 2);	// 일정의 뷰의 높이 조정
-		}
 	};
 	
 	self.peekCalendar = function() {
@@ -194,7 +223,7 @@ App
 	
 	/**
 	 * 캘린더 타입이 변하거나, 캘린더의 날짜 이동이 발생하면 처리하는 이벤트이다.
-	 * 시작, 종료 날짜를 캘린더 타입별로 구해서 self.calendar와 self.scheduleList를 반영한다.
+	 * 시작, 종료 날짜를 캘린더 타입별로 구해서 self.calendar와 scheduleList를 반영한다.
 	 */
 	$scope.$on('changeCalendarView', function() {
 		var type = $('.calendar-view:visible').attr('id');
@@ -226,5 +255,9 @@ App
 		self.calendar = calendarService.getCalendar(self.currentDate, calType);
 		getScheduleList(start, end);
 		setCalendarTitle();
+	});
+	
+	$rootScope.$on('renderingCalendar', function() {
+		renderingCalendar(self.scheduleList);
 	});
 }]);

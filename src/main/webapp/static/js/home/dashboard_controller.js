@@ -9,6 +9,7 @@ function(taskService, taskStatus, userService, approveService, approveTrayType, 
 	self.trays = [];
 	
 	self.user = userService.getLoggedInUser();
+	$rootScope.loggedInUser = self.user;
 	
 	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
 		$rootScope.prevUrl = oldUrl.substring(oldUrl.indexOf('#') + 1);

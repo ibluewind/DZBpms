@@ -1,5 +1,13 @@
 App
 .service('calendarService', ['$http', '$q', function($http, $q) {
+	this.scheduleList = [];
+	this.orgScheduleList = [];
+	this.filterOptions = {
+		own: false,
+		task: false,
+		vocation: false,
+		personal: false
+	};
 	
 	this.getCalendar = function(currentDate, type) {
 		var numOfWeeks = getNumberOfWeeks(currentDate, type);
@@ -27,7 +35,6 @@ App
 	this.getScheduleList = function(start, end) {
 		var deferred = $q.defer();
 		
-		console.log('start = ', start + ', end = ', end);
 		$http.get('/bpms/rest/schedule', {params:{start: start, end: end}})
 		.then(
 			function(response) {

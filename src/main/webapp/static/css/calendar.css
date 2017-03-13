@@ -78,10 +78,11 @@ div.nav_bar {
 	display: none;
 }
 
-#schedule-bar-area {
-	background-color: #7ab5f1;
+.schedule-bar-area {
+	background-color: #ccc;
 }
-#schedule-bar-area span {
+
+.schedule-bar-area span {
 	width: 12%;
 	display: inline-block;
 	height: 100%;
@@ -150,34 +151,36 @@ div.nav_bar {
 	font-size: 0.9em;
 	color: #eee;
 	line-height: 1.5em;
+	display: inline-block;
+}
+
+.title-line {
+	margin-right: 17px;
 }
 
 #weekView .title-line {
-	/* height:44px; */
 	border:1px solid #ccc;
-	margin-right:18px;
 	margin-left: -1px;
 }
 
 #dayView .title-line {
-	height:25px;
 	border:1px solid #ccc;
-	margin-right:18px;
 	margin-left: -1px;
 }
 
+.schedule-bar {
+	border-radius: 10px;
+}
+
 .schedule-bar.V {
-	border: 2px solid #65149a;
 	background-color: #c67fec;
 }
 
 .schedule-bar.T {
-	border: 2px solid #3c763d;
 	background-color: #77b778;
 }
 
 .schedule-bar.P {
-	border: 2px solid #2a5f79;
 	background-color: #337ab7;
 }
 ::-webkit-scrollbar {
