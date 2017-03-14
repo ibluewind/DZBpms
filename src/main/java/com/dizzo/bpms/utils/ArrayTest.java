@@ -44,8 +44,13 @@ public class ArrayTest {
 		System.out.println("lines: " + lines);
 		
 		List<ApproveLine>	pls = lines.stream().filter(t -> t.getType().equals("P")).collect(Collectors.toList());
+		List<ApproveLine>	rls = lines.stream().filter(t -> t.getType().equals("R")).collect(Collectors.toList());
 		
-		System.out.println("pls: " + pls);
+		List<ApproveLine>	newList = new ArrayList<>();
+		newList.addAll(pls);
+		newList.addAll(rls);
+		
+		System.out.println("newList: " + newList);
 	}
 
 }

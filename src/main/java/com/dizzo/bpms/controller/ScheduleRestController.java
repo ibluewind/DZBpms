@@ -28,7 +28,6 @@ public class ScheduleRestController {
 		String	userId = IndexController.getPrincipal();
 		DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		
-		System.out.println("userId: " + userId + ", start = " + start + ", end = " + end);
-		return scheduleService.list(userId, format.parse(start), format.parse(end));
+		return scheduleService.list(format.parse(start), format.parse(end));
 	}
 }

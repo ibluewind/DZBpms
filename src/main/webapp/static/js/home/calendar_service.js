@@ -1,12 +1,12 @@
 App
-.service('calendarService', ['$http', '$q', function($http, $q) {
+.service('calendarService', ['calendarType', '$http', '$q', function(calendarType, $http, $q) {
 	this.scheduleList = [];
 	this.orgScheduleList = [];
 	this.filterOptions = {
 		own: false,
-		task: false,
-		vocation: false,
-		personal: false
+		task: true,
+		vocation: true,
+		personal: true
 	};
 	
 	this.getCalendar = function(currentDate, type) {
@@ -16,14 +16,14 @@ App
 		
 		// type에 맞춰서 달력을 가져온다.
 		for (var i = 0; i < numOfWeeks; i++)
-			calendar[i] = new Array(7);
+			calendar[i] = new Array();
 		
 		// 월, 주에 따른 처리 필요.
 		date.setDate(1);
 		date.setDate(1 - date.getDay());
 		
 		for (var i = 0; i < numOfWeeks; i++) {
-			for (var j = 0; j < 7; j++) {
+			for (var j = 0; type != calendarType.DAY && j < 7; j++) {
 				calendar[i][j] = new Date(date.getTime());
 				date.setDate(date.getDate() + 1);
 			}
@@ -51,7 +51,7 @@ App
 	function getNumberOfWeeks(currentDate, type) {
 		var date = new Date(currentDate.getTime()), next;
 		
-		if (type != 'month')	return 1;
+		if (type != calendarType.MONTH)	return 1;
 		
 		date.setDate(1);
 		next = new Date(currentDate.getTime());

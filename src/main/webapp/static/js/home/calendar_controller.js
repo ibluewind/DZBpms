@@ -35,7 +35,6 @@ App
 	
 	// Filters
 	self.filterSchedule = function() {
-		console.log('options: ', self.filterOptions);
 		$rootScope.$broadcast('renderingCalendar');
 	};
 }])
@@ -57,8 +56,10 @@ App
 	var start = new Date();
 	var end = new Date();
 	start.setDate(1);
-	end.setMonth(end.getMonth() + 1);
-	end.setDate(0);
+	start.setDate(start.getDate() - start.getDay());
+	
+	end.setFullYear(end.getFullYear(), end.getMonth() + 1, 0);	// 해당 월의 마지막 날
+	end.setDate(end.getDate() + (6 - end.getDay()));
 	
 	getScheduleList(start, end);
 	
@@ -84,27 +85,23 @@ App
 	 * 선택되어진 필터값으로 목록을 재정렬한다.
 	 */
 	function filteringScheduleList() {
-		self.scheduleList = angular.copy(calendarService.orgScheduleList);
-		console.log('schedules: ', self.scheduleList);
+		var list = angular.copy(calendarService.orgScheduleList);
+		var plist = [], vlist = [], tlist = [];
+		
 		if (calendarService.filterOptions.own) {
-			console.log('filtering owner: ', $rootScope.loggedInUser);
-			self.schduleList = $filter('filter')(self.scheduleList, {userId: $rootScope.loggedInUser.userId});
-		}
-		if (calendarService.filterOptions.task) {
-			console.log('filtering task');
-			console.log('filtered: ',  $filter('filter')(self.scheduleList, {type: 'T'}));
-			self.schduleList = $filter('filter')(self.scheduleList, {type: 'T'});
-		}
-		if (calendarService.filterOptions.vocation) {
-			console.log('filtering vocation');
-			self.schduleList = $filter('filter')(self.scheduleList, {type: 'V'});
-		}
-		if (calendarService.filterOptions.personal) {
-			console.log('filtering pesonal');
-			self.schduleList = $filter('filter')(self.scheduleList, {type: 'P'});
+			list = $filter('filter')(list, {userId: $rootScope.loggedInUser.userId});
 		}
 		
-		console.log('schedules: ', self.scheduleList);
+		if (calendarService.filterOptions.task)
+			tlist = $filter('filter')(list, {type: 'T'});
+		if (calendarService.filterOptions.vocation)
+			vlist = $filter('filter')(list, {type: 'V'});
+		if (calendarService.filterOptions.personal)
+			plist = $filter('filter')(list, {type: 'P'});
+		
+		
+		
+		self.scheduleList = tlist.concat(vlist, plist);
 	}
 	/**
 	 * 달력 보기 종류에 따라 표시할 제목을 달리한다.
@@ -231,33 +228,41 @@ App
 		
 		$('.schedule-bar').remove();
 		
+		console.log('currentDate: ', self.currentDate);
 		start = new Date(self.currentDate.getTime());
 		end = new Date(self.currentDate.getTime());
 		
 		switch(type) {
 		case calendarType.MONTHVIEW:
 			calType = calendarType.MONTH;
+			
 			start.setDate(1);
-			end.setMonth(end.getMonth() + 1);
-			end.setDate(0);
+			self.currentDate = new Date(start.getTime());
+			start.setDate(start.getDate() - start.getDay());
+			
+			end.setFullYear(end.getFullYear(), end.getMonth() + 1, 0);	// 해당 월의 마지막 날
+			end.setDate(end.getDate() + (6 - end.getDay()));
+			console.log('start = ' + start  + ', end = ' + end);
 			break;
 		case calendarType.WEEKVIEW:
 			calType = calendarType.WEEK;
 			start.setDate(start.getDate() - start.getDay());
 			end.setDate(end.getDate() + (6 - end.getDay()));
+			self.currentDate = new Date(start.getTime());
 			break;
 		case calendarType.DAYVIEW:
 			calType = calendarType.DAY;
+			self.currentDate = new Date(start.getTime());
 			break;
 		}
 		
-		self.currentDate = start;
 		self.calendar = calendarService.getCalendar(self.currentDate, calType);
 		getScheduleList(start, end);
 		setCalendarTitle();
 	});
 	
 	$rootScope.$on('renderingCalendar', function() {
+		filteringScheduleList();
 		renderingCalendar(self.scheduleList);
 	});
 }]);

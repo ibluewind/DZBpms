@@ -13,6 +13,7 @@ public class Schedule {
 	private String	title;
 	private String	content;
 	private String	refUrl;
+	private String	refId;
 	
 	// Additional Fields
 	private String	userName;
@@ -69,6 +70,14 @@ public class Schedule {
 	public void setRefUrl(String refUrl) {
 		this.refUrl = refUrl;
 	}
+	public String getRefId() {
+		return refId;
+	}
+
+	public void setRefId(String refId) {
+		this.refId = refId;
+	}
+
 	public String getUserName() {
 		return userName;
 	}

@@ -18,6 +18,7 @@ public class ScheduleRowMapper implements RowMapper<Schedule> {
 		schedule.setEndDate(rs.getTimestamp("end"));
 		schedule.setType(rs.getString("type"));
 		schedule.setRefUrl(rs.getString("referUrl"));
+		schedule.setRefId(rs.getString("refId"));
 		schedule.setUserId(rs.getString("userId"));
 		schedule.setUserName(rs.getString("userName"));
 		schedule.setDeptName(rs.getString("deptName"));

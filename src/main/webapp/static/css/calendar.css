@@ -13,7 +13,7 @@ div.nav_bar {
 
 .calendar-row {
 	width: 100%;
-	padding: 0 1%;
+	padding: 0;
 	display: inline-table
 }
 .calendar-header {
@@ -35,6 +35,13 @@ div.nav_bar {
 	text-align:right;
 	display:table-cell;
 	padding: 0 5px;
+}
+
+#monthView .calendar-row .calendar-cell {
+	border-left: 1px dotted #ccc;
+}
+#monthView .calendar-row .calendar-cell:last-child {
+	border-right: 1px dotted #ccc;
 }
 
 .current-month {
