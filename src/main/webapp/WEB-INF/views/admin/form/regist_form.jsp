@@ -129,9 +129,9 @@
 								<div class="panel-body">
 									<label class="col-md-4 control-label">후처리 선택</label>
 									<div class="col-md-5">
-										<select class="form-control" ng-model="ctrl.form.postProcess">
+										<select class="form-control" ng-model="ctrl.form.postProc">
 											<option value="">------선택------</option>
-											<option value="S">일정등록</option>
+											<option value="com.dizzo.bpms.post.SchedulePostProcess">일정등록</option>
 										</select>
 									</div>
 								</div>

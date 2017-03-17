@@ -36,7 +36,7 @@
 		      <ul class="nav navbar-nav">
 		        <li><a href="#/calendar"/>일정<span class="sr-only">(current)</span></a></li>
 		        <li class="dropdown">
-		          <a href="#/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">작업<span class="caret"></span></a>
+		          <a href="./" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">작업<span class="caret"></span></a>
 		          <ul class="dropdown-menu" role="menu">
 		            <li><a href="#/task_list">작업목록</a></li>
 		            <li><a href="#/regist_task/-9999">작업등록</a></li>
@@ -47,7 +47,7 @@
 		          </ul>
 		        </li>
 		        <li class="dropdown">
-		          <a href=#/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">결재함<span class="caret"></span></a>
+		          <a href="./" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">결재함<span class="caret"></span></a>
 		          <ul class="dropdown-menu" role="menu">
 		            <li><a href="#/list_app">결재등록</a></li>
 		            <li><a href="#/approve_tray/U">미결함</a></li>

@@ -512,15 +512,16 @@ App
 	
 	function getPostProcessFields() {
 		var $postFields = $('*[data-post-process]');
-		var field = new Object();
+		var field = {};
 		
 		$postFields.each(function() {
 			var prop = $(this).data("post-process");
 			var val = $(this).val();
 			
-			Object.defineProperty(field, prop, {value: val});
+			field[prop] = val;
 		});
 		
+		field['formId'] = self.form.formId;
 		console.log('field: ', field);
 		return field;
 	}

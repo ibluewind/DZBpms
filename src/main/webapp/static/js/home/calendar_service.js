@@ -72,7 +72,8 @@ App
 												scope:scope,
 												autoClose:true,
 												html: true,
-												placement:'bottom'
+												placement:'auto bottom',
+												animation: "am-flip-x"
 							});
 	var deferred;
 	
@@ -106,4 +107,30 @@ App
 	};
 	
 	return peekCal;
+}])
+.service('registSchedulePopover', ['$q', '$popover', '$rootScope', function($q, $popover, $rootScope) {
+
+	var scope = $rootScope.$new();
+	var registPopover = $popover($('#registSchedule'), {
+												contentTemplate: '/bpms/home/registschedule',
+												trigger: 'manual',
+												scope:scope,
+												autoClose:true,
+												html: true,
+												placement:'auto right'
+							});
+	var deferred;
+	var schedule = {};
+	var parentShow = registPopover.show;
+	
+	registPopover.show = function(date, target) {
+		console.log(angular.element(target));
+		console.log('popover: ', registPopover);
+		scope.date = date;
+		deferred = $q.defer();
+		parentShow();
+		return deferred.promise;
+	};
+	
+	return registPopover;
 }]);

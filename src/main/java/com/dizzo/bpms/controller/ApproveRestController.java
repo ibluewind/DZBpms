@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ import com.dizzo.bpms.model.Form;
 import com.dizzo.bpms.model.FormField;
 import com.dizzo.bpms.model.User;
 import com.dizzo.bpms.model.UserDepartmentPosition;
+import com.dizzo.bpms.post.PostProcess;
 import com.dizzo.bpms.service.ApproveFormFieldService;
 import com.dizzo.bpms.service.ApproveLineService;
 import com.dizzo.bpms.service.ApproveSummaryService;
@@ -65,6 +67,9 @@ public class ApproveRestController {
 	
 	@Autowired
 	DepartmentService		deptService;
+	
+	@Autowired
+	ApplicationContext	context;	// 후처리 프로세스를 Bean에 추가하기 위해 필요.
 	
 	@RequestMapping(value="/form/{appId}", method=RequestMethod.GET)
 	public Form getFormInformationByApproveId(@PathVariable String appId) {
@@ -474,9 +479,46 @@ public class ApproveRestController {
 	}
 	
 	@RequestMapping(value="/post", method=RequestMethod.POST)
-	public Object runPostProcess(@RequestBody Map<Object, Object> fields) {
+	public Object runPostProcess(@RequestBody Map<String, String> fields) {
 		System.out.println("DEBUG: runPostProcess fields : " + fields);
+		String	formId = fields.get("formId");
+		
+		System.out.println("post processing runnit for : " + formId);
+		
+		Form	form = formService.getById(formId);
+		
+		PostProcess post = (PostProcess)getPostProcess(form);
+		
+		// 후처리 프로세스에서는 필요한 Service를 @Autowired하기 때문에, 생성된 인스턴스를 ApplicationContext Bean에 등록해야
+		// @Autowired가 동작한다.
+		context.getAutowireCapableBeanFactory().autowireBean(post);
+		
+		System.out.println("PostProcess: " + post.getClass().getCanonicalName());
+		post.setFields(fields);
+		post.process();
+		
 		return fields;
+	}
+	
+	/**
+	 * 후처리 프로세스 생성
+	 */
+	private Object getPostProcess(Form form) {
+		String postProcess = form.getPostProc();
+		Object o = null;
+		
+		try {
+			Class<?> c = Class.forName(postProcess);
+			o = c.newInstance();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
+		return o;
 	}
 	
 	/**

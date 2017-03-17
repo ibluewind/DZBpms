@@ -10,8 +10,11 @@ public class Form {
 	private Date	created;
 	private Date	modified;
 	private String	creator;		// 생정자 userId;
-	private String	creatorName;
+	private String	useYN;
 	private String	procDept;
+	private String	postProc;
+	
+	private String	creatorName;
 	private	String	procDeptName;
 	
 	public Form() {}
@@ -83,7 +86,23 @@ public class Form {
 		this.procDeptName = procDeptName;
 	}
 
+	public String getUseYN() {
+		return useYN;
+	}
+
+	public void setUseYN(String useYN) {
+		this.useYN = useYN;
+	}
+
+	public String getPostProc() {
+		return postProc;
+	}
+
+	public void setPostProc(String postProc) {
+		this.postProc = postProc;
+	}
+
 	public String toString() {
-		return "Form: {id: " + id + ", title: " + title + ", comment: " + comment + ", created: " + created + ", modified: " + modified + ", creator: " + creator +"}";
+		return "Form: {id: " + id + ", title: " + title + ", comment: " + comment + ", created: " + created + ", modified: " + modified + ", creator: " + creator +", procDept: " + procDept + ", postProc: " + postProc + "}";
 	}
 }

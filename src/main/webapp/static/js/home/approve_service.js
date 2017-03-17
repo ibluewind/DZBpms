@@ -814,8 +814,9 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 	 * 후처리 진행
 	 */
 	this.runPostProcess = function(fields) {
-		console.log('fields: ', fields);
-		return $http.post('/bpms/rest/approve/post', fields)
+		console.log('fileds: ', fields);
+		console.log('fields: ', JSON.stringify(fields));
+		return $http.post('/bpms/rest/approve/post',fields)
 		.then(
 			function(response) {
 				return response.data;

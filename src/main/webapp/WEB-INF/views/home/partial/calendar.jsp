@@ -91,7 +91,7 @@
 						<span class="calendar-week">토요일</span>
 					</div>
 					<div class="calendar-row top-border" ng-repeat="cell in ctrl.calendar">
-						<span class="calendar-cell" style="height:140px;" ng-repeat="d in cell track by $index" ng-class="[{'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]"> {{d.getDate()}}</span>
+						<span class="calendar-cell" style="height:140px;" ng-repeat="d in cell track by $index" ng-class="[{'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]" ng-click="ctrl.popupScheduleMake($event, d)"> {{d.getDate()}}</span>
 					</div>
 				</div>
 			</div>
@@ -988,6 +988,7 @@
 		</div>
 	</div>
 </div>
+<div id="registSchedule"></div>
 <script>
 	$(document).ready(function() {
 		$(window).on('resize', function(e) {

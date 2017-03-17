@@ -155,6 +155,8 @@ public class ScheduleDaoImpl implements ScheduleDao {
 					  + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		schedule.setId(UUID.randomUUID().toString());
+		
+		System.out.println("save schedule: " + schedule);
 		new JdbcTemplate(dataSource).update(query, new Object[] {
 			schedule.getId(),
 			schedule.getUserId(),

@@ -25,7 +25,6 @@ public class ScheduleRestController {
 	
 	@RequestMapping(method=RequestMethod.GET)
 	public List<Schedule> list(@RequestParam String start, @RequestParam String end) throws ParseException {
-		String	userId = IndexController.getPrincipal();
 		DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		
 		return scheduleService.list(format.parse(start), format.parse(end));

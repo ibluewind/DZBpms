@@ -27,14 +27,15 @@ public class FormDaoImpl implements FormDao {
 
 	@Override
 	public Form save(Form form) {
-		String	query = "insert into form (id, title, comment, created, modified, creator, procDept) values (?, ?, ?, now(), now(), ?, ?)";
+		String	query = "insert into form (id, title, comment, created, modified, creator, procDept, postProc) values (?, ?, ?, now(), now(), ?, ?, ?)";
 		form.setId(UUID.randomUUID().toString());
 		new JdbcTemplate(dataSource).update(query, new Object[] {
 			form.getId(),
 			form.getTitle(),
 			form.getComment(),
 			form.getCreator(),
-			form.getProcDept()
+			form.getProcDept(),
+			form.getPostProc()
 		});
 		
 		return form;
@@ -51,6 +52,7 @@ public class FormDaoImpl implements FormDao {
 					 + " concat(u.lastName, u.firstName) 'creatorName',"
 					 + " f.useYN,"
 					 + " f.procDept,"
+					 + " f.postProc,"
 					 + " d.name 'procDeptName'"
 					 + " FROM form f"
 					 + " LEFT JOIN departments d ON f.procDept = d.deptid, users u"
@@ -70,6 +72,7 @@ public class FormDaoImpl implements FormDao {
 				 + " concat(u.lastName, u.firstName) 'creatorName',"
 				 + " f.useYN,"
 				 + " f.procDept,"
+				 + " f.postProc,"
 				 + " d.name 'procDeptName'"
 				 + " FROM form f"
 				 + " LEFT JOIN departments d ON f.procDept = d.deptid, users u"
@@ -80,12 +83,13 @@ public class FormDaoImpl implements FormDao {
 
 	@Override
 	public Form update(Form form) {
-		String	query = "update form set title=?, comment=?, modified=now(), procDept=? where id=?";
+		String	query = "update form set title=?, comment=?, modified=now(), procDept=?, postProc=? where id=?";
 		System.out.println("update form: " + form);
 		new JdbcTemplate(dataSource).update(query, new Object[] {
 				form.getTitle(),
 				form.getComment(),
 				form.getProcDept(),
+				form.getPostProc(),
 				form.getId()
 		});
 		return form;
@@ -139,6 +143,7 @@ public class FormDaoImpl implements FormDao {
 	   				 + " concat(u.lastName, u.firstName) 'creatorName',"
        				 + " f.useYN,"
 	   				 + " f.procDept,"
+       				 + " f.postProc,"
 	   				 + " d.name 'procDeptName'"
 	   				 + " FROM form f LEFT JOIN departments d ON f.procDept=d.deptid, approve_summary s, users u"
 	   				 + " WHERE f.id = s.formId AND f.creator=u.userid AND s.appId=?";

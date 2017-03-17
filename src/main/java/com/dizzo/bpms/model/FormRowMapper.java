@@ -16,10 +16,12 @@ public class FormRowMapper implements RowMapper<Form> {
 		form.setComment(rs.getString("comment"));
 		form.setCreated(rs.getTimestamp("created"));
 		form.setModified(rs.getTimestamp("modified"));
+		form.setUseYN(rs.getString("useYN"));
 		form.setCreator(rs.getString("creator"));
 		form.setCreatorName(rs.getString("creatorname"));
 		form.setProcDept(rs.getString("procDept"));
 		form.setProcDeptName(rs.getString("procDeptName"));
+		form.setPostProc(rs.getString("postProc"));
 		return form;
 	}
 

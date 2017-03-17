@@ -84,6 +84,10 @@ public class IndexController {
 		return "/home/partial/peekcalendar";
 	}
 	
+	@RequestMapping(value="/home/registschedule", method=RequestMethod.GET)
+	public String getRegistSchedulePopoverPage() {
+		return "/home/partial/registschedule";
+	}
 	/*
 	 * MODAL Windows
 	 */

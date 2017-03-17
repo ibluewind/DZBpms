@@ -38,8 +38,8 @@ App
 		$rootScope.$broadcast('renderingCalendar');
 	};
 }])
-.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope', '$filter',
-									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope, $filter) {
+.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', 'registSchedulePopover', '$scope', '$rootScope', '$filter',
+									function(calendarService, calendarType, peekCalendarPopover, registSchedulePopover, $scope, $rootScope, $filter) {
 	var self = this;
 	var today = new Date();
 	var calType = calendarType.MONTH;
@@ -210,12 +210,20 @@ App
 		.then(
 			function(date) {
 				self.currentDate = date;
+				// 월 단위 일정으로 표시한다.
+				$('.calendar-view').hide();
+				$('#monthView').show();
 				$scope.$broadcast('changeCalendarView');
 			},
 			function(err) {
 				console.error('Error while display peek calendar popover');
 			}
 		);
+	};
+	
+	self.popupScheduleMake = function($event, date) {
+		console.log('date: ', date);
+		registSchedulePopover.show(date, $event.currentTarget);
 	};
 	
 	/**
