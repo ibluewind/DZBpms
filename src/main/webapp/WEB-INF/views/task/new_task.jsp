@@ -215,7 +215,7 @@
 			<span class="glyphicon glyphicon-ok"></span> 확인
 		</button>
 		<button type="button" class="btn btn-danger btn-sm" ng-click="ctrl.cancel()" ng-hide="ctrl.task.taskId==''">
-			<span class="glyphicon glyphicon-ban-circle" data-placement="top" data-type="info" data-animation="am-fade-and-scale" data-title="작업을 취소합니다." bs-tooltip></span> 취소
+			<span class="glyphicon glyphicon-ban-circle" data-placement="top" data-type="info" data-animation="am-fade-and-scale" data-title="작업을 삭제합니다." bs-tooltip></span> 삭제
 		</button>
 		<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.gotoList()">
 			<span class="glyphicon glyphicon-list" data-placement="top" data-type="info" data-animation="am-fade-and-scale" data-title="사용자의 작업 목록화면으로 이동합니다." bs-tooltip></span> 목록

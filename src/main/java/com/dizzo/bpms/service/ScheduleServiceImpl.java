@@ -21,6 +21,11 @@ public class ScheduleServiceImpl implements ScheduleService {
 	}
 
 	@Override
+	public Schedule getByRefId(String refId) {
+		return dao.getByRefId(refId);
+	}
+
+	@Override
 	public List<Schedule> list(Date start, Date end) {
 		return dao.list(start, end);
 	}

@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -472,6 +471,12 @@ public class ApproveRestController {
 	public List<ApproveLine> updateApproveLine(@PathVariable String appId, @RequestBody List<ApproveLine> appLines) {
 		appLineService.deleteAll(appId);
 		return appLineService.insert(appLines);
+	}
+	
+	@RequestMapping(value="/post", method=RequestMethod.POST)
+	public Object runPostProcess(@RequestBody Map<Object, Object> fields) {
+		System.out.println("DEBUG: runPostProcess fields : " + fields);
+		return fields;
 	}
 	
 	/**

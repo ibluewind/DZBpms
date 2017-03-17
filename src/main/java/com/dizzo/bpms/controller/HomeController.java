@@ -10,32 +10,32 @@ public class HomeController {
 
 	@RequestMapping(value="/task/list", method=RequestMethod.GET)
 	public String getTaskListPage() {
-		return "/home/partial/task_list";
+		return "/task/task_list";
 	}
 	
 	@RequestMapping(value="/task/new", method=RequestMethod.GET)
 	public String getNewTaskPage() {
-		return "/home/partial/new_task";
+		return "/task/new_task";
 	}
 	
 	@RequestMapping(value="/task/view", method=RequestMethod.GET)
 	public String getEditTaskPage() {
-		return "/home/partial/view_task";
+		return "/task/view_task";
 	}
 	
 	@RequestMapping(value="/task/delayed", method=RequestMethod.GET)
 	public String getDelayedTaskPage() {
-		return "/home/partial/delayed_task";
+		return "/task/delayed_task";
 	}
 	
 	@RequestMapping(value="/task/expect", method=RequestMethod.GET)
 	public String getExceptTask() {
-		return "/home/partial/except_task";
+		return "/task/except_task";
 	}
 	
 	@RequestMapping(value="/dashboard", method=RequestMethod.GET)
 	public String getDashboardPage() {
-		return "/home/partial/dashboard";
+		return "/home/dashboard";
 	}
 	
 	@RequestMapping(value="/forms/vocation", method=RequestMethod.GET)

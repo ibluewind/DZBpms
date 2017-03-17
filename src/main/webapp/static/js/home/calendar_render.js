@@ -24,7 +24,7 @@ var renderingCalendar = function(schedules) {
 		
 		switch(type) {
 		case calendarType.MONTHVIEW:
-			left = start.getDay() * 14;
+			left = start.getDay() * 14 + 1;
 			right = (6 - end.getDay()) * 14;
 			top = (getNumOfWeeks(start) - 1) * 140 + (20 * numOfSchedules) + numOfSchedules + 50;
 			$scheduleBar.css({left: left + "%", right: right + "%", top: top + "px"});
@@ -59,7 +59,6 @@ var renderingCalendar = function(schedules) {
 			break;
 		case calendarType.DAYVIEW:
 			hourDiff = Math.ceil((end.getTime() - start.getTime()) / 1000 / 60 / 60 * 60) / 30
-			console.log('hourDiff = ' + hourDiff);
 			width = $target.width();
 			
 			if (hourDiff >= 48) {
@@ -100,11 +99,18 @@ var getNumOfWeeks = function(date) {
 	return Math.ceil((firstDay.getDay() + date.getDate()) / 7);
 };
 
+/**
+ * date에 일정이 몇개인지 카운트 한다.
+ * 단, 시:분:초는 비교 대상에서 제외하여야 한다. 시:분:초까지 비교하면 같은 날짜의 일정이지만, 고려되지 않을 수 있다.
+ */
 var getNumOfSchedulesAtDate = function(schedules, date, idx) {
 	var number = 0;
 	
 	for (var i = 0; i < idx; i++) {
 		var s = schedules[i];
+		
+		s.startDate = resetHoursMinutesSeconds(s.startDate);
+		s.endDate = resetHoursMinutesSeconds(s.endDate);
 		
 		if (s.startDate <= date.getTime() && date.getTime() <= s.endDate) {
 			number++;
@@ -112,6 +118,15 @@ var getNumOfSchedulesAtDate = function(schedules, date, idx) {
 	}
 
 	return number;
+}
+
+var resetHoursMinutesSeconds = function(date) {
+	date = new Date(date);
+	date.setHours(0);
+	date.setMinutes(0);
+	date.setSeconds(0);
+	
+	return date;
 }
 
 /**

@@ -242,6 +242,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
 				     + "    user_dept_position udp,"
 				     + "    position p"
 				   + " WHERE     l.seq = @pv + 1"
+				   + "		AND l.appId = ?"
 				   + "		AND l.type = ?"
 				   + "      AND u.userid = l.userId"
 				   + "      AND udp.userid = u.userid"
@@ -251,7 +252,7 @@ public class ApproveLineDaoImpl implements ApproveLineDao {
 		ApproveLine	l = null;
 		
 		try {
-			l = new JdbcTemplate(dataSource).queryForObject(query, new Object[] {appId, userId, type}, new ApproveLineRowMapper());
+			l = new JdbcTemplate(dataSource).queryForObject(query, new Object[] {appId, userId, appId, type}, new ApproveLineRowMapper());
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}

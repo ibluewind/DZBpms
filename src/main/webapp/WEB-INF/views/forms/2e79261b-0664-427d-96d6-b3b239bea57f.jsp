@@ -8,6 +8,11 @@
 		<form name="form" class="form-horizontal">
 			<div class="form-group">
 				<label class="col-md-1 control-label">부서</label>
+				<!-- 후처리를 위한 필드 정의 -->
+				<input type="hidden" data-post-process="title" value="휴가"/>
+				<input type="hidden" data-post-process="type" value="V"/>
+				<input type="hidden" data-post-process="userId" ng-value="ctrl.summary.userId"/>
+				<input type="hidden" data-post-process="refId" ng-value="ctrl.summary.appId"/>
 				<div class="col-md-11">
 					<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['deptName']" readonly ng-disabled="!ctrl.edit">
 				</div>
@@ -61,10 +66,10 @@
 								<td>
 									<div class="form-group">
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker ng-disabled="!ctrl.edit"/>
+											<input type="text" class="form-control input-sm" data-post-process="startDate" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker ng-disabled="!ctrl.edit"/>
 										</div>
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker ng-disabled="!ctrl.edit"/>
+											<input type="text" class="form-control input-sm" data-post-process="endDate" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker ng-disabled="!ctrl.edit"/>
 										</div>
 									</div>
 								</td>
@@ -72,7 +77,7 @@
 									<span >{{ctrl.dateDiff(field.startDate, field.endDate)}}</span>
 								</td>
 								<td>
-									<input type="text" class="form-control input-sm" ng-model="field.comment" ng-disabled="!ctrl.edit"/>
+									<input type="text" class="form-control input-sm" data-post-process="content" ng-model="field.comment" ng-disabled="!ctrl.edit"/>
 								</td>
 								<td>
 									<input type="text" class="form-control input-sm" ng-model="field.remark" ng-disabled="!ctrl.edit"/>

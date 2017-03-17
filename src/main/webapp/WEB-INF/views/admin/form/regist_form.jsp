@@ -120,6 +120,24 @@
 							</div>
 						</div>
 					</div>
+					<div class="row">
+						<div class="col-md-offset-2 col-md-9">
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<div class="panel-title">후처리 프로세스</div>
+								</div>
+								<div class="panel-body">
+									<label class="col-md-4 control-label">후처리 선택</label>
+									<div class="col-md-5">
+										<select class="form-control" ng-model="ctrl.form.postProcess">
+											<option value="">------선택------</option>
+											<option value="S">일정등록</option>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -219,14 +219,16 @@ App
 .service('userService', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
 	
 	this.getLoggedInUser = function() {
+		var deferred = $q.defer();
+		
 		if (!angular.isUndefined($rootScope.loggedInUser)) {
 			console.log('already stored logged user information');
-			return $rootScope.loggedInUser;
+			deferred.resolve($rootScope.loggedInUser);
 		} else {
 			$http.get('/bpms/rest/user')
 			.then(
 				function(response) {
-					$rootScope.loggedInUser = response.data;
+					deferred.resolve(response.data);
 				},
 				function(err) {
 					$q.reject();
@@ -234,6 +236,6 @@ App
 			);
 		}
 		
-		return $rootScope.loggedInUser;
+		return deferred.promise;
 	};
 }]);

@@ -58,7 +58,7 @@ App
 		self.canEditLine = false;
 	}
 	
-	self.user = userService.getLoggedInUser();
+	self.user = $rootScope.loggedInUser;
 	
 	history.historyId = '';
 	history.appId = '';
@@ -226,11 +226,6 @@ App
 		}
 		self.form.fields['fieldRows'][clause].push(fields);
 	}
-	
-	self.cancelApprove = function() {
-		console.log('prevUrl: ' + $rootScope.prevUrl);
-		$location.path($rootScope.prevUrl);
-	};
 	
 	/**
 	 * 결재라인 추가/삭제 후에 seq를 재 정리한다.
@@ -480,14 +475,29 @@ App
 			} else {
 				var line = getUserApproveLine();
 				var summary = document.summary;
+				var postFields = getPostProcessFields();
 				
 				approveService.submitApprove(summary, line, history)
 				.then(
 					function(data) {
-						$location.path(prevUrl);
+						if (data == "") {
+							// 결재가 완료되었음.
+							// 후 처리를 위한 필드 생성
+							console.log('postFields: ', postFields);
+							return approveService.runPostProcess(postFields);
+						}
+						//$location.path(prevUrl);
 					},
 					function(err) {
 						console.error('Error while submit Approve');
+					}
+				)
+				.then(
+					function(data) {
+						console.log('result for postProcessing: ', data);
+					},
+					function(err) {
+						console.error('Error while run postProcessing');
 					}
 				);
 			}
@@ -495,6 +505,25 @@ App
 		
 		$location.path(prevUrl);
 	};
+	
+	function postProcessing() {
+		var $postFields = $('*[data-post-process]');
+	}
+	
+	function getPostProcessFields() {
+		var $postFields = $('*[data-post-process]');
+		var field = new Object();
+		
+		$postFields.each(function() {
+			var prop = $(this).data("post-process");
+			var val = $(this).val();
+			
+			Object.defineProperty(field, prop, {value: val});
+		});
+		
+		console.log('field: ', field);
+		return field;
+	}
 	
 	/**
 	 * 결재 문서 삭제
@@ -764,7 +793,7 @@ App
 	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
 		$rootScope.prevUrl = oldUrl.substring(oldUrl.indexOf('#') + 1);
 	});
-	self.user = userService.getLoggedInUser();
+	self.user = $rootScope.loggedInUser;
 	
 	approveService.getFormList()
 	.then(

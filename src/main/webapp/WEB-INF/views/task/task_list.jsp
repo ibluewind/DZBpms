@@ -22,7 +22,7 @@
 	</div>
 	<div class="panel-body">
 		<div class="table-responsive">
-			<table class="table table-hover">
+			<table class="table">
 				<thead>
 					<th>번호</th>
 					<th>상태</th>

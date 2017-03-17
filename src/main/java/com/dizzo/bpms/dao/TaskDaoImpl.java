@@ -1,7 +1,10 @@
 package com.dizzo.bpms.dao;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -10,8 +13,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dizzo.bpms.model.Schedule;
+import com.dizzo.bpms.model.ScheduleType;
 import com.dizzo.bpms.model.Task;
 import com.dizzo.bpms.model.TaskRowMapper;
+import com.dizzo.bpms.service.ScheduleService;
 
 @Repository("taskDao")
 @Transactional
@@ -27,8 +33,8 @@ public class TaskDaoImpl implements TaskDao {
 	
 	@Override
 	public Task save(Task task) {
-		String query = "insert into task (taskId, userId, workerId, createDate, endDate, status, priority, targetRate, currentRate, opened, title, content) "
-					+ " values (?, ?, ?, now(), ?, ?, ?, ?, ?, ?, ?, ?)";
+		String query = "INSERT INTO TASK (taskId, userId, workerId, createDate, endDate, status, priority, targetRate, currentRate, opened, title, content) "
+					+ " VALUES (?, ?, ?, now(), ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		System.out.println("Insert Task: " + task);
 		new JdbcTemplate(dataSource).update(query, new Object[] {
@@ -45,6 +51,8 @@ public class TaskDaoImpl implements TaskDao {
 			task.getContent()
 		});
 		
+		// 일정에 작업 내역 등록
+		saveSchedule(task);
 		return task;
 	}
 
@@ -114,6 +122,8 @@ public class TaskDaoImpl implements TaskDao {
 				task.getContent(),
 				task.getTaskId()
 		});
+		
+		updateSchedule(task);
 		return task;
 	}
 
@@ -155,5 +165,76 @@ public class TaskDaoImpl implements TaskDao {
 			action.add("진척율 변경 [" + dest.getCurrentRate() + "%]");
 
 		return action.toString().substring(1, action.toString().length() - 1);
+	}
+	
+	
+	@Autowired
+	ScheduleService	scheduleService;
+	
+	/**
+	 * 신규 등록된 작업 내용을 일정에 등록한다.
+	 * 등록의 기준은 작업자를 기준으로 등록한다.
+	 * @param task
+	 */
+	private void saveSchedule(Task task) {
+		Schedule	schedule = new Schedule();
+		
+		schedule.setId(UUID.randomUUID().toString());
+		schedule.setUserId(task.getWorkerId());
+		schedule.setStartDate(setTo0Hour(task.getCreateDate()));
+		schedule.setEndDate(setTo23Hour(task.getEndDate()));
+		schedule.setType(ScheduleType.TASK.getType());
+		schedule.setTitle(task.getTitle());
+		schedule.setContent(task.getContent());
+		schedule.setRefId(task.getTaskId());
+		schedule.setRefUrl("/edit_task/" + task.getTaskId());
+		
+		scheduleService.save(schedule);
+	}
+	
+	private void updateSchedule(Task task) {
+		Schedule	schedule = scheduleService.getByRefId(task.getTaskId());
+		
+		schedule.setContent(task.getContent());
+		schedule.setTitle(task.getTitle());
+		schedule.setEndDate(setTo23Hour(task.getEndDate()));
+		schedule.setUserId(task.getWorkerId());
+		
+		scheduleService.update(schedule);
+	}
+	
+	/**
+	 * 날짜의 시간을 0:0:0으로 세팅한다.
+	 * 
+	 * @param date
+	 * @return
+	 */
+	private Date setTo0Hour(Date date) {
+		Calendar	c = Calendar.getInstance();
+		c.setTime(date);
+		
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		
+		return c.getTime();
+	}
+	
+	/**
+	 * 날짜의 시간을 23:59:59로 세팅한다.
+	 * @param date
+	 * @return
+	 */
+	private Date setTo23Hour(Date date) {
+		Calendar c = Calendar.getInstance();
+		
+		c.setTime(date);
+		
+		c.set(Calendar.HOUR_OF_DAY, 23);
+		c.set(Calendar.MINUTE, 59);
+		c.set(Calendar.SECOND, 59);
+		
+		return c.getTime();
+		
 	}
 }

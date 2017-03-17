@@ -51,6 +51,35 @@ public class ScheduleDaoImpl implements ScheduleDao {
 		return new JdbcTemplate(dataSource).queryForObject(query, new Object[]{id}, new ScheduleRowMapper()); 
 	}
 
+	@Override
+	public Schedule getByRefId(String refId) {
+		String query = "  SELECT s.id,"
+				 + " s.userId,"
+				 + " s.title,"
+				 + " s.start,"
+				 + " s.end,"
+				 + " s.content,"
+				 + " s.referUrl,"
+				 + " s.type,"
+				 + " s.refId,"
+				 + " concat(u.lastName, u.firstName) 'userName',"
+				 + " d.name 'deptName',"
+				 + " p.name 'positionName'"
+				 + " FROM schedule s,"
+				 + " users u,"
+				 + " user_dept_position udp,"
+				 + " position p,"
+				 + " departments d"
+				 + " WHERE     s.userId = u.userid"
+				 + " AND udp.userid = s.userid"
+				 + " AND p.id = udp.positionid"
+				 + " AND d.deptid = udp.deptid"
+				 + " AND s.refId = ?"
+				 + " GROUP BY s.userId";
+		
+		return new JdbcTemplate(dataSource).queryForObject(query, new Object[]{refId}, new ScheduleRowMapper()); 
+	}
+
 	/**
 	 * 캘린더에서 필요한 일정 목록을 조회한다.
 	 * 월단위 조회는 해당월을 주단위로 나누어 조회한 후, 결과를 하나로 조인한다.
@@ -123,7 +152,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
 	@Override
 	public Schedule save(Schedule schedule) {
 		String	query = "INSERT INTO schedule (id, userId, start, end, type, content, referUrl, refId, title) "
-					  + " VLAUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					  + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		schedule.setId(UUID.randomUUID().toString());
 		new JdbcTemplate(dataSource).update(query, new Object[] {
@@ -143,13 +172,14 @@ public class ScheduleDaoImpl implements ScheduleDao {
 
 	@Override
 	public Schedule update(Schedule schedule) {
-		String	query = "UPDATE schedule SET start = ?, end = ?, type = ?, content = ?, referUrl = ?, refId=?, title = ?"
+		String	query = "UPDATE schedule SET userid=?, start = ?, end = ?, type = ?, content = ?, referUrl = ?, refId=?, title = ?"
 					  + " WHERE id = ?";
 		Calendar	scal = Calendar.getInstance(), ecal = Calendar.getInstance();
 		scal.setTime(schedule.getStartDate());
 		ecal.setTime(schedule.getEndDate());
 		
 		new JdbcTemplate(dataSource).update(query, new Object[] {
+			schedule.getUserId(),
 			String.format("%04d-%02d-%02d %02d:%02d:%02d", scal.get(Calendar.YEAR), scal.get(Calendar.MONTH) + 1, scal.get(Calendar.DATE), scal.get(Calendar.HOUR_OF_DAY), scal.get(Calendar.MINUTE), scal.get(Calendar.SECOND)),
 			String.format("%04d-%02d-%02d %02d:%02d:%02d", ecal.get(Calendar.YEAR), ecal.get(Calendar.MONTH) + 1, ecal.get(Calendar.DATE), ecal.get(Calendar.HOUR_OF_DAY), ecal.get(Calendar.MINUTE), ecal.get(Calendar.SECOND)),
 			schedule.getType(),

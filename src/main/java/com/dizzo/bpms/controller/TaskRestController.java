@@ -1,6 +1,7 @@
 package com.dizzo.bpms.controller;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ public class TaskRestController {
 	@RequestMapping(method=RequestMethod.POST)
 	public Task saveTask(@RequestBody Task task) {
 		task.setTaskId(UUID.randomUUID().toString());
+		task.setCreateDate(new Date());
 		System.out.println("create task " + task);
 		taskService.save(task);
 		

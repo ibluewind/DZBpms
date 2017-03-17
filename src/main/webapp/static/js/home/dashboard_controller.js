@@ -8,8 +8,19 @@ function(taskService, taskStatus, userService, approveService, approveTrayType, 
 	self.tasks = [];
 	self.trays = [];
 	
-	self.user = userService.getLoggedInUser();
-	$rootScope.loggedInUser = self.user;
+	if (angular.isUndefined($rootScope.loggedInUser)) {
+		userService.getLoggedInUser()
+		.then(
+			function(user) {
+				self.user = user;
+				$rootScope.loggedInUser = user;
+			}
+		);
+	} else {
+		self.user = $rootScope.loggedInUser;
+	}
+	
+	//$rootScope.loggedInUser = self.user;
 	
 	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
 		$rootScope.prevUrl = oldUrl.substring(oldUrl.indexOf('#') + 1);

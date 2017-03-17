@@ -4,20 +4,27 @@ import java.util.Date;
 
 public class Task {
 
+	/*
+	 * 테이블 필드
+	 */
 	private String	taskId;
 	private String	title;
 	private String	content;
-	private String	userId;
-	private String	userName;
-	private String	workerId;
-	private String	workerName;
 	private Date	createDate;
+	private String	userId;
+	private String	workerId;
 	private Date	endDate;
 	private String	status;
 	private String	priority;
 	private int		targetRate;
 	private int		currentRate;
 	private String	opened;
+	
+	/**
+	 * 부가 필드
+	 */
+	private String	userName;
+	private String	workerName;
 	private String	comment;		// 이력관리를 위한 필드이며, task table에 저장되지 않는다.
 	private String	action;			// 이력관리를 위한 작업 내용이며, task table에 저장되지 않는다.
 	

@@ -362,7 +362,7 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 				if (worker.id == -9999) return false;
 				
 				self.worker = worker;
-				self.task.workerId = worker.id;
+				self.task.workerId = worker.userId;
 				self.task.workerName = worker.lastName + worker.firstName;
 			},
 			function(err) {}
@@ -447,14 +447,14 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 	};
 	
 	self.cancel = function() {
-		insertCommentModal.setTitle('취소사유입력');
-		insertCommentModal.setContent('취소 사유를 입력하십시오.');
+		insertCommentModal.setTitle('삭제사유입력');
+		insertCommentModal.setContent('삭제 사유를 입력하십시오.');
 		insertCommentModal.show()
 		.then(
 			function(data) {
 				self.task.status = taskStatus.CANCEL;
 				self.task.comment = data;
-				addAction("작업 취소");
+				addAction("작업 삭제");
 				taskService.updateTask(self.task)
 				.then(
 					function(task) {

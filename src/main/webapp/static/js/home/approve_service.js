@@ -330,7 +330,12 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		$q.all([func_submit, func_history])
 		.then(
 			function(results) {
-				if (results[0].data != "")		func_summary();
+				console.log('results: ', results[0].data);
+				if (results[0].data != "") {
+					console.log('summary: ', results[0].data);
+				} else {
+					console.log('summary: ', results[0].data);
+				}
 				deferred.resolve(results[0].data);
 			},
 			function(err) {
@@ -803,6 +808,22 @@ App.service('approveService', ['$http', '$q', '$filter', 'approveStatus', 'appro
 		}
 		
 		return formFields;
+	};
+	
+	/**
+	 * 후처리 진행
+	 */
+	this.runPostProcess = function(fields) {
+		console.log('fields: ', fields);
+		return $http.post('/bpms/rest/approve/post', fields)
+		.then(
+			function(response) {
+				return response.data;
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
 	};
 	
 	/**
