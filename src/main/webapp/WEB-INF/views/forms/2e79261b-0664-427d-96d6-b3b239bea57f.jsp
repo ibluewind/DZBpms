@@ -50,7 +50,7 @@
 						<tbody>
 							<tr ng-repeat="field in ctrl.form.fields['fieldRows'][0] track by $index">
 								<td>
-									<select class="form-control input-sm" ng-model="field.type" ng-disabled="!ctrl.edit">
+									<select class="form-control input-sm" ng-model="field.type" ng-disabled="!ctrl.edit" required>
 										<option value='1'>연차 휴가</option>
 										<option value='2'>경조 휴가</option>
 										<option value='3'>생리 휴가</option>
@@ -66,10 +66,10 @@
 								<td>
 									<div class="form-group">
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" data-post-process="startDate" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker ng-disabled="!ctrl.edit"/>
+											<input type="text" class="form-control input-sm" data-post-process="startDate" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker ng-disabled="!ctrl.edit" required/>
 										</div>
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" data-post-process="endDate" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker ng-disabled="!ctrl.edit"/>
+											<input type="text" class="form-control input-sm" data-post-process="endDate" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker ng-disabled="!ctrl.edit" required/>
 										</div>
 									</div>
 								</td>
