@@ -77,7 +77,7 @@
 									<span >{{ctrl.dateDiff(field.startDate, field.endDate)}}</span>
 								</td>
 								<td>
-									<input type="text" class="form-control input-sm" data-post-process="content" ng-model="field.comment" ng-disabled="!ctrl.edit"/>
+									<input type="text" class="form-control input-sm" data-post-process="content" ng-model="field.comment" ng-disabled="!ctrl.edit" required/>
 								</td>
 								<td>
 									<input type="text" class="form-control input-sm" ng-model="field.remark" ng-disabled="!ctrl.edit"/>

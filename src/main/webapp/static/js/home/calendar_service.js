@@ -21,6 +21,7 @@ App
 		// 월, 주에 따른 처리 필요.
 		date.setDate(1);
 		date.setDate(1 - date.getDay());
+		date.setHours(0, 0, 0, 0);			// milliseconds까지 0으로 설정해야 한다.
 		
 		for (var i = 0; i < numOfWeeks; i++) {
 			for (var j = 0; type != calendarType.DAY && j < 7; j++) {
@@ -66,14 +67,15 @@ App
 
 	var today = new Date();
 	var scope = $rootScope.$new();
-	var peekCal = $popover($('#peekCalendar'), {
-												contentTemplate: '/bpms/home/peekcalendar',
-												trigger: 'manual',
-												scope:scope,
-												autoClose:true,
-												html: true,
-												placement:'auto bottom',
-												animation: "am-flip-x"
+	var peekCal = $popover($('#peekCalendar'),
+							{
+								contentTemplate: '/bpms/home/peekcalendar',
+								trigger: 'manual',
+								scope:scope,
+								autoClose:true,
+								html: true,
+								placement:'auto bottom',
+								animation: "am-flip-x"
 							});
 	var deferred;
 	
@@ -108,29 +110,53 @@ App
 	
 	return peekCal;
 }])
-.service('registSchedulePopover', ['$q', '$popover', '$rootScope', function($q, $popover, $rootScope) {
-
-	var scope = $rootScope.$new();
-	var registPopover = $popover($('#registSchedule'), {
-												contentTemplate: '/bpms/home/registschedule',
-												trigger: 'manual',
-												scope:scope,
-												autoClose:true,
-												html: true,
-												placement:'auto right'
-							});
-	var deferred;
-	var schedule = {};
-	var parentShow = registPopover.show;
-	
-	registPopover.show = function(date, target) {
-		console.log(angular.element(target));
-		console.log('popover: ', registPopover);
-		scope.date = date;
-		deferred = $q.defer();
-		parentShow();
-		return deferred.promise;
+.directive('schedulePopover', ['$popover', '$http', '$q', function($popover, $http, $q) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attr) {
+			var pop = $popover(element, {
+				contentTemplate: '/bpms/home/registschedule',
+				trigger: 'manual',
+				autoClose:true,
+				html: true,
+				placement:'auto top',
+				animation: "am-flip-x",
+				scope:scope
+			});
+			
+			scope.showPopover = function(date) {
+				console.log(date);
+				scope.startDate = date;
+				scope.endDate = date;
+				scope.title = "제목";
+				scope.content = "";
+				pop.show();
+			};
+			
+			scope.saveSchedule = function() {
+				var schedule = {};
+				
+				schedule.title = scope.title;
+				schedule.startDate = scope.startDate;
+				schedule.endDate = scope.endDate;
+				schedule.type = "P";
+				schedule.content = scope.content;
+				
+				$http.post('/bpms/rest/schedule', schedule)
+				.then(
+					function(response) {
+						console.log('saved schedule: ', response.data);
+					},
+					function(err) {
+						$q.reject(err);
+					}
+				);
+				scope.closePopover();
+			};
+			
+			scope.closePopover = function() {
+				pop.hide();
+			};
+		}
 	};
-	
-	return registPopover;
 }]);

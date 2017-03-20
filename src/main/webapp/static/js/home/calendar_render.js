@@ -3,9 +3,12 @@
  * 일정에 대한 타입별 모양은 class에 미리 정의한다. 기본 클래스명은 .schedule-bar이고
  * #monthView, #weekView, #dayView에 따라 변형되며, 각 타입별로 위치와 크기가 변형된다.
  */
-var renderingCalendar = function(schedules) {
+var CALENDAR, calendarType;
+var renderingCalendar = function(schedules, calendar) {
 	var type = $('.calendar-view:visible').attr('id');
-	var calendarType = angular.injector(['ng', 'bpmApp']).get('calendarType');		// calencarType constant 호출
+	
+	CALENDAR = calendar;
+	calendarType = angular.injector(['ng', 'bpmApp']).get('calendarType');		// calencarType constant 호출
 
 	// 일정막대 초기화
 	$('abbr.schedule-bar').remove();
@@ -92,11 +95,23 @@ var renderingCalendar = function(schedules) {
 	}
 };
 
+/**
+ * 현재 보이는 달력에서 몇번째 주인가를 확인해야한다.
+ * 일정이 속한 월의 주를 계산하게되면, 마지막 주에 있는 일정은 다음달 첫번째 주에 표시되어야 하는데
+ * 다음달의 마지막 주의 위치에 표시되게 된다.
+ */
 var getNumOfWeeks = function(date) {
-	var firstDay = angular.copy(date);
+	var type = $('.calendar-view:visible').attr('id');
+	var numOfWeeks = 0;
 	
-	firstDay.setDate(1);
-	return Math.ceil((firstDay.getDay() + date.getDate()) / 7);
+	if (type != calendarType.MONTHVIEW)		return 1;
+	
+	for (;numOfWeeks < CALENDAR.length; numOfWeeks++) {
+		if (CALENDAR[numOfWeeks][0].getTime() <= date.getTime() && date.getTime() <= CALENDAR[numOfWeeks][6].getTime()) {
+			break;
+		}
+	}
+	return numOfWeeks + 1;
 };
 
 /**
@@ -143,20 +158,20 @@ var findTargetElement = function(start) {
 	numOfHours = Math.floor(start.getHours() * 2 + (start.getMinutes() / 30));
 	
 	switch(type) {
-	case 'monthView':
+	case calendarType.MONTHVIEW:
 		/*
 		 * 월별 일정은 몇번째 주 무슨 요일인지로 타멧을 찾는다.
 		 */
 		$target = $($($('#monthView .calendar-row')[numOfWeeks]).find('span')[numOfDays]);
 		break;
-	case 'weekView':
+	case calendarType.WEEKVIEW:
 		/*
 		 * .time-line은 주별, 일별 일정에서 사용하므로 현재 보여지는 .time-line에서 해당 요일을 찾는다.
 		 * 요일 구분은 <td>로 되어 있으므로 요일 순번의 <td>를 찾고, 일정 시작 시간의 위치를 찾는다.
 		 */
 		$target = $($($('.time-line:visible td')[numOfDays + 1]).find('.time-content')[numOfHours]);
 		break;
-	case 'dayView':
+	case calendarType.DAYVIEW:
 		/*
 		 * 일별 일정은 시간만 표시하므로 시간을 구분하는 .time-content의 순번을 찾는다.
 		 */

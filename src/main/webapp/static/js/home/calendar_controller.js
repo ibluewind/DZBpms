@@ -38,14 +38,16 @@ App
 		$rootScope.$broadcast('renderingCalendar');
 	};
 }])
-.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', 'registSchedulePopover', '$scope', '$rootScope', '$filter',
-									function(calendarService, calendarType, peekCalendarPopover, registSchedulePopover, $scope, $rootScope, $filter) {
+.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope', '$filter',
+									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope, $filter) {
 	var self = this;
 	var today = new Date();
 	var calType = calendarType.MONTH;
 	
 	self.currentDate = new Date();
 	self.scheduleList = [];
+	self.weeks = [0, 1, 2, 3, 4, 5, 6];
+	self.hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];	// time-table의 ng-repeat를 위한 배열
 	
 	self.calendar = calendarService.getCalendar(today, calType);
 	self.calendarTitle = self.currentDate.getFullYear() + '년 ' + (self.currentDate.getMonth() + 1) + '월 ';
@@ -73,7 +75,7 @@ App
 				calendarService.scheduleList = list;
 				calendarService.orgScheduleList = angular.copy(list);
 				filteringScheduleList();
-				renderingCalendar(self.scheduleList);
+				renderingCalendar(self.scheduleList, self.calendar);
 			},
 			function(err) {
 				console.error('Error while fetching schedule list');
@@ -194,6 +196,7 @@ App
 	
 	self.calendarViewChange = function($event, typeId) {
 		var start, end;
+		self.currentDate = new Date();
 		
 		$('.calendar-view').hide();
 		
@@ -221,11 +224,6 @@ App
 		);
 	};
 	
-	self.popupScheduleMake = function($event, date) {
-		console.log('date: ', date);
-		registSchedulePopover.show(date, $event.currentTarget);
-	};
-	
 	/**
 	 * 캘린더 타입이 변하거나, 캘린더의 날짜 이동이 발생하면 처리하는 이벤트이다.
 	 * 시작, 종료 날짜를 캘린더 타입별로 구해서 self.calendar와 scheduleList를 반영한다.
@@ -236,7 +234,6 @@ App
 		
 		$('.schedule-bar').remove();
 		
-		console.log('currentDate: ', self.currentDate);
 		start = new Date(self.currentDate.getTime());
 		end = new Date(self.currentDate.getTime());
 		
@@ -265,12 +262,13 @@ App
 		}
 		
 		self.calendar = calendarService.getCalendar(self.currentDate, calType);
+		console.log('calendar: ', self.calendar);
 		getScheduleList(start, end);
 		setCalendarTitle();
 	});
 	
 	$rootScope.$on('renderingCalendar', function() {
 		filteringScheduleList();
-		renderingCalendar(self.scheduleList);
+		renderingCalendar(self.scheduleList, self.calendar);
 	});
 }]);
