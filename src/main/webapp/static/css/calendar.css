@@ -144,6 +144,7 @@ div.nav_bar {
 	font-size: 0.9em;
 	color: #eee;
 	line-height: 1.5em;
+	overflow: hidden;
 }
 
 #weekView .schedule-bar {

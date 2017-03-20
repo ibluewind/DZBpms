@@ -267,7 +267,12 @@ App
 		setCalendarTitle();
 	});
 	
+	$rootScope.$on('changeSchedule', function() {
+		$scope.$broadcast('changeCalendarView');
+	});
+	
 	$rootScope.$on('renderingCalendar', function() {
+		console.log('renderingCalendar');
 		filteringScheduleList();
 		renderingCalendar(self.scheduleList, self.calendar);
 	});

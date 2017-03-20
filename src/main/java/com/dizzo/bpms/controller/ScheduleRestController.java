@@ -34,6 +34,8 @@ public class ScheduleRestController {
 	@RequestMapping(method=RequestMethod.POST)
 	public Schedule save(@RequestBody Schedule schedule) {
 		schedule.setUserId(IndexController.getPrincipal());
+		
+		System.out.println("DEBUG: schedule: " + schedule);
 		return scheduleService.save(schedule);
 	}
 }

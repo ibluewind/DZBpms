@@ -110,7 +110,7 @@ App
 	
 	return peekCal;
 }])
-.directive('schedulePopover', ['$popover', '$http', '$q', function($popover, $http, $q) {
+.directive('schedulePopover', ['$popover', '$http', '$q', '$rootScope', function($popover, $http, $q, $rootScope) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attr) {
@@ -119,7 +119,7 @@ App
 				trigger: 'manual',
 				autoClose:true,
 				html: true,
-				placement:'auto top',
+				placement:'top',
 				animation: "am-flip-x",
 				scope:scope
 			});
@@ -136,16 +136,19 @@ App
 			scope.saveSchedule = function() {
 				var schedule = {};
 				
-				schedule.title = scope.title;
-				schedule.startDate = scope.startDate;
-				schedule.endDate = scope.endDate;
+				console.log('startDate: ', $(start).val());
+				schedule.title = $(title).val();			//??? 왜 이런지는 모르겠으나, 이렇게해야 입력된 내용을 가져 올 수 있다. 뭐지? (폼의 ID 값을 사용해서 값을 가져온다. 결론은 ng-model은 아무 의미가 없다...)
+				schedule.startDate = $(start).val();
+				schedule.endDate = $(end).val();
 				schedule.type = "P";
-				schedule.content = scope.content;
+				schedule.content = $(content).val();
 				
+				console.log('schedule: ', schedule);
 				$http.post('/bpms/rest/schedule', schedule)
 				.then(
 					function(response) {
 						console.log('saved schedule: ', response.data);
+						$rootScope.$broadcast('changeSchedule');
 					},
 					function(err) {
 						$q.reject(err);

@@ -66,7 +66,7 @@ App
 }])
 .config(['$datepickerProvider', function($datepickerProvider) {
 	angular.extend($datepickerProvider.defaults, {
-		dateFormat: 'yyyy/MM/dd',
+		dateFormat: 'yyyy-MM-dd',
 		startWeek: 0
 	})
 }]);
