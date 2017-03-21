@@ -90,7 +90,7 @@ div.nav_bar {
 }
 
 .schedule-bar-area {
-	background-color: #ccc;
+	background-color: #f5f5f5;
 }
 
 .schedule-bar-area span {
@@ -127,7 +127,11 @@ div.nav_bar {
 	width: 100%;
     border-right: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
-    background-color: #f5f5f5;
+    /*background-color: #f5f5f5;*/
+}
+
+.selected {
+	background-color: #7ba9d0;
 }
 
 .time-content {
@@ -141,8 +145,6 @@ div.nav_bar {
 	position: absolute;
 	margin-left: 2%;
 	margin-right: 3%;
-	font-size: 0.9em;
-	color: #eee;
 	line-height: 1.5em;
 	overflow: hidden;
 }
@@ -150,8 +152,6 @@ div.nav_bar {
 #weekView .schedule-bar {
 	text-align: center;
 	position: relative;
-	font-size: 0.9em;
-	color: #eee;
 	line-height: 1.5em;
 	height: 18px;
 	float: left;
@@ -160,14 +160,21 @@ div.nav_bar {
 #dayView .schedule-bar {
 	text-align: center;
 	position: relative;
-	font-size: 0.9em;
-	color: #eee;
 	line-height: 1.5em;
 	display: inline-block;
 }
 
 .title-line {
 	margin-right: 17px;
+}
+
+.title-line td {
+	font-size: 0.9em;
+	color: #777;
+}
+
+td.hover:hover {
+	background-color:#efefef;
 }
 
 #weekView .title-line {
@@ -181,19 +188,22 @@ div.nav_bar {
 }
 
 .schedule-bar {
-	border-radius: 10px;
+	border-radius: 5px;
+	box-shadow: 2px 2px 2px #ccc;
+	font-size: 0.8em;
+	color: #eee;
 }
 
 .schedule-bar.V {
-	background-color: #c67fec;
+	background-color: #e48e28;
 }
 
 .schedule-bar.T {
-	background-color: #77b778;
+	background-color: #256a96;
 }
 
 .schedule-bar.P {
-	background-color: #337ab7;
+	background-color: #419e54;
 }
 ::-webkit-scrollbar {
     height: 16px;

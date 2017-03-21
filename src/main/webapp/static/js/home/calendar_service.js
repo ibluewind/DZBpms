@@ -18,10 +18,15 @@ App
 		for (var i = 0; i < numOfWeeks; i++)
 			calendar[i] = new Array();
 		
+		console.log('type: ', type);
 		// 월, 주에 따른 처리 필요.
-		date.setDate(1);
-		date.setDate(1 - date.getDay());
-		date.setHours(0, 0, 0, 0);			// milliseconds까지 0으로 설정해야 한다.
+		if (type == calendarType.MONTH) {
+			date.setDate(1);
+			date.setDate(1 - date.getDay());
+			date.setHours(0, 0, 0, 0);			// milliseconds까지 0으로 설정해야 한다.
+		} else if (type == calendarType.WEEK) {
+			date.setDate(date.getDate() - date.getDay());
+		}
 		
 		for (var i = 0; i < numOfWeeks; i++) {
 			for (var j = 0; type != calendarType.DAY && j < 7; j++) {
@@ -110,50 +115,69 @@ App
 	
 	return peekCal;
 }])
-.directive('schedulePopover', ['$popover', '$http', '$q', '$rootScope', function($popover, $http, $q, $rootScope) {
+.directive('schedulePopover', ['$popover', '$http', '$q', '$rootScope', 'calendarType', function($popover, $http, $q, $rootScope, calendarType) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attr) {
+			var schedule = {}, viewType;
 			var pop = $popover(element, {
 				contentTemplate: '/bpms/home/registschedule',
 				trigger: 'manual',
 				autoClose:true,
 				html: true,
-				placement:'top',
+				placement:'auto left',
 				animation: "am-flip-x",
-				scope:scope
+				scope:scope,
+				onShow: function() { element.addClass('selected');},
+				onHide: function() { element.removeClass('selected');}
 			});
 			
-			scope.showPopover = function(date) {
-				console.log(date);
-				scope.startDate = date;
-				scope.endDate = date;
-				scope.title = "제목";
+			scope.showPopover = function(date, hours) {
+				viewType = $('.calendar-view:visible').attr('id');
+				scope.startDate = new Date(date.getTime());
+				scope.endDate = new Date(date.getTime());
 				scope.content = "";
+				
+				if (viewType != calendarType.MONTHVIEW) {
+					scope.hasHours = true;
+					hours = hours.split(':');
+					scope.startDate.setHours(hours[0], hours[1], hours[2]);
+					scope.endDate = new Date(scope.startDate.getTime());
+					scope.endDate.setMinutes(scope.startDate.getMinutes() + 30);
+				}
+				else {
+					scope.hasHours = false;
+					scope.startDate.setHours(0, 0, 0);
+					scope.endDate.setHours(23, 59, 59);
+				}
+				
 				pop.show();
 			};
 			
 			scope.saveSchedule = function() {
-				var schedule = {};
-				
-				console.log('startDate: ', $(start).val());
 				schedule.title = $(title).val();			//??? 왜 이런지는 모르겠으나, 이렇게해야 입력된 내용을 가져 올 수 있다. 뭐지? (폼의 ID 값을 사용해서 값을 가져온다. 결론은 ng-model은 아무 의미가 없다...)
 				schedule.startDate = $(start).val();
 				schedule.endDate = $(end).val();
 				schedule.type = "P";
 				schedule.content = $(content).val();
 				
-				console.log('schedule: ', schedule);
+				if (viewType == calendarType.MONTHVIEW) {
+					schedule.startDate = new Date(schedule.startDate += " 00:00:00");
+					schedule.endDate = new Date(schedule.endDate += " 23:59:59");
+				} else {
+					schedule.startDate = new Date(schedule.startDate += (" " + $(startHours).val() + ":00"));
+					schedule.endDate = new Date(schedule.endDate += (" " + $(endHours).val() + ":00"));
+				}
 				$http.post('/bpms/rest/schedule', schedule)
 				.then(
 					function(response) {
-						console.log('saved schedule: ', response.data);
 						$rootScope.$broadcast('changeSchedule');
 					},
 					function(err) {
 						$q.reject(err);
 					}
 				);
+				
 				scope.closePopover();
 			};
 			

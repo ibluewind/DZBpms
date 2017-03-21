@@ -133,9 +133,9 @@
 										<div class="time-cell" style="height:42px;">오후11시</div>
 									</td>
 									<td style="width:88%;">
-										<div class="time-contents" ng-repeat="h in ctrl.hours track by $index" style="height:42px;">
-											<div class="time-content" style="height:20px"></div>
-											<div class="time-content" style="height:20px"></div>
+										<div class="time-contents" ng-repeat="h in ctrl.hours" style="height:42px;">
+											<div class="time-content" schedule-popover ng-click="showPopover(ctrl.currentDate, h + ':00:00')" style="height:20px"></div>
+											<div class="time-content" schedule-popover ng-click="showPopover(ctrl.currentDate, h + ':30:00')" style="height:20px"></div>
 										</div>
 									</td>
 								</tr>
@@ -150,13 +150,13 @@
 						<tbody>
 							<tr>
 								<td>&nbsp;</td>
-								<td>일요일</td>
-								<td>월요일</td>
-								<td>화요일</td>
-								<td>수요일</td>
-								<td>목요일</td>
-								<td>금요일</td>
-								<td>토요일</td>
+								<td>{{ctrl.calendar[0][0]|date:'MM.dd'}}(일)</td>
+								<td>{{ctrl.calendar[0][1]|date:'MM.dd'}}(월)</td>
+								<td>{{ctrl.calendar[0][2]|date:'MM.dd'}}(화)</td>
+								<td>{{ctrl.calendar[0][3]|date:'MM.dd'}}(수)</td>
+								<td>{{ctrl.calendar[0][4]|date:'MM.dd'}}(목)</td>
+								<td>{{ctrl.calendar[0][5]|date:'MM.dd'}}(금)</td>
+								<td>{{ctrl.calendar[0][6]|date:'MM.dd'}}(토)</td>
 							</tr>
 						</tbody>
 					</table>
@@ -202,10 +202,10 @@
 										<div class="time-cell" style="height:42px;">오후10시</div>
 										<div class="time-cell" style="height:42px;">오후11시</div>
 									</td>
-									<td ng-repeat="w in ctrl.weeks">
+									<td class="hover" ng-repeat="w in ctrl.calendar[0] track by $index">
 										<div class="time-contents" style="height:42px;" ng-repeat="h in ctrl.hours">
-											<div class="time-content" style="height:20px"></div>
-											<div class="time-content" style="height:20px"></div>
+											<div class="time-content" schedule-popover ng-click="showPopover(w, h + ':00:00')" style="height:20px"></div>
+											<div class="time-content" schedule-popover ng-click="showPopover(w, h + ':30:00')" style="height:20px"></div>
 										</div>
 									</td>
 								</tr>

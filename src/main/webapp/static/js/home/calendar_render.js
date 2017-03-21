@@ -46,6 +46,7 @@ var renderingCalendar = function(schedules, calendar) {
 				height = 20 * hourDiff;
 				lineHeight = 1.5 * hourDiff;
 				wholeDay = false;
+				top = 0;
 			}
 			else {
 				height = 20;
@@ -71,6 +72,7 @@ var renderingCalendar = function(schedules, calendar) {
 				lineHeight = 1.5;
 			}
 			else {
+				left = "0%";
 				height = 20 * hourDiff;
 				lineHeight = 1.5 * hourDiff;
 			}
@@ -79,8 +81,13 @@ var renderingCalendar = function(schedules, calendar) {
 			break;
 		}
 		
-		$scheduleBar.text(s.userName + ":" + s.title);
-		$scheduleBar.attr("title", s.userName + ":" + s.title);
+		if (s.type == 'P') {
+			$scheduleBar.append("<a ng-click='ctrl.updateSchedule(" + s.id + ")'>" + s.userName + ":" + s.title + "</a>");
+		} else {
+			$scheduleBar.text(s.userName + ":" + s.title);
+		}
+		
+		$scheduleBar.attr("title", s.userName + ":" + s.title + ":" + s.content);
 		
 		$target.append($scheduleBar);
 		

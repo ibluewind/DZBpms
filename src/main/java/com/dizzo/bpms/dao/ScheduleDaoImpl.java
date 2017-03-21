@@ -35,19 +35,10 @@ public class ScheduleDaoImpl implements ScheduleDao {
 					 + " s.type,"
 					 + " s.refId,"
 					 + " concat(u.lastName, u.firstName) 'userName',"
-					 + " d.name 'deptName',"
-					 + " p.name 'positionName'"
 					 + " FROM schedule s,"
-					 + " users u,"
-					 + " user_dept_position udp,"
-					 + " position p,"
-					 + " departments d"
+					 + " users u"
 					 + " WHERE     s.userId = u.userid"
-					 + " AND udp.userid = s.userid"
-					 + " AND p.id = udp.positionid"
-					 + " AND d.deptid = udp.deptid"
-					 + " AND s.id = ?"
-					 + " GROUP BY s.userId";
+					 + " AND s.id = ?";
 		return new JdbcTemplate(dataSource).queryForObject(query, new Object[]{id}, new ScheduleRowMapper()); 
 	}
 
@@ -63,19 +54,10 @@ public class ScheduleDaoImpl implements ScheduleDao {
 				 + " s.type,"
 				 + " s.refId,"
 				 + " concat(u.lastName, u.firstName) 'userName',"
-				 + " d.name 'deptName',"
-				 + " p.name 'positionName'"
 				 + " FROM schedule s,"
-				 + " users u,"
-				 + " user_dept_position udp,"
-				 + " position p,"
-				 + " departments d"
+				 + " users u"
 				 + " WHERE     s.userId = u.userid"
-				 + " AND udp.userid = s.userid"
-				 + " AND p.id = udp.positionid"
-				 + " AND d.deptid = udp.deptid"
-				 + " AND s.refId = ?"
-				 + " GROUP BY s.userId";
+				 + " AND s.refId = ?";
 		
 		return new JdbcTemplate(dataSource).queryForObject(query, new Object[]{refId}, new ScheduleRowMapper()); 
 	}
@@ -97,22 +79,13 @@ public class ScheduleDaoImpl implements ScheduleDao {
 					 + " s.referUrl,"
 					 + " s.type,"
 					 + " s.refId,"
-					 + " concat(u.lastName, u.firstName) 'userName',"
-					 + " d.name 'deptName',"
-					 + " p.name 'positionName'"
+					 + " concat(u.lastName, u.firstName) 'userName'"
 					 + " FROM schedule s,"
-					 + " users u,"
-					 + " user_dept_position udp,"
-					 + " position p,"
-					 + " departments d"
+					 + " users u"
 					 + " WHERE"
 					 + " (s.start BETWEEN ? AND ?"
 					 + " OR ? BETWEEN s.start AND s.end)"
 				     + " AND s.userId = u.userid"
-					 + " AND udp.userid = s.userid"
-					 + " AND p.id = udp.positionid"
-					 + " AND d.deptid = udp.deptid"
-					 + " GROUP BY s.id"
 					 + " ORDER BY s.start";
 		Calendar	scal = Calendar.getInstance();
 		Calendar	ecal = Calendar.getInstance();

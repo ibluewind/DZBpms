@@ -17,9 +17,6 @@ public class Schedule {
 	
 	// Additional Fields
 	private String	userName;
-	private String	deptName;
-	private String	positionName;
-	
 	public Schedule() {}
 	
 	public String getId() {
@@ -83,18 +80,6 @@ public class Schedule {
 	}
 	public void setUserName(String userName) {
 		this.userName = userName;
-	}
-	public String getDeptName() {
-		return deptName;
-	}
-	public void setDeptName(String deptName) {
-		this.deptName = deptName;
-	}
-	public String getPositionName() {
-		return positionName;
-	}
-	public void setPositionName(String positionName) {
-		this.positionName = positionName;
 	}
 	public String toString() {
 		return "Schedule: {id: " + id + ", userId: " + userId + ", startDate: " + startDate + ", endDate: " + endDate + ", title: " + title + "}";
