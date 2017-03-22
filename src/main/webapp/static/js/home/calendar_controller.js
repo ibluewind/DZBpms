@@ -2,7 +2,7 @@
  * Angular Calendar Controller
  */
 App
-.controller('miniCalendarController', ['calendarService', 'calendarType', '$rootScope', function(calendarService, calendarType, $rootScope) {
+.controller('miniCalendarController', ['calendarService', 'calendarType', '$scope', '$rootScope', function(calendarService, calendarType, $scope, $rootScope) {
 	
 	var self = this;
 	var today = new Date();
@@ -37,6 +37,16 @@ App
 	self.filterSchedule = function() {
 		$rootScope.$broadcast('renderingCalendar');
 	};
+	
+	/**
+	 * 캘린더 보기 변경 처리
+	 */
+	$rootScope.$on('changeCalendarView', function() {
+		if (self.currentDate.getMonth() != calendarService.currentDate.getMonth()) {
+			self.currentDate = calendarService.currentDate
+			self.calendar = calendarService.getCalendar(self.currentDate, calendarType.MONTH);
+		}
+	});
 }])
 .controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope', '$filter',
 									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope, $filter) {
@@ -155,7 +165,8 @@ App
 			break;
 		}
 		
-		$scope.$broadcast('changeCalendarView');
+		calendarService.currentDate = self.currentDate;
+		$rootScope.$broadcast('changeCalendarView');
 	};
 	
 	self.gotoNext = function() {
@@ -174,12 +185,14 @@ App
 			break;
 		}
 		
-		$scope.$broadcast('changeCalendarView');
+		calendarService.currentDate = self.currentDate;
+		$rootScope.$broadcast('changeCalendarView');
 	};
 	
 	self.goToday = function() {
 		self.currentDate = new Date();
-		$scope.$broadcast('changeCalendarView');
+		calendarService.currentDate = self.currentDate;
+		$rootScope.$broadcast('changeCalendarView');
 	};
 	
 	self.isToday = function(d) {
@@ -205,7 +218,9 @@ App
 		$($event.target).addClass("active");
 		
 		$('#'+typeId).show();
-		$scope.$broadcast('changeCalendarView');
+		
+		calendarService.currentDate = self.currentDate;
+		$rootScope.$broadcast('changeCalendarView');
 	};
 	
 	self.peekCalendar = function() {
@@ -216,7 +231,8 @@ App
 				// 월 단위 일정으로 표시한다.
 				$('.calendar-view').hide();
 				$('#monthView').show();
-				$scope.$broadcast('changeCalendarView');
+				calendarService.currentDate = self.currentDate;
+				$rootScope.$broadcast('changeCalendarView');
 			},
 			function(err) {
 				console.error('Error while display peek calendar popover');
@@ -248,7 +264,6 @@ App
 			
 			end.setFullYear(end.getFullYear(), end.getMonth() + 1, 0);	// 해당 월의 마지막 날
 			end.setDate(end.getDate() + (6 - end.getDay()));
-			console.log('start = ' + start  + ', end = ' + end);
 			break;
 		case calendarType.WEEKVIEW:
 			calType = calendarType.WEEK;
@@ -263,7 +278,6 @@ App
 		}
 		
 		self.calendar = calendarService.getCalendar(self.currentDate, calType);
-		console.log('calendar: ', self.calendar);
 		getScheduleList(start, end);
 		setCalendarTitle();
 	});
@@ -273,7 +287,6 @@ App
 	});
 	
 	$rootScope.$on('renderingCalendar', function() {
-		console.log('renderingCalendar');
 		filteringScheduleList();
 		renderingCalendar(self.scheduleList, self.calendar);
 	});

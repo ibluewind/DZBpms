@@ -91,7 +91,7 @@
 						<span class="calendar-week">토요일</span>
 					</div>
 					<div class="calendar-row top-border" ng-repeat="cell in ctrl.calendar">
-						<span class="calendar-cell"schedule-popover ng-click="showPopover(cell[$index])"  style="height:140px;" ng-repeat="d in cell track by $index" ng-class="[{'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]">
+						<span class="calendar-cell"schedule-popover ng-click="showPopover($event, cell[$index])"  style="height:140px;" ng-repeat="d in cell track by $index" ng-class="[{'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]">
 							{{d.getDate()}}
 						</span>
 					</div>
@@ -99,7 +99,7 @@
 			</div>
 			<div class="row calendar-view" id="dayView">
 				<div class="title-line">
-					<div class="schedule-bar-area"></div>
+					<div class="schedule-bar-area" schedule-popover ng-click="showPopover($event, ctrl.currentDate)"></div>
 				</div>
 				<div class="scroll-container">
 					<div class="time-line">
@@ -134,8 +134,8 @@
 									</td>
 									<td style="width:88%;">
 										<div class="time-contents" ng-repeat="h in ctrl.hours" style="height:42px;">
-											<div class="time-content" schedule-popover ng-click="showPopover(ctrl.currentDate, h + ':00:00')" style="height:20px"></div>
-											<div class="time-content" schedule-popover ng-click="showPopover(ctrl.currentDate, h + ':30:00')" style="height:20px"></div>
+											<div class="time-content" schedule-popover ng-click="showPopover($event, ctrl.currentDate, h + ':00:00')" style="height:20px"></div>
+											<div class="time-content" schedule-popover ng-click="showPopover($event, ctrl.currentDate, h + ':30:00')" style="height:20px"></div>
 										</div>
 									</td>
 								</tr>
@@ -161,14 +161,7 @@
 						</tbody>
 					</table>
 					<div class="schedule-bar-area">
-						<span></span>
-						<span></span>
-						<span></span>
-						<span></span>
-						<span></span>
-						<span></span>
-						<span></span>
-						<span></span>
+						<span ng-repeat="d in ctrl.calendar[0] track by $index" schedule-popover ng-click="showPopover($event, d)"></span>
 					</div>
 				</div>
 				<div class="scroll-container">
@@ -204,8 +197,8 @@
 									</td>
 									<td class="hover" ng-repeat="w in ctrl.calendar[0] track by $index">
 										<div class="time-contents" style="height:42px;" ng-repeat="h in ctrl.hours">
-											<div class="time-content" schedule-popover ng-click="showPopover(w, h + ':00:00')" style="height:20px"></div>
-											<div class="time-content" schedule-popover ng-click="showPopover(w, h + ':30:00')" style="height:20px"></div>
+											<div class="time-content" schedule-popover ng-click="showPopover($event, w, h + ':00:00')" style="height:20px"></div>
+											<div class="time-content" schedule-popover ng-click="showPopover($event, w, h + ':30:00')" style="height:20px"></div>
 										</div>
 									</td>
 								</tr>

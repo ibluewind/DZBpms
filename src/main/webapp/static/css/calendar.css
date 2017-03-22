@@ -41,6 +41,16 @@ div.nav_bar {
 	padding: 0 5px;
 }
 
+.calendar-cell abbr.info {
+	background-color: aqua;
+    position: absolute;
+    font-size: 0.8em;
+    text-align: left;
+    margin-right: 15px;
+}
+#monthView .calendar-cell:hover {
+	background-color: #fafafa;
+}
 #monthView .calendar-row .calendar-cell {
 	border-left: 1px dotted #ccc;
 }
@@ -131,7 +141,7 @@ div.nav_bar {
 }
 
 .selected {
-	background-color: #7ba9d0;
+	background-color: #d9edf7;
 }
 
 .time-content {
@@ -205,6 +215,28 @@ td.hover:hover {
 .schedule-bar.P {
 	background-color: #419e54;
 }
+
+.schedule-bar a {
+	color: #eee;
+	text-decoation: none;
+}
+.schedule-bar a:link {
+	color: #eee;
+	text-decoration: none;
+}
+.schedule-bar a:visited {
+	color: #eee;
+	text-decoration: none;
+}
+.schedule-bar a:hover {
+	color: #eee;
+	text-decoration: underline;
+}
+.schedule-bar a:active {
+	color: #eee;
+	text-decoration: underline;
+}
+
 ::-webkit-scrollbar {
     height: 16px;
     overflow: visible;

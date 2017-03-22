@@ -34,7 +34,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
 					 + " s.referUrl,"
 					 + " s.type,"
 					 + " s.refId,"
-					 + " concat(u.lastName, u.firstName) 'userName',"
+					 + " concat(u.lastName, u.firstName) 'userName'"
 					 + " FROM schedule s,"
 					 + " users u"
 					 + " WHERE     s.userId = u.userid"
@@ -53,7 +53,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
 				 + " s.referUrl,"
 				 + " s.type,"
 				 + " s.refId,"
-				 + " concat(u.lastName, u.firstName) 'userName',"
+				 + " concat(u.lastName, u.firstName) 'userName'"
 				 + " FROM schedule s,"
 				 + " users u"
 				 + " WHERE     s.userId = u.userid"
@@ -147,14 +147,13 @@ public class ScheduleDaoImpl implements ScheduleDao {
 
 	@Override
 	public Schedule update(Schedule schedule) {
-		String	query = "UPDATE schedule SET userid=?, start = ?, end = ?, type = ?, content = ?, referUrl = ?, refId=?, title = ?"
+		String	query = "UPDATE schedule SET start = ?, end = ?, type = ?, content = ?, referUrl = ?, refId=?, title = ?"
 					  + " WHERE id = ?";
 		Calendar	scal = Calendar.getInstance(), ecal = Calendar.getInstance();
 		scal.setTime(schedule.getStartDate());
 		ecal.setTime(schedule.getEndDate());
 		
 		new JdbcTemplate(dataSource).update(query, new Object[] {
-			schedule.getUserId(),
 			String.format("%04d-%02d-%02d %02d:%02d:%02d", scal.get(Calendar.YEAR), scal.get(Calendar.MONTH) + 1, scal.get(Calendar.DATE), scal.get(Calendar.HOUR_OF_DAY), scal.get(Calendar.MINUTE), scal.get(Calendar.SECOND)),
 			String.format("%04d-%02d-%02d %02d:%02d:%02d", ecal.get(Calendar.YEAR), ecal.get(Calendar.MONTH) + 1, ecal.get(Calendar.DATE), ecal.get(Calendar.HOUR_OF_DAY), ecal.get(Calendar.MINUTE), ecal.get(Calendar.SECOND)),
 			schedule.getType(),

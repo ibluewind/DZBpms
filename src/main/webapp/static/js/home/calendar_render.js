@@ -25,12 +25,26 @@ var renderingCalendar = function(schedules, calendar) {
 		var numOfSchedules = getNumOfSchedulesAtDate(schedules, start, i);		// 중복되는 일정의 갯수
 		var numOfChildren = 0;													// 같은 날 일정의 갯수 (루프를 돌 때마다 값이 변한다.)
 		
+		if (s.type == 'P') {
+			$scheduleBar.append("<a data-schedule='" + s.id + "'>" + s.userName + ":" + s.title + "</a>");
+		} else {
+			$scheduleBar.text(s.userName + ":" + s.title);
+		}
+		$scheduleBar.attr("title", s.userName + ":" + s.title + ":" + s.content);
+		
+		console.log(s.title + ': schedulesNum: ' + numOfSchedules);
 		switch(type) {
 		case calendarType.MONTHVIEW:
 			left = start.getDay() * 14 + 1;
 			right = (6 - end.getDay()) * 14;
 			top = (getNumOfWeeks(start) - 1) * 140 + (20 * numOfSchedules) + numOfSchedules + 50;
 			$scheduleBar.css({left: left + "%", right: right + "%", top: top + "px"});
+			if (numOfSchedules > 3) {
+				$scheduleBar.removeClass('schedule-bar');
+				$scheduleBar.removeAttr("title");
+				$scheduleBar.addClass("info");
+				$scheduleBar.text("+ " + (numOfSchedules - 3) + " more...");
+			}
 			break;
 		case calendarType.WEEKVIEW:
 			dateDiff = Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
@@ -81,14 +95,6 @@ var renderingCalendar = function(schedules, calendar) {
 			break;
 		}
 		
-		if (s.type == 'P') {
-			$scheduleBar.append("<a ng-click='ctrl.updateSchedule(" + s.id + ")'>" + s.userName + ":" + s.title + "</a>");
-		} else {
-			$scheduleBar.text(s.userName + ":" + s.title);
-		}
-		
-		$scheduleBar.attr("title", s.userName + ":" + s.title + ":" + s.content);
-		
 		$target.append($scheduleBar);
 		
 	}
@@ -130,25 +136,20 @@ var getNumOfSchedulesAtDate = function(schedules, date, idx) {
 	
 	for (var i = 0; i < idx; i++) {
 		var s = schedules[i];
+		var st = new Date(s.startDate);
+		var et = new Date(s.endDate);
+		var d = new Date(date.getTime());
 		
-		s.startDate = resetHoursMinutesSeconds(s.startDate);
-		s.endDate = resetHoursMinutesSeconds(s.endDate);
+		st.setHours(0, 0, 0, 0);
+		et.setHours(0, 0, 0, 0);
+		d.setHours(0, 0, 0, 0);
 		
-		if (s.startDate <= date.getTime() && date.getTime() <= s.endDate) {
+		if (st.getTime() <= d.getTime() && d.getTime() <= et.getTime()) {
 			number++;
 		}
 	}
 
 	return number;
-}
-
-var resetHoursMinutesSeconds = function(date) {
-	date = new Date(date);
-	date.setHours(0);
-	date.setMinutes(0);
-	date.setSeconds(0);
-	
-	return date;
 }
 
 /**

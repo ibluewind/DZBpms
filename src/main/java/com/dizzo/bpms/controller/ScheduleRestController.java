@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,5 +38,22 @@ public class ScheduleRestController {
 		
 		System.out.println("DEBUG: schedule: " + schedule);
 		return scheduleService.save(schedule);
+	}
+	
+	@RequestMapping(value="/{id}", method=RequestMethod.GET)
+	public Schedule get(@PathVariable String id) {
+		return scheduleService.get(id);
+	}
+	
+	@RequestMapping(method=RequestMethod.PUT)
+	public Schedule update(@RequestBody Schedule schedule) {
+		System.out.println("DEBUG: update scheduel " + schedule);
+		return scheduleService.update(schedule);
+	}
+	
+	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
+	public Schedule delete(@PathVariable String id) {
+		System.out.println("DEBUG: delete schedule " + id);
+		return scheduleService.delete(id);
 	}
 }

@@ -9,10 +9,14 @@ App
 		personal: true
 	};
 	
+	this.currentDate;
+	
 	this.getCalendar = function(currentDate, type) {
 		var numOfWeeks = getNumberOfWeeks(currentDate, type);
 		var calendar = new Array(numOfWeeks);
 		var date = new Date(currentDate.getTime());
+		
+		this.currentDate = currentDate;
 		
 		// type에 맞춰서 달력을 가져온다.
 		for (var i = 0; i < numOfWeeks; i++)
@@ -42,6 +46,22 @@ App
 		var deferred = $q.defer();
 		
 		$http.get('/bpms/rest/schedule', {params:{start: start, end: end}})
+		.then(
+			function(response) {
+				deferred.resolve(response.data);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+		
+		return deferred.promise;
+	};
+	
+	this.getSchedule = function(id) {
+		var deferred = $q.defer();
+		
+		$http.get('/bpms/rest/schedule/' + id)
 		.then(
 			function(response) {
 				deferred.resolve(response.data);
@@ -115,13 +135,15 @@ App
 	
 	return peekCal;
 }])
-.directive('schedulePopover', ['$popover', '$http', '$q', '$rootScope', 'calendarType', function($popover, $http, $q, $rootScope, calendarType) {
+.directive('schedulePopover', ['$popover', '$http', '$q', '$rootScope', 'calendarService', 'calendarType', 'deleteConfirm',
+								function($popover, $http, $q, $rootScope, calendarService, calendarType, deleteConfirm) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attr) {
-			var schedule = {}, viewType;
+			var schedule = {}, wholeDay = false;
 			var pop = $popover(element, {
 				contentTemplate: '/bpms/home/registschedule',
+				container: 'body',
 				trigger: 'manual',
 				autoClose:true,
 				html: true,
@@ -132,42 +154,89 @@ App
 				onHide: function() { element.removeClass('selected');}
 			});
 			
-			scope.showPopover = function(date, hours) {
-				viewType = $('.calendar-view:visible').attr('id');
+			scope.eidt = false;
+			
+			function updateSchedule($target) {
+				scope.edit = true;
+				
+				var schedule = {};
+				var scheduleId = $target.data('schedule');
+				
+				calendarService.getSchedule(scheduleId)
+				.then(
+					function(data) {
+						schedule = data;
+						scope.scheduleId = scheduleId;
+						scope.title = schedule.title;
+						scope.startDate = schedule.startDate;
+						scope.endDate = schedule.endDate;
+						scope.content = schedule.content;
+						
+						if (Math.ceil((schedule.endDate.getTime() - schedule.startDate.getTime())/1000/60/60) == 24)
+							wholeDay = true;	// 하루종일 일정
+					},
+					function(err) {
+						$q.reject(err);
+					}
+				);
+			}
+			
+			function insertSchedule(date, hours) {
 				scope.startDate = new Date(date.getTime());
 				scope.endDate = new Date(date.getTime());
 				scope.content = "";
+				scope.title = "";
 				
-				if (viewType != calendarType.MONTHVIEW) {
-					scope.hasHours = true;
+				scope.hasHours = true;
+					
+				if (hours) {
 					hours = hours.split(':');
 					scope.startDate.setHours(hours[0], hours[1], hours[2]);
 					scope.endDate = new Date(scope.startDate.getTime());
 					scope.endDate.setMinutes(scope.startDate.getMinutes() + 30);
+				} else {
+					scope.startDate.setHours(9, 0, 0);
+					scope.endDate.setHours(10, 0, 0);
 				}
-				else {
-					scope.hasHours = false;
-					scope.startDate.setHours(0, 0, 0);
-					scope.endDate.setHours(23, 59, 59);
-				}
+			}
+			
+			scope.showPopover = function($event, date, hours) {
+				var $target = $($event.target);
+				
+				console.log('target: ', $target);
+				
+				if ($target.get(0).tagName == 'A')
+					updateSchedule($target);
+				else
+					insertSchedule(date, hours);
 				
 				pop.show();
 			};
 			
-			scope.saveSchedule = function() {
-				schedule.title = $(title).val();			//??? 왜 이런지는 모르겠으나, 이렇게해야 입력된 내용을 가져 올 수 있다. 뭐지? (폼의 ID 값을 사용해서 값을 가져온다. 결론은 ng-model은 아무 의미가 없다...)
-				schedule.startDate = $(start).val();
-				schedule.endDate = $(end).val();
-				schedule.type = "P";
-				schedule.content = $(content).val();
+			function setSchedule() {
+				var s = {};
 				
-				if (viewType == calendarType.MONTHVIEW) {
-					schedule.startDate = new Date(schedule.startDate += " 00:00:00");
-					schedule.endDate = new Date(schedule.endDate += " 23:59:59");
+				s.title = $(title).val();			//??? 왜 이런지는 모르겠으나, 이렇게해야 입력된 내용을 가져 올 수 있다. 뭐지? (폼의 ID 값을 사용해서 값을 가져온다. 결론은 ng-model은 아무 의미가 없다...)
+				s.startDate = $(start).val();
+				s.endDate = $(end).val();
+				s.type = "P";
+				s.content = $(content).val();
+				
+				if (wholeDay) {
+					s.startDate = new Date(s.startDate += " 00:00:00");
+					s.endDate = new Date(s.endDate += " 23:50:00");
 				} else {
-					schedule.startDate = new Date(schedule.startDate += (" " + $(startHours).val() + ":00"));
-					schedule.endDate = new Date(schedule.endDate += (" " + $(endHours).val() + ":00"));
+					s.startDate = new Date(s.startDate += (" " + $(startHours).val() + ":00"));
+					s.endDate = new Date(s.endDate += (" " + $(endHours).val() + ":00"));
 				}
+				
+				return s;
+			}
+			
+			scope.saveSchedule = function() {
+				schedule = setSchedule();
+				console.log('schedule : ', schedule);
+				
 				$http.post('/bpms/rest/schedule', schedule)
 				.then(
 					function(response) {
@@ -175,6 +244,48 @@ App
 					},
 					function(err) {
 						$q.reject(err);
+					}
+				);
+				
+				scope.closePopover();
+			};
+			
+			scope.updateSchedule = function() {
+				schedule = setSchedule();
+				schedule.id = scope.scheduleId;
+				
+				$http.put('/bpms/rest/schedule', schedule)
+				.then(
+					function(response) {
+						$rootScope.$broadcast('changeSchedule');
+					},
+					function(err) {
+						$q.reject(err);
+					}
+				);
+				
+				scope.closePopover();
+			};
+			
+			scope.deleteSchedule = function() {
+				deleteConfirm.show()
+				.then(
+					function(ans) {
+						if (ans == 'yes') {
+							console.log('id: ', scope.scheduleId);
+							$http.delete('/bpms/rest/schedule/' + scope.scheduleId)
+							.then(
+								function(response) {
+									$rootScope.$broadcast('changeSchedule');
+								},
+								function(err) {
+									$q.reject(err);
+								}
+							);
+						}
+					},
+					function(err) {
+						console.log('Error while show delete confirm modal window');
 					}
 				);
 				
