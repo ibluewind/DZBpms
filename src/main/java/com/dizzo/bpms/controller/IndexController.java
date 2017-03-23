@@ -88,6 +88,12 @@ public class IndexController {
 	public String getRegistSchedulePopoverPage() {
 		return "/home/partial/registschedule";
 	}
+	
+	@RequestMapping(value="/home/listschedule", method=RequestMethod.GET)
+	public String getListSchedulePopoverPage() {
+		return "/home/partial/listschedule";
+	}
+	
 	/*
 	 * MODAL Windows
 	 */

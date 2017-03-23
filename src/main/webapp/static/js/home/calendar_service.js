@@ -44,8 +44,8 @@ App
 	
 	this.getScheduleList = function(start, end) {
 		var deferred = $q.defer();
-		
-		$http.get('/bpms/rest/schedule', {params:{start: start, end: end}})
+		console.log('start: ', start + ', end: ', end);
+		$http.get('/bpms/rest/schedule', {params:{start: start.getTime(), end: end.getTime()}})
 		.then(
 			function(response) {
 				deferred.resolve(response.data);
@@ -99,8 +99,7 @@ App
 								scope:scope,
 								autoClose:true,
 								html: true,
-								placement:'auto bottom',
-								animation: "am-flip-x"
+								placement:'auto bottom'
 							});
 	var deferred;
 	
@@ -135,12 +134,12 @@ App
 	
 	return peekCal;
 }])
-.directive('schedulePopover', ['$popover', '$http', '$q', '$rootScope', 'calendarService', 'calendarType', 'deleteConfirm',
-								function($popover, $http, $q, $rootScope, calendarService, calendarType, deleteConfirm) {
+.directive('schedulePopover', ['$popover', '$http', '$q', '$rootScope', '$filter', 'calendarService', 'calendarType', 'deleteConfirm',
+								function($popover, $http, $q, $rootScope, $filter, calendarService, calendarType, deleteConfirm) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attr) {
-			var schedule = {}, wholeDay = false;
+			scope.schedule = {};
 			var pop = $popover(element, {
 				contentTemplate: '/bpms/home/registschedule',
 				container: 'body',
@@ -148,16 +147,32 @@ App
 				autoClose:true,
 				html: true,
 				placement:'auto left',
-				animation: "am-flip-x",
 				scope:scope,
 				onShow: function() { element.addClass('selected');},
-				onHide: function() { element.removeClass('selected');}
+				onHide: function() { element.removeClass('selected'); initVariables();}
+			}),
+			list = $popover(element, {
+				contentTemplate: '/bpms/home/listschedule',
+				container: 'body',
+				trigger: 'manual',
+				autoClose:true,
+				html: true,
+				placement:'auto top',
+				scope:scope,
+				onShow: function() { element.addClass('selected');},
+				onHide: function() { element.removeClass('selected'); initVariables();}
 			});
 			
-			scope.eidt = false;
+			initVariables();
+			
+			function initVariables() {
+				scope.schedule = {};
+				scope.edit = true;
+				scope.schedule.wholeDay = false;
+			}
 			
 			function updateSchedule($target) {
-				scope.edit = true;
+				scope.edit = false;
 				
 				var schedule = {};
 				var scheduleId = $target.data('schedule');
@@ -165,15 +180,10 @@ App
 				calendarService.getSchedule(scheduleId)
 				.then(
 					function(data) {
-						schedule = data;
-						scope.scheduleId = scheduleId;
-						scope.title = schedule.title;
-						scope.startDate = schedule.startDate;
-						scope.endDate = schedule.endDate;
-						scope.content = schedule.content;
+						scope.schedule = data;
 						
-						if (Math.ceil((schedule.endDate.getTime() - schedule.startDate.getTime())/1000/60/60) == 24)
-							wholeDay = true;	// 하루종일 일정
+						if (Math.ceil((data.endDate - data.startDate)/1000/60/60) == 24)
+							scope.schedule.wholeDay = true;	// 하루종일 일정
 					},
 					function(err) {
 						$q.reject(err);
@@ -182,89 +192,105 @@ App
 			}
 			
 			function insertSchedule(date, hours) {
-				scope.startDate = new Date(date.getTime());
-				scope.endDate = new Date(date.getTime());
-				scope.content = "";
-				scope.title = "";
+				scope.schedule.startDate = new Date(date.getTime());
+				scope.schedule.endDate = new Date(date.getTime());
+				scope.schedule.content = "";
+				scope.schedule.title = "";
 				
-				scope.hasHours = true;
-					
 				if (hours) {
 					hours = hours.split(':');
-					scope.startDate.setHours(hours[0], hours[1], hours[2]);
-					scope.endDate = new Date(scope.startDate.getTime());
-					scope.endDate.setMinutes(scope.startDate.getMinutes() + 30);
+					scope.schedule.startDate.setHours(hours[0], hours[1], hours[2]);
+					scope.schedule.endDate = new Date(scope.schedule.startDate.getTime());
+					scope.schedule.endDate.setMinutes(scope.schedule.startDate.getMinutes() + 30);
 				} else {
-					scope.startDate.setHours(9, 0, 0);
-					scope.endDate.setHours(10, 0, 0);
+					scope.schedule.startDate.setHours(9, 0, 0);
+					scope.schedule.endDate.setHours(10, 0, 0);
 				}
+			}
+			
+			function showSchedules(date) {
+				calendarService.getScheduleList(date, date)
+				.then(
+					function(list) {
+						console.log('list: ', list);
+						scope.list = list;
+					},
+					function(err) {
+						console.error('Error while fetching schedule list');
+					}
+				);
 			}
 			
 			scope.showPopover = function($event, date, hours) {
 				var $target = $($event.target);
+				var tagName = $target.get(0).tagName;
 				
 				console.log('target: ', $target);
 				
-				if ($target.get(0).tagName == 'A')
+				if (tagName == 'A' || tagName == 'TD') {
 					updateSchedule($target);
-				else
+					//$event.stopPropagation();
+				} else if (tagName == 'SPAN' || (tagName == 'DIV' && $target.hasClass("time-content"))) {
 					insertSchedule(date, hours);
-				
+					//$event.stopPropagation();
+				} else if (tagName == 'ABBR' && $target.hasClass("info")) {
+					showSchedules(date);
+					list.show();
+					$('.popover .arrow').hide();
+					return false;
+//					/$event.stopPropagation();
+				} else {
+					return false;
+				}
+					
 				pop.show();
+				$('.popover .arrow').hide();
 			};
 			
 			function setSchedule() {
-				var s = {};
+				console.log('title: ', scope.schedule.title + ', startDate: ', scope.schedule.startDate + ', endDate = ', scope.schedule.endDate);
+				scope.schedule.type = "P";
 				
-				s.title = $(title).val();			//??? 왜 이런지는 모르겠으나, 이렇게해야 입력된 내용을 가져 올 수 있다. 뭐지? (폼의 ID 값을 사용해서 값을 가져온다. 결론은 ng-model은 아무 의미가 없다...)
-				s.startDate = $(start).val();
-				s.endDate = $(end).val();
-				s.type = "P";
-				s.content = $(content).val();
-				
-				if (wholeDay) {
-					s.startDate = new Date(s.startDate += " 00:00:00");
-					s.endDate = new Date(s.endDate += " 23:50:00");
-				} else {
-					s.startDate = new Date(s.startDate += (" " + $(startHours).val() + ":00"));
-					s.endDate = new Date(s.endDate += (" " + $(endHours).val() + ":00"));
+				if (scope.schedule.wholeDay) {
+					scope.schedule.startDate = new Date(scope.schedule.startDate);
+					scope.schedule.endDate = new Date(scope.schedule.endDate);
+					
+					scope.schedule.startDate.setHours(0, 0, 0, 0);
+					scope.schedule.endDate.setHours(23, 50, 0, 0);
 				}
-				
-				return s;
 			}
 			
 			scope.saveSchedule = function() {
-				schedule = setSchedule();
-				console.log('schedule : ', schedule);
+				setSchedule();
+				console.log('schedule : ', scope.schedule);
 				
-				$http.post('/bpms/rest/schedule', schedule)
-				.then(
-					function(response) {
-						$rootScope.$broadcast('changeSchedule');
-					},
-					function(err) {
-						$q.reject(err);
-					}
-				);
+				if (edit) {
+					$http.put('/bpms/rest/schedule', scope.schedule)
+					.then(
+						function(response) {
+							$rootScope.$broadcast('changeSchedule');
+						},
+						function(err) {
+							$q.reject(err);
+						}
+					);
+				} else {
+					$http.post('/bpms/rest/schedule', scope.schedule)
+					.then(
+						function(response) {
+							$rootScope.$broadcast('changeSchedule');
+						},
+						function(err) {
+							$q.reject(err);
+						}
+					);
+				}
 				
 				scope.closePopover();
 			};
 			
 			scope.updateSchedule = function() {
-				schedule = setSchedule();
-				schedule.id = scope.scheduleId;
-				
-				$http.put('/bpms/rest/schedule', schedule)
-				.then(
-					function(response) {
-						$rootScope.$broadcast('changeSchedule');
-					},
-					function(err) {
-						$q.reject(err);
-					}
-				);
-				
-				scope.closePopover();
+				scope.edit = true;
 			};
 			
 			scope.deleteSchedule = function() {
@@ -272,8 +298,8 @@ App
 				.then(
 					function(ans) {
 						if (ans == 'yes') {
-							console.log('id: ', scope.scheduleId);
-							$http.delete('/bpms/rest/schedule/' + scope.scheduleId)
+							console.log('id: ', scope.schedule.id);
+							$http.delete('/bpms/rest/schedule/' + scope.schedule.id)
 							.then(
 								function(response) {
 									$rootScope.$broadcast('changeSchedule');
@@ -295,6 +321,12 @@ App
 			scope.closePopover = function() {
 				pop.hide();
 			};
-		}
+			
+			scope.timeFilter = function(s) {
+				if (Math.ceil((s.endDate - s.startDate)/1000/60/60) == 24)
+					return "종일";
+				return $filter('date')(s.startDate, 'HH시mm분');
+			};
+		}	// end of link:
 	};
 }]);

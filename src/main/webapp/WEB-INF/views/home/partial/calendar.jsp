@@ -20,7 +20,7 @@
 							<span class="calendar-week">토</span>
 						</div>
 						<div class="calendar-row" ng-repeat="cell in ctrl.calendar">
-							<span class="calendar-cell" ng-repeat="d in cell track by $index" ng-class="[{'current-month':ctrl.isCurrentMonth(d)}, {'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]"> {{d.getDate()}}</span>
+							<span class="calendar-cell" ng-repeat="d in cell track by $index" ng-class="[{'current-month':ctrl.isCurrentMonth(d)}, {'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]" ng-click="ctrl.selectDate($event, d)"> {{d.getDate()}}</span>
 						</div>
 					</div>
 				</div>

@@ -70,6 +70,7 @@ public class ScheduleDaoImpl implements ScheduleDao {
 	 */
 	@Override
 	public List<Schedule> list(Date start, Date end) {
+		Date	st = new Date(), dt;
 		String query = "  SELECT s.id,"
 					 + " s.userId,"
 					 + " s.title,"
@@ -119,6 +120,9 @@ public class ScheduleDaoImpl implements ScheduleDao {
 			scal = (Calendar) ecal.clone();
 		}
 		
+		dt = new Date();
+		
+		System.out.println("run " + (dt.getTime() - st.getTime()) + "ms");
 		return scheduleList;
 	}
 

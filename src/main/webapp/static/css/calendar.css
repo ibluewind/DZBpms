@@ -39,14 +39,16 @@ div.nav_bar {
 	text-align:right;
 	display:table-cell;
 	padding: 0 5px;
+	cursor: pointer;
 }
 
 .calendar-cell abbr.info {
-	background-color: aqua;
+	background-color: #d9edf7;
     position: absolute;
     font-size: 0.8em;
     text-align: left;
     margin-right: 15px;
+    cursor: pointer;
 }
 #monthView .calendar-cell:hover {
 	background-color: #fafafa;
@@ -219,6 +221,7 @@ td.hover:hover {
 .schedule-bar a {
 	color: #eee;
 	text-decoation: none;
+	cursor: pointer;
 }
 .schedule-bar a:link {
 	color: #eee;

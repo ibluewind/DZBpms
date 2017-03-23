@@ -6,6 +6,7 @@
 var CALENDAR, calendarType;
 var renderingCalendar = function(schedules, calendar) {
 	var type = $('.calendar-view:visible').attr('id');
+	var st = new Date();
 	
 	CALENDAR = calendar;
 	calendarType = angular.injector(['ng', 'bpmApp']).get('calendarType');		// calencarType constant 호출
@@ -26,29 +27,32 @@ var renderingCalendar = function(schedules, calendar) {
 		var numOfChildren = 0;													// 같은 날 일정의 갯수 (루프를 돌 때마다 값이 변한다.)
 		
 		if (s.type == 'P') {
-			$scheduleBar.append("<a data-schedule='" + s.id + "'>" + s.userName + ":" + s.title + "</a>");
+			$scheduleBar.append(i + ":<a data-schedule='" + s.id + "'>" + s.userName + ":" + s.title + "</a>");
 		} else {
-			$scheduleBar.text(s.userName + ":" + s.title);
+			$scheduleBar.text(i + ":" + s.userName + ":" + s.title);
 		}
 		$scheduleBar.attr("title", s.userName + ":" + s.title + ":" + s.content);
 		
-		console.log(s.title + ': schedulesNum: ' + numOfSchedules);
+		console.log(i + ":" + s.title + ': schedulesNum: ' + numOfSchedules);
 		switch(type) {
 		case calendarType.MONTHVIEW:
 			left = start.getDay() * 14 + 1;
 			right = (6 - end.getDay()) * 14;
 			top = (getNumOfWeeks(start) - 1) * 140 + (20 * numOfSchedules) + numOfSchedules + 50;
-			$scheduleBar.css({left: left + "%", right: right + "%", top: top + "px"});
+			
 			if (numOfSchedules > 3) {
 				$scheduleBar.removeClass('schedule-bar');
 				$scheduleBar.removeAttr("title");
 				$scheduleBar.addClass("info");
 				$scheduleBar.text("+ " + (numOfSchedules - 3) + " more...");
+				top = getNumOfWeeks(start) * 140 + 10;
 			}
+			
+			$scheduleBar.css({left: left + "%", right: right + "%", top: top + "px"});
 			break;
 		case calendarType.WEEKVIEW:
 			dateDiff = Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
-			hourDiff = Math.ceil((end.getTime() - start.getTime()) / 1000 / 60 / 60 * 60) / 30
+			hourDiff = Math.ceil((end.getTime() - start.getTime()) / 1000 / 60 / 30);
 			width = $target.width() * dateDiff;
 			
 			/**
@@ -69,14 +73,14 @@ var renderingCalendar = function(schedules, calendar) {
 				// 종일 일정인 경우에는 타임라인이 아닌 schedule-bar-area에 표시한다.
 				$target = $($('#weekView .schedule-bar-area span')[start.getDay() + 1]);
 				numOfChildren = $target.children('abbr').length;		// 같은 날짜칸에 있는 일정막대의 갯수
-				top =  (numOfSchedules - numOfChildren) * 20 + numOfSchedules + "px";
+				top =  (numOfSchedules - numOfChildren) * 20 + (numOfSchedules) * 2 + "px";
 			}
 			
 			$('#weekView .schedule-bar-area').height((numOfSchedules + 1) * 20 + numOfSchedules + "px");
 			$scheduleBar.css({width: width + "px", height: height + "px", left:left + "%", "line-height":lineHeight + 'em', top:top, overflow:'hidden'});
 			break;
 		case calendarType.DAYVIEW:
-			hourDiff = Math.ceil((end.getTime() - start.getTime()) / 1000 / 60 / 60 * 60) / 30
+			hourDiff = Math.ceil((end.getTime() - start.getTime()) / 1000 / 60 / 30);
 			width = $target.width();
 			
 			if (hourDiff >= 48) {
@@ -106,6 +110,9 @@ var renderingCalendar = function(schedules, calendar) {
 		var $container = $('#'+type).find('.scroll-container');
 		$container.height($(window).innerHeight() - $container.offset().top - 2);	// 일정의 뷰의 높이 조정
 	}
+	
+	var et = new Date();
+	console.log('run ' + (et.getTime() - st.getTime()) + 'ms');
 };
 
 /**
@@ -119,12 +126,19 @@ var getNumOfWeeks = function(date) {
 	
 	if (type != calendarType.MONTHVIEW)		return 1;
 	
+	/*
 	for (;numOfWeeks < CALENDAR.length; numOfWeeks++) {
 		if (CALENDAR[numOfWeeks][0].getTime() <= date.getTime() && date.getTime() <= CALENDAR[numOfWeeks][6].getTime()) {
 			break;
 		}
 	}
+	
 	return numOfWeeks + 1;
+	*/
+	var f = new Date(date.getTime());
+	f.setDate(1);
+	
+	return Math.ceil((f.getDay() + date.getDate()) / 7);
 };
 
 /**

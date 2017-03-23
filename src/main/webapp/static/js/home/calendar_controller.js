@@ -7,7 +7,7 @@ App
 	var self = this;
 	var today = new Date();
 	
-	self.currentDate = new Date();
+	self.currentDate = calendarService.currentDate = new Date();
 	self.currentDate.setDate(1);
 	self.filterOptions = calendarService.filterOptions;
 	
@@ -33,6 +33,14 @@ App
 		self.calendar = calendarService.getCalendar(self.currentDate, calendarType.MONTH);
 	};
 	
+	self.selectDate = function($event, date) {
+		console.log('date: ', date);
+		$('.mini-calendar .calendar-cell').removeClass('selected');
+		$($event.target).addClass('selected');
+		calendarService.currentDate = date;
+		$rootScope.$broadcast('changeCalendarView');
+	};
+	
 	// Filters
 	self.filterSchedule = function() {
 		$rootScope.$broadcast('renderingCalendar');
@@ -54,7 +62,7 @@ App
 	var today = new Date();
 	var calType = calendarType.MONTH;
 	
-	self.currentDate = new Date();
+	self.currentDate = calendarService.currentDate = new Date();
 	self.scheduleList = [];
 	self.weeks = [0, 1, 2, 3, 4, 5, 6];
 	self.hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];	// time-table의 ng-repeat를 위한 배열
@@ -245,11 +253,12 @@ App
 	 * 캘린더 타입이 변하거나, 캘린더의 날짜 이동이 발생하면 처리하는 이벤트이다.
 	 * 시작, 종료 날짜를 캘린더 타입별로 구해서 self.calendar와 scheduleList를 반영한다.
 	 */
-	$scope.$on('changeCalendarView', function() {
+	$rootScope.$on('changeCalendarView', function() {
 		var type = $('.calendar-view:visible').attr('id');
 		var start, end;
 		
 		$('.schedule-bar').remove();
+		self.currentDate = calendarService.currentDate;
 		
 		start = new Date(self.currentDate.getTime());
 		end = new Date(self.currentDate.getTime());
@@ -283,7 +292,7 @@ App
 	});
 	
 	$rootScope.$on('changeSchedule', function() {
-		$scope.$broadcast('changeCalendarView');
+		$rootScope.$broadcast('changeCalendarView');
 	});
 	
 	$rootScope.$on('renderingCalendar', function() {

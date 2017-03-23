@@ -3,6 +3,7 @@ package com.dizzo.bpms.controller;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,8 @@ public class ScheduleRestController {
 	ScheduleService	scheduleService;
 	
 	@RequestMapping(method=RequestMethod.GET)
-	public List<Schedule> list(@RequestParam String start, @RequestParam String end) throws ParseException {
-		DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		
-		return scheduleService.list(format.parse(start), format.parse(end));
+	public List<Schedule> list(@RequestParam long start, @RequestParam long end) throws ParseException {
+		return scheduleService.list(new Date(start), new Date(end));
 	}
 	
 	@RequestMapping(method=RequestMethod.POST)
