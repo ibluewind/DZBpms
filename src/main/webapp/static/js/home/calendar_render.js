@@ -27,13 +27,12 @@ var renderingCalendar = function(schedules, calendar) {
 		var numOfChildren = 0;													// 같은 날 일정의 갯수 (루프를 돌 때마다 값이 변한다.)
 		
 		if (s.type == 'P') {
-			$scheduleBar.append(i + ":<a data-schedule='" + s.id + "'>" + s.userName + ":" + s.title + "</a>");
+			$scheduleBar.append("<a data-schedule='" + s.id + "'>" + s.userName + ":" + s.title + "</a>");
 		} else {
-			$scheduleBar.text(i + ":" + s.userName + ":" + s.title);
+			$scheduleBar.text(s.userName + ":" + s.title);
 		}
 		$scheduleBar.attr("title", s.userName + ":" + s.title + ":" + s.content);
 		
-		console.log(i + ":" + s.title + ': schedulesNum: ' + numOfSchedules);
 		switch(type) {
 		case calendarType.MONTHVIEW:
 			left = start.getDay() * 14 + 1;
@@ -73,10 +72,10 @@ var renderingCalendar = function(schedules, calendar) {
 				// 종일 일정인 경우에는 타임라인이 아닌 schedule-bar-area에 표시한다.
 				$target = $($('#weekView .schedule-bar-area span')[start.getDay() + 1]);
 				numOfChildren = $target.children('abbr').length;		// 같은 날짜칸에 있는 일정막대의 갯수
-				top =  (numOfSchedules - numOfChildren) * 20 + (numOfSchedules) * 2 + "px";
+				top =  (numOfSchedules - numOfChildren) * 20 + numOfSchedules * 2 + "px";
+				$('#weekView .schedule-bar-area').height((numOfSchedules + 1) * 20 + (numOfSchedules * 2) + 1 + "px");
 			}
 			
-			$('#weekView .schedule-bar-area').height((numOfSchedules + 1) * 20 + numOfSchedules + "px");
 			$scheduleBar.css({width: width + "px", height: height + "px", left:left + "%", "line-height":lineHeight + 'em', top:top, overflow:'hidden'});
 			break;
 		case calendarType.DAYVIEW:
@@ -126,7 +125,6 @@ var getNumOfWeeks = function(date) {
 	
 	if (type != calendarType.MONTHVIEW)		return 1;
 	
-	/*
 	for (;numOfWeeks < CALENDAR.length; numOfWeeks++) {
 		if (CALENDAR[numOfWeeks][0].getTime() <= date.getTime() && date.getTime() <= CALENDAR[numOfWeeks][6].getTime()) {
 			break;
@@ -134,11 +132,6 @@ var getNumOfWeeks = function(date) {
 	}
 	
 	return numOfWeeks + 1;
-	*/
-	var f = new Date(date.getTime());
-	f.setDate(1);
-	
-	return Math.ceil((f.getDay() + date.getDate()) / 7);
 };
 
 /**
@@ -182,7 +175,7 @@ var findTargetElement = function(start) {
 	switch(type) {
 	case calendarType.MONTHVIEW:
 		/*
-		 * 월별 일정은 몇번째 주 무슨 요일인지로 타멧을 찾는다.
+		 * 월별 일정은 몇번째 주 무슨 요일인지로 타겟을 찾는다.
 		 */
 		$target = $($($('#monthView .calendar-row')[numOfWeeks]).find('span')[numOfDays]);
 		break;

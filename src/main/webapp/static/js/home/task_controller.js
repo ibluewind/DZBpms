@@ -1,8 +1,8 @@
 'use strict';
 
 App
-.controller('viewTask', ['taskStatus', 'taskService', 'userService', 'warningModal', 'insertCommentModal', 'historyModal', 'confirmModal', 'selectUserModal', '$routeParams', '$location',
-function(taskStatus, taskService, userService, warningModal, insertCommentModal, historyModal, confirmModal, selectUserModal, $routeParams, $location) {
+.controller('viewTask', ['taskStatus', 'taskService', 'userService', 'warningModal', 'insertCommentModal', 'historyModal', 'confirmModal', 'selectUserModal', '$rootScope', '$routeParams', '$location',
+function(taskStatus, taskService, userService, warningModal, insertCommentModal, historyModal, confirmModal, selectUserModal, $rootScope, $routeParams, $location) {
 	var self = this;
 	var taskId = $routeParams.taskId;
 	
@@ -80,7 +80,7 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 		);
 	}
 	
-	self.user = userService.getLoggedInUser();
+	self.user = $rootScope.loggedInUser;
 	getTask();
 	
 	taskService.listTaskHistory(taskId)
@@ -318,8 +318,8 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 		self.task.action += action;
 	}
 }])
-.controller('registTask', ['taskStatus', 'taskService', 'userService', 'selectUserModal', 'warningModal', 'insertCommentModal', 'historyModal', '$routeParams', '$location',
-function(taskStatus, taskService, userService, selectUserModal, warningModal, insertCommentModal, historyModal, $routeParams, $location) {
+.controller('registTask', ['taskStatus', 'taskService', 'userService', 'selectUserModal', 'warningModal', 'insertCommentModal', 'historyModal', '$rootScope', '$routeParams', '$location',
+function(taskStatus, taskService, userService, selectUserModal, warningModal, insertCommentModal, historyModal, $rootScope, $routeParams, $location) {
 	var self =this;
 	var taskId = $routeParams.taskId;
 	
@@ -338,7 +338,7 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 	self.attachFiles = taskService.attachFiles;
 	self.taskHistory = [];
 	
-	self.user = userService.getLoggedInUser();
+	self.user = $rootScope.loggedInuser;
 	console.log('user: ', self.user);
 	self.task.userId = self.user.userId;
 	self.task.userName = self.user.lastName + self.user.firstName;
@@ -532,15 +532,19 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 		self.task.action += action;
 	}
 }])
-.controller('taskList', ['taskStatus', 'taskService', 'userService', '$location', function(taskStatus, taskService, userService, $location) {
+.controller('taskList', ['taskStatus', 'taskService', 'userService', '$location', '$rootScope', function(taskStatus, taskService, userService, $location, $rootScope) {
 	var	self = this;
 	self.tasks = [];
 	self.user = {};
 	
-	self.user = userService.getLoggedInUser();
+	self.user = $rootScope.loggedInUser;
 	
 	self.isOwner = function(task) {
 		return self.user.userId == task.userId;
+	};
+	
+	self.isWorker = function(task) {
+		return self.user.userId == task.workerId;
 	};
 	
 	/**

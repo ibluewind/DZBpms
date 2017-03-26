@@ -41,9 +41,7 @@
 		            <li><a href="#/task_list">작업목록</a></li>
 		            <li><a href="#/regist_task/-9999">작업등록</a></li>
 		            <li class="divider"></li>
-		            <li><a href="#/expect_task">예정된 작업</a></li>
-		            <li class="divider"></li>
-		            <li class="bg-danger"><a href="#/delayed_task">지연된 작업</a></li>
+		            <li><a href="#/expect_task">작업 보고서</a></li>
 		          </ul>
 		        </li>
 		        <li class="dropdown">

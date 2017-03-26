@@ -148,7 +148,7 @@
 				<div class="title-line">
 					<table style="width:100%; border-collapse:separate; text-align:center;">
 						<tbody>
-							<tr>
+							<tr style="height:22px;">
 								<td>&nbsp;</td>
 								<td>{{ctrl.calendar[0][0]|date:'MM.dd'}}(일)</td>
 								<td>{{ctrl.calendar[0][1]|date:'MM.dd'}}(월)</td>

@@ -51,7 +51,7 @@
 					</div>
 					<div class="radio">
 						<label data-placement="right" data-type="info" data-animation="am-fade-and-scale" data-title="부서내 사용자에게 작업을 공개합니다." bs-tooltip>
-							<input type="radio" name="opened" value="P" ng-model="ctrl.task.opened">부서 공개
+							<input type="radio" name="opened" value="D" ng-model="ctrl.task.opened">부서 공개
 						</label>
 					</div>
 					<div class="radio">

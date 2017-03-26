@@ -181,8 +181,9 @@ App
 				.then(
 					function(data) {
 						scope.schedule = data;
+						console.log('schedule: ', scope.schedule);
 						
-						if (Math.ceil((data.endDate - data.startDate)/1000/60/60) == 24)
+						if (Math.ceil((data.endDate - data.startDate)/1000/60/60) >= 24)
 							scope.schedule.wholeDay = true;	// 하루종일 일정
 					},
 					function(err) {
@@ -264,7 +265,7 @@ App
 				setSchedule();
 				console.log('schedule : ', scope.schedule);
 				
-				if (edit) {
+				if (scope.schedule.id) {
 					$http.put('/bpms/rest/schedule', scope.schedule)
 					.then(
 						function(response) {
@@ -290,16 +291,18 @@ App
 			};
 			
 			scope.updateSchedule = function() {
+				console.log('schedule: ', scope.schedule);
 				scope.edit = true;
 			};
 			
-			scope.deleteSchedule = function() {
+			scope.deleteSchedule = function(id) {
+				console.log('schedule: ', scope.schedule);
 				deleteConfirm.show()
 				.then(
 					function(ans) {
 						if (ans == 'yes') {
-							console.log('id: ', scope.schedule.id);
-							$http.delete('/bpms/rest/schedule/' + scope.schedule.id)
+							console.log('id: ', id);
+							$http.delete('/bpms/rest/schedule/' + id)
 							.then(
 								function(response) {
 									$rootScope.$broadcast('changeSchedule');

@@ -41,7 +41,7 @@
 			<button type="button" class="btn btn-primary btn-sm" ng-click="saveSchedule()" ng-disabled="form.$invalid" ng-show="edit">저장</button>
 			<button type="button" class="btn btn-primary btn-sm" ng-click="updateSchedule()" ng-disabled="form.$invalid" ng-hide="edit || schedule.type != 'P'">수정</button>
 			<button type="button" class="btn bnt-defulat btn-sm" ng-click="closePopover()">취소</button>
-			<button type="button" class="btn btn-danger btn-sm" ng-click="deleteSchedule()" ng-hide="edit || schedule.type != 'P'">삭제</button>
+			<button type="button" class="btn btn-danger btn-sm" ng-click="deleteSchedule(schedule.id)" ng-hide="edit || schedule.type != 'P'">삭제</button>
 		</div>
 	</div>
 </form>

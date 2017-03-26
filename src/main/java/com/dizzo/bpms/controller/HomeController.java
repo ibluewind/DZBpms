@@ -30,7 +30,7 @@ public class HomeController {
 	
 	@RequestMapping(value="/task/expect", method=RequestMethod.GET)
 	public String getExceptTask() {
-		return "/task/except_task";
+		return "/task/expect_task";
 	}
 	
 	@RequestMapping(value="/dashboard", method=RequestMethod.GET)

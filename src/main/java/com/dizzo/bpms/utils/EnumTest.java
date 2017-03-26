@@ -9,7 +9,7 @@ public class EnumTest {
 		UserState	state = UserState.ACTIVE;
 		
 		System.out.println("userState: " + state.getState());
-		System.out.println("RETIERED: " + UserState.RETIRED.getState());
+		System.out.println("RETIERED: " + UserState.RETIRED);
 
 		ApproveStatus	status = ApproveStatus.FINISH;
 		System.out.println("status : " + status.getStatus());

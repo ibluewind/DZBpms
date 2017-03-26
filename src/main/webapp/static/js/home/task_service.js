@@ -217,7 +217,6 @@ App
 	};
 }])
 .service('userService', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
-	
 	this.getLoggedInUser = function() {
 		var deferred = $q.defer();
 		

@@ -45,7 +45,7 @@
 						<td>{{task.createDate}}</td>
 						<td>{{task.currentRate}} / {{task.targetRate}}</td>
 						<td>
-							<div class="btn-group" role="group" ng-hide="task.currentRate == 100">
+							<div class="btn-group" role="group" ng-hide="task.currentRate == 100 || !ctrl.isWorker(task)">
 								<button type="button" tabindex=100 class="btn btn-default btn-xs" ng-click="ctrl.processRateDown(task)"><span class="caret"></span></button>
 								<button type="button" tabindex=100 class="btn btn-default btn-xs dropup" ng-click="ctrl.processRateUp(task)"><span class="caret"></span></button>
 							</div>
