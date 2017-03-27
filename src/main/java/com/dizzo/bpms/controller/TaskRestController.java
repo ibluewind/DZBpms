@@ -17,15 +17,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dizzo.bpms.model.Task;
 import com.dizzo.bpms.model.TaskHistory;
+import com.dizzo.bpms.model.User;
+import com.dizzo.bpms.model.UserAuthority;
+import com.dizzo.bpms.model.UserRole;
 import com.dizzo.bpms.service.FileAttachService;
 import com.dizzo.bpms.service.TaskHistoryService;
 import com.dizzo.bpms.service.TaskService;
+import com.dizzo.bpms.service.UserService;
 
 @CrossOrigin(origins="*", maxAge=3600)
 @RestController
 @RequestMapping("/rest/task")
 public class TaskRestController {
 
+	@Autowired
+	UserService		userService;
+	
 	@Autowired
 	TaskService		taskService;
 	
@@ -56,19 +63,32 @@ public class TaskRestController {
 	}
 	
 	
+	/**
+	 * 사용자의 권한에 따라 조회하는 내용을 다르게 한다.
+	 * 부문장/부서장/팀장의 경우에는 각 담당 부서와 하위 부서의 모든 작업을 조회하고,
+	 * 일반 팀원의 경우에는 본인의 작업과 공개된 작업만을 조회한다.
+	 * @return
+	 */
 	@RequestMapping(value="/user", method=RequestMethod.GET) 
 	public List<Task> listOfMyTask() {
 		List<Task>		listAll = new ArrayList<Task>();
 		List<Task>		tasks = new ArrayList<Task>();
 		String			userId = getPrincipal();
 		
-		tasks = taskService.listByCreator(userId);
-		if (!tasks.isEmpty())
-			listAll.addAll(tasks);
-		
-		tasks = taskService.listByWorker(userId);
-		if (!tasks.isEmpty())
-			listAll.addAll(tasks);
+		User	user = userService.getByUserId(userId);
+		if (hasLeaderAuthority(user)) {
+			// 하위 부서의 모든 작업을 조회한다.
+			System.out.println("has authority... list of departments");
+		} else {
+			// 본인의 작업과 공개된 작업만을 조회한다.
+			tasks = taskService.listByCreator(userId);
+			if (!tasks.isEmpty())
+				listAll.addAll(tasks);
+			
+			tasks = taskService.listByWorker(userId);
+			if (!tasks.isEmpty())
+				listAll.addAll(tasks);
+		}
 		
 		return listAll;
 	}
@@ -111,5 +131,23 @@ public class TaskRestController {
 	
 	private String getPrincipal() {
 		return IndexController.getPrincipal();
+	}
+	
+	private boolean hasLeaderAuthority(User user) {
+		List<UserAuthority>	auths = user.getUserAuthorities();
+		boolean	hasAuth = false;
+		
+		for (int i = 0; i < auths.size(); i++) {
+			UserAuthority ua = auths.get(i);
+			if (ua.getRoleName().equals(UserRole.DL.getUserRole())) {
+				hasAuth = true;
+				break;
+			} else if (ua.getRoleName().equals(UserRole.TL.getUserRole())) {
+				hasAuth = true;
+				break;
+			}
+		}
+		
+		return hasAuth;
 	}
 }

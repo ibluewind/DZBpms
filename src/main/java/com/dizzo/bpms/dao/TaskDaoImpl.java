@@ -17,6 +17,8 @@ import com.dizzo.bpms.model.Schedule;
 import com.dizzo.bpms.model.ScheduleType;
 import com.dizzo.bpms.model.Task;
 import com.dizzo.bpms.model.TaskRowMapper;
+import com.dizzo.bpms.model.User;
+import com.dizzo.bpms.model.UserDepartmentPosition;
 import com.dizzo.bpms.service.ScheduleService;
 
 @Repository("taskDao")
@@ -58,21 +60,54 @@ public class TaskDaoImpl implements TaskDao {
 
 	@Override
 	public List<Task> listByWorker(String userId) {
-		String	query = "select t.taskId, t.userId, concat(u.lastName, u.firstName) 'userName', workerId, w.userName 'workerName', t.createDate, t.endDate,"
-				+" t.status, t.priority, t.targetRate, t.currentRate, t.opened, t.title, t.content"
-				+ " from task t, users u, (select userId, concat(lastName, firstName) 'userName' from users) w"
-				+ " where t.workerId=? and t.workerId=w.userId and t.userId=u.userId";
-		
+		String	query = "SELECT t.taskId,"
+					  + " t.userId,"
+					  + " concat(u.lastName, u.firstName) 'userName',"
+       				  + " workerId,"
+       				  + " w.userName 'workerName',"
+       				  + " t.createDate,"
+       				  + " t.endDate,"
+       				  + " t.status,"
+       				  + " t.priority,"
+       				  + " t.targetRate,"
+       				  + " t.currentRate,"
+       				  + " t.opened,"
+       				  + " t.title,"
+       				  + " t.content"
+  				  + " FROM task t,"
+       				  + " users u,"
+       				  + " (SELECT userId, concat(lastName, firstName) 'userName' FROM users) w"
+ 				  + " WHERE     t.workerId = ?"
+       				  + " AND t.workerId = w.userId"
+       				  + " AND t.userId = u.userId";
+				
 		List<Task>	tasks = new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new TaskRowMapper());
 		return tasks;
 	}
 
 	@Override
 	public List<Task> listByCreator(String userId) {
-		String	query = "select t.taskId, t.userId, concat(u.lastName, u.firstName) 'userName', workerId, w.userName 'workerName', t.createDate, t.endDate,"
-				+" t.status, t.priority, t.targetRate, t.currentRate, t.opened, t.title, t.content"
-				+ " from task t, users u, (select userId, concat(lastName, firstName) 'userName' from users) w"
-				+ " where t.userId=? and t.workerId=w.userId and t.userId=u.userId";
+		String	query = "SELECT t.taskId,"
+				  + " t.userId,"
+				  + " concat(u.lastName, u.firstName) 'userName',"
+				  + " workerId,"
+				  + " w.userName 'workerName',"
+				  + " t.createDate,"
+				  + " t.endDate,"
+				  + " t.status,"
+				  + " t.priority,"
+				  + " t.targetRate,"
+				  + " t.currentRate,"
+				  + " t.opened,"
+				  + " t.title,"
+				  + " t.content"
+				  + " FROM task t,"
+				  + " users u,"
+				  +  " (SELECT userId, concat(lastName, firstName) 'userName' FROM users) w"
+				  + " WHERE     t.userId = ?"
+				  + " AND t.userId != t.workerId"
+				  + " AND t.workerId = w.userId"
+				  + " AND t.userId = u.userId";
 		
 		List<Task>	tasks = new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new TaskRowMapper());
 		return tasks;
@@ -86,6 +121,15 @@ public class TaskDaoImpl implements TaskDao {
 						+ " where t.workerId in (select userid from user_dept_position where deptid=?) and u.userId=t.userId and t.workerId=w.userId";
 		List<Task> tasks = new JdbcTemplate(dataSource).query(query, new Object[] {deptId}, new TaskRowMapper());
 		
+		return tasks;
+	}
+
+	@Override
+	public List<Task> listByAuthority(User user) {
+		List<Task>	tasks = new ArrayList<>();
+		List<UserDepartmentPosition>	udps = user.getDeptPositions();
+		
+		//TODO 조회할 부서 아이디를 먼저 추출한 후, listByDept()를 수행한다.
 		return tasks;
 	}
 

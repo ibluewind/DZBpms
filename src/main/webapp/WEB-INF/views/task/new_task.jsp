@@ -46,7 +46,7 @@
 				<div class="col-md-6">
 					<div class="radio">
 						<label data-placement="right" data-type="info" data-animation="am-fade-and-scale" data-title="팀 내부 사용자에게만 작업을 공개합니다." bs-tooltip>
-							<input type="radio" name="opened" value="T" ng-model="ctrl.task.opened" checked>팀내 공개
+							<input type="radio" name="opened" value="T" ng-model="ctrl.task.opened">팀내 공개
 						</label>
 					</div>
 					<div class="radio">
@@ -56,7 +56,7 @@
 					</div>
 					<div class="radio">
 						<label data-placement="right" data-type="info" data-animation="am-fade-and-scale" data-title="작성자와 담당자외에 공개하지 않습니다." bs-tooltip>
-							<input type="radio" name="opened" value="N" ng-model="ctrl.task.opened">공개 안함
+							<input type="radio" name="opened" value="N" ng-model="ctrl.task.opened" checked>공개 안함
 						</label>
 					</div>
 				</div>

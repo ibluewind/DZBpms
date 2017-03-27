@@ -338,8 +338,7 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 	self.attachFiles = taskService.attachFiles;
 	self.taskHistory = [];
 	
-	self.user = $rootScope.loggedInuser;
-	console.log('user: ', self.user);
+	self.user = $rootScope.loggedInUser;
 	self.task.userId = self.user.userId;
 	self.task.userName = self.user.lastName + self.user.firstName;
 	

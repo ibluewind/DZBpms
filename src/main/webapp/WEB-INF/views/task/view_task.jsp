@@ -6,7 +6,7 @@
 				<div class="panel-title">작업 내역</div>
 			</div>
 			<div class="col-md-2 pull-right" ng-show="ctrl.isOwner()">
-				<button class="btn btn-default btn-sm" ng-click="ctrl.editTask()">수정</button>
+				<!-- button class="btn btn-default btn-sm" ng-click="ctrl.editTask()">수정</button-->
 			</div>
 		</div>
 	</div>
