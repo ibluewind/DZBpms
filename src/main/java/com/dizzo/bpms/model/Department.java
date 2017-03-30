@@ -12,6 +12,7 @@ public class Department {
 	private String 	useYN;
 	private Date	lastModified;
 	private int		depth;
+	private int		seq;
 	
 	private String	companyName;
 	private String	parentName;
@@ -81,6 +82,14 @@ public class Department {
 
 	public void setDepth(int depth) {
 		this.depth = depth;
+	}
+
+	public int getSeq() {
+		return seq;
+	}
+
+	public void setSeq(int seq) {
+		this.seq = seq;
 	}
 
 	public String toString() {

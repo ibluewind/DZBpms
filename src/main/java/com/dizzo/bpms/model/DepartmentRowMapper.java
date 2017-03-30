@@ -20,6 +20,7 @@ public class DepartmentRowMapper implements RowMapper<Department> {
 		dept.setCompanyName(rs.getString("companyName"));
 		dept.setParentName(rs.getString("parentName"));
 		dept.setDepth(rs.getInt("depth"));
+		dept.setSeq(rs.getInt("seq"));
 		
 		return dept;
 	}

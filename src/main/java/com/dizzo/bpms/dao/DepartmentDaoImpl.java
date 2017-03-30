@@ -35,7 +35,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	
 	@Override
 	public List<Department> getAll(String companyId) {
-		String	query = "select d.pid, d.deptid, d.name, p.name 'parentName', d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth"
+		String	query = "select d.pid, d.deptid, d.name, p.name 'parentName', d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth, d.seq"
 					+ " from departments d, company c, (select deptid, name from departments) p"
 					+ " where d.companyid=c.id and d.useyn='Y' and d.pid=p.deptid and c.id=?";
 		return new JdbcTemplate(dataSource).query(query, new Object[] {companyId}, new DepartmentRowMapper());
@@ -43,7 +43,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 
 	@Override
 	public Department getByDeptId(String deptId) {
-		String	query = "select d.pid, p.name 'parentName', d.deptid, d.name, d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth"
+		String	query = "select d.pid, p.name 'parentName', d.deptid, d.name, d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth. d.seq"
 				+ " from departments d, company c,"
 				+ " (select deptid, name from departments) p"
 				+ " where d.companyid=c.id and d.deptid=? and d.pid=p.deptid";
@@ -64,7 +64,8 @@ public class DepartmentDaoImpl implements DepartmentDao {
 					+ "c.name 'companyName', "
 					+ "d.useyn, "
 					+ "d.lastmodified, "
-					+ "d.depth "
+					+ "d.depth, "
+					+ "d.seq"
 					+ "FROM departments d, company c "
 					+ "WHERE d.deptid = ? AND d.companyid = c.id";
 			dept = jdbcTemplate.queryForObject(query, new Object[]{deptId}, new DepartmentRowMapper());
@@ -75,7 +76,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	
 	@Override
 	public Department getRootByCompanyId(String companyId) {
-		String	query = "select d.pid, c.name 'parentName', d.deptid, d.name, d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth"
+		String	query = "select d.pid, c.name 'parentName', d.deptid, d.name, d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth, d.seq"
 				+ " from departments d, company c"
 				+ " where d.companyid=c.id and d.pid='#' and d.companyid=?";
 		Department department = null;
@@ -93,7 +94,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 
 	@Override
 	public Department save(Department dept) {
-		String	query = "insert into departments (companyid, pid, deptid, name, useyn, lastmodified, depth) values (?, ?, ?, ?, ?, now(), ?)";
+		String	query = "insert into departments (companyid, pid, deptid, name, useyn, lastmodified, depth, seq) values (?, ?, ?, ?, ?, now(), ?, ?)";
 		dept.setDeptId( UUID.randomUUID().toString());
 		log.info("dept = {}", dept);
 		new JdbcTemplate(dataSource).update(query, new Object[] {
@@ -102,7 +103,8 @@ public class DepartmentDaoImpl implements DepartmentDao {
 				dept.getDeptId(),
 				dept.getName(),
 				dept.getUseYN(),
-				dept.getDepth()
+				dept.getDepth(),
+				dept.getSeq()
 		});
 		
 		return dept;
@@ -112,13 +114,14 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	public Department update(Department dept) {
 		// update瑜� �뿀�슜�븯�뒗 �빆紐⑹� �긽�쐞遺��꽌, 遺��꽌紐�, 臾몄꽌愿�由ъ옄, �궗�슜�뿬遺�, �닔�젙�씪�옄 肉먯씠�떎.
 		// �굹癒몄� �빆紐⑹� �닔�젙 遺덇�
-		String	query = "update departments set pid=?, name=?, useyn=?, lastmodified=now(), depth=? where deptid=?";
+		String	query = "update departments set pid=?, name=?, useyn=?, lastmodified=now(), depth=?, seq=? where deptid=?";
 		
 		new JdbcTemplate(dataSource).update(query, new Object[] {
 				dept.getpId(),
 				dept.getName(),
 				dept.getUseYN(),
 				dept.getDepth(),
+				dept.getSeq(),
 				dept.getDeptId()
 		});
 		
@@ -138,7 +141,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 
 	@Override
 	public List<DepartmentTree> getJsTree(String companyId) {
-		String	query = "select d.pid, d.deptid, d.name, 'parentName', d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth"
+		String	query = "select d.pid, d.deptid, d.name, 'parentName', d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth, d.seq"
 				+ " from departments d, company c"
 				+ " where d.companyid=c.id and d.useyn='Y' and c.id=?";
 		
@@ -161,8 +164,8 @@ public class DepartmentDaoImpl implements DepartmentDao {
 
 	@Override
 	public void createRootDepartment(Company company) {
-		String	query = "insert into departments (pid, deptid, name, companyid, useyn, lastmodified, depth) "
-				+ " values ('#', uuid(), ?, ?, 'Y', now(), 0)";
+		String	query = "insert into departments (pid, deptid, name, companyid, useyn, lastmodified, depth, seq) "
+				+ " values ('#', uuid(), ?, ?, 'Y', now(), 0, 1)";
 		new JdbcTemplate(dataSource).update(query, new Object[] {
 				company.getName(),
 				company.getId()
