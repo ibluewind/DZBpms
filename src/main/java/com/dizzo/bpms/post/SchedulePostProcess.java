@@ -45,7 +45,7 @@ public class SchedulePostProcess implements PostProcess {
 
 	private Date convertToDate(String date, boolean am) {
 		Date d = new Date();
-		DateFormat	format = new SimpleDateFormat("yyyy/MM/dd");
+		DateFormat	format = new SimpleDateFormat("yyyy-MM-dd");
 		
 		try {
 			d = format.parse(date);

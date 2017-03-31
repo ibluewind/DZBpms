@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.dizzo.bpms.model.ApproveLine;
 import com.dizzo.bpms.model.UserDepartmentPosition;
 
 public class ArrayTest {
@@ -69,8 +68,16 @@ public class ArrayTest {
 		
 		udps = udps.stream().filter(t -> t.getPositionType().equals("R")).collect(Collectors.toList());
 		
-		System.out.println("upds: " + udps);
-		//System.out.println("rls: " + rls);
+		List<UserDepartmentPosition>	root = new ArrayList<>();
+		
+		for (int i = 0; i < udps.size(); i++) {
+			String	pid = udps.get(i).getDeptPid();
+			if (udps.stream().filter(t->t.getDeptId().equals(pid)).collect(Collectors.toList()).isEmpty()) {
+				System.out.println("add root : " + udps.get(i));
+				root.add(udps.get(i));
+			}
+		}
+		System.out.println("root : " + root);
 	}
 
 }

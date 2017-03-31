@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -161,10 +162,9 @@ public class TaskDaoImpl implements TaskDao {
 					+ "                                   WHERE d.deptid = t.deptId) tmp))"
 					+ "       AND u.userId = t.userId AND t.workerId = w.userId";
 		List<Task>	tasks = new ArrayList<>();
-		List<UserDepartmentPosition>	udps = user.getDeptPositions();
+		List<UserDepartmentPosition>	udps = filteringDepartment(user.getDeptPositions());
 		
 		for (int i = 0; i < udps.size(); i++) {
-			System.out.println("udps[" + i + "] : " + udps.get(i));
 			String	deptId = udps.get(i).getDeptId();
 			
 			tasks.addAll(new JdbcTemplate(dataSource).query(query, new Object[] {deptId, deptId}, new TaskRowMapper()));
@@ -225,6 +225,30 @@ public class TaskDaoImpl implements TaskDao {
 		new JdbcTemplate(dataSource).update(query, args);
 		
 		return task;
+	}
+	
+	/**
+	 * 사용자 부서/직책 정보에서 직책을 가진 부서와 직책을 가진 부서 중에 최상위 부서만을 조회한다.
+	 * 최상위 부서만을 필터링하는 이유는 그렇게 하지 않으면, 하위 부서의 작업 목록을 조회하게 되므로 목록이 중복되기 때문이다.
+	 * @param ul
+	 * @return
+	 */
+	private List<UserDepartmentPosition> filteringDepartment(List<UserDepartmentPosition> ul) {
+		List<UserDepartmentPosition> rl = new ArrayList<>();
+
+		// 직책만 가진 정보를 필터링 한다.
+		// Java8에서만 동작한다.
+		ul = ul.stream().filter(t->t.getPositionType().equals("R")).collect(Collectors.toList());
+		
+		for (int i = 0; i < ul.size(); i++) {
+			String	pid = ul.get(i).getDeptPid();
+			
+			// 현재 부서 정보의 부모 코드를 가진 부서 정보가 없다면, 현재 부서가 최상위 부서이다.
+			if (ul.stream().filter(t->t.getDeptId().equals(pid)).collect(Collectors.toList()).isEmpty()) {
+				rl.add(ul.get(i));
+			}
+		}
+		return rl;
 	}
 
 	private String checkChangeField(Task org, Task dest) {

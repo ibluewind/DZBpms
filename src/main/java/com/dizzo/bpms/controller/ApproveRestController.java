@@ -135,6 +135,8 @@ public class ApproveRestController {
 				DocumentManager docManager = getDocumentManager(summary, form.getProcDept());
 				if (docManager == null) {
 					System.out.println("Finished approve processing");
+					summary.setStatus(ApproveStatus.FINISH.getStatus());
+					summaryService.update(summary);
 					return null;
 				} else {
 					// 처리부서의 문서 담당자 결재함에 결재 정보를 등록한다.
