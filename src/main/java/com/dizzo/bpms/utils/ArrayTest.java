@@ -5,52 +5,72 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.dizzo.bpms.model.ApproveLine;
+import com.dizzo.bpms.model.UserDepartmentPosition;
 
 public class ArrayTest {
 
 	public static void main(String[] args) {
-		List<ApproveLine> lines = new ArrayList<ApproveLine>();
-		ApproveLine	line = new ApproveLine();
+		List<UserDepartmentPosition>	udps = new ArrayList<>();
+		UserDepartmentPosition u = new UserDepartmentPosition();
 		
-		line.setApprovalId("andrew");
-		line.setType("R");
+		u.setUserId("bigfoot@chosun.com");
+		u.setDeptId("aaaaaa");
+		u.setDeptName("미디어부문");
+		u.setDeptPid("aaaadfdfd");
+		u.setPositionId("1111");
+		u.setPositionName("부장");
+		u.setPositionType("R");
 		
-		lines.add(line);
+		udps.add(u);
 		
-		line = new ApproveLine();
-		line.setApprovalId("dylee");
-		line.setType("P");
+		u = new UserDepartmentPosition();
+		u.setUserId("bigfoot@chosun.com");
+		u.setDeptId("aaaaaa");
+		u.setDeptName("미디어부분");
+		u.setDeptPid("aaaadfdfd");
+		u.setPositionId("222222");
+		u.setPositionName("국장");
+		u.setPositionType("P");
 		
-		lines.add(line);
+		udps.add(u);
 		
-		line = new ApproveLine();
-		line.setAppId("bigfoot");
-		line.setType("R");
+		u = new UserDepartmentPosition();
+		u.setUserId("bigfoot@chosun.com");
+		u.setDeptId("bbbbbb");
+		u.setDeptName("미디어기술부");
+		u.setDeptPid("aaaaaa");
+		u.setPositionId("1111");
+		u.setPositionName("부장");
+		u.setPositionType("R");
 		
-		lines.add(line);
+		udps.add(u);
 		
-		line = new ApproveLine();
-		line.setApprovalId("kds");
-		line.setType("P");
+		u = new UserDepartmentPosition();
+		u.setUserId("bigfoot@chosun.com");
+		u.setDeptId("cccccc");
+		u.setDeptName("미디어개발부");
+		u.setDeptPid("111111");
+		u.setPositionId("1111");
+		u.setPositionName("부장");
+		u.setPositionType("R");
 		
-		lines.add(line);
+		udps.add(u);
 		
-		line = new ApproveLine();
-		line.setApprovalId("yunju");
-		line.setType("R");
+		u = new UserDepartmentPosition();
+		u.setUserId("bigfoot@chosun.com");
+		u.setDeptId("dddddd");
+		u.setDeptName("미디어개발팀");
+		u.setDeptPid("cccccc");
+		u.setPositionId("3333");
+		u.setPositionName("팀장");
+		u.setPositionType("R");
 		
-		lines.add(line);
+		udps.add(u);
 		
-		System.out.println("lines: " + lines);
+		udps = udps.stream().filter(t -> t.getPositionType().equals("R")).collect(Collectors.toList());
 		
-		List<ApproveLine>	pls = lines.stream().filter(t -> t.getType().equals("P")).collect(Collectors.toList());
-		List<ApproveLine>	rls = lines.stream().filter(t -> t.getType().equals("R")).collect(Collectors.toList());
-		
-		List<ApproveLine>	newList = new ArrayList<>();
-		newList.addAll(pls);
-		newList.addAll(rls);
-		
-		System.out.println("newList: " + newList);
+		System.out.println("upds: " + udps);
+		//System.out.println("rls: " + rls);
 	}
 
 }

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +17,6 @@ import com.dizzo.bpms.model.Task;
 import com.dizzo.bpms.model.TaskHistory;
 import com.dizzo.bpms.model.User;
 import com.dizzo.bpms.model.UserAuthority;
-import com.dizzo.bpms.model.UserRole;
 import com.dizzo.bpms.service.FileAttachService;
 import com.dizzo.bpms.service.TaskHistoryService;
 import com.dizzo.bpms.service.TaskService;
@@ -79,6 +76,7 @@ public class TaskRestController {
 		if (hasLeaderAuthority(user)) {
 			// 하위 부서의 모든 작업을 조회한다.
 			System.out.println("has authority... list of departments");
+			listAll = taskService.listByAuthority(user);
 		} else {
 			// 본인의 작업과 공개된 작업만을 조회한다.
 			tasks = taskService.listByCreator(userId);
@@ -92,6 +90,7 @@ public class TaskRestController {
 		
 		return listAll;
 	}
+	
 	
 	@RequestMapping(value="/{taskId}", method=RequestMethod.GET)
 	public Task getByTaskId(@PathVariable String taskId) {
@@ -139,10 +138,13 @@ public class TaskRestController {
 		
 		for (int i = 0; i < auths.size(); i++) {
 			UserAuthority ua = auths.get(i);
-			if (ua.getRoleName().equals(UserRole.DL.getUserRole())) {
+			System.out.println("DEBUG : ua " + ua);
+			if (ua.getRoleName().equals("DL")) {
+				System.out.println("user has DL");
 				hasAuth = true;
 				break;
-			} else if (ua.getRoleName().equals(UserRole.TL.getUserRole())) {
+			} else if (ua.getRoleName().equals("TL")) {
+				System.out.println("user has TL");
 				hasAuth = true;
 				break;
 			}

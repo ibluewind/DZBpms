@@ -46,12 +46,12 @@
 				<button type="button" class="btn btn-danger btn-xs" ng-click="ctrl.clearDocumentManager('S')"><span class="glyphicon glyphicon-trash"></span></button>
 			</div>
 		</div>
-		<!-- div class="form-group">
-			<label class="col-md-3 control-label" for="depth">Depth(임시)</label>
+		<div class="form-group">
+			<label class="col-md-3 control-label" for="seq">순번</label>
 			<div class="col-md-7">
-				<input type="text" id="depth" class="form-control" ng-model="ctrl.dept.depth">
+				<input type="text" id="seq" class="form-control" ng-model="ctrl.dept.seq">
 			</div>
-		</div-->
+		</div>
 		</form>
 	</div>
 	<div class="panel-footer">

@@ -35,15 +35,28 @@ public class DepartmentDaoImpl implements DepartmentDao {
 	
 	@Override
 	public List<Department> getAll(String companyId) {
-		String	query = "select d.pid, d.deptid, d.name, p.name 'parentName', d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth, d.seq"
-					+ " from departments d, company c, (select deptid, name from departments) p"
-					+ " where d.companyid=c.id and d.useyn='Y' and d.pid=p.deptid and c.id=?";
+		String	query = "SELECT d.pid,"
+						+ "       d.deptid,"
+						+ "       d.name,"
+						+ "       p.name 'parentName',"
+						+ "       d.companyid,"
+						+ "       c.name 'companyName',"
+						+ "       d.useyn,"
+						+ "       d.lastmodified,"
+						+ "       d.depth,"
+						+ "       d.seq"
+						+ "  FROM departments d, company c, (SELECT deptid, name FROM departments) p"
+						+ " WHERE     d.companyid = c.id"
+						+ "       AND d.useyn = 'Y'"
+						+ "       AND d.pid = p.deptid"
+						+ "       AND c.id = ?"
+						+ "ORDER BY d.depth, d.seq;";
 		return new JdbcTemplate(dataSource).query(query, new Object[] {companyId}, new DepartmentRowMapper());
 	}
 
 	@Override
 	public Department getByDeptId(String deptId) {
-		String	query = "select d.pid, p.name 'parentName', d.deptid, d.name, d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth. d.seq"
+		String	query = "select d.pid, p.name 'parentName', d.deptid, d.name, d.companyid, c.name 'companyName', d.useyn, d.lastmodified, d.depth, d.seq"
 				+ " from departments d, company c,"
 				+ " (select deptid, name from departments) p"
 				+ " where d.companyid=c.id and d.deptid=? and d.pid=p.deptid";
@@ -65,7 +78,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
 					+ "d.useyn, "
 					+ "d.lastmodified, "
 					+ "d.depth, "
-					+ "d.seq"
+					+ "d.seq "
 					+ "FROM departments d, company c "
 					+ "WHERE d.deptid = ? AND d.companyid = c.id";
 			dept = jdbcTemplate.queryForObject(query, new Object[]{deptId}, new DepartmentRowMapper());

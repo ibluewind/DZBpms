@@ -126,10 +126,49 @@ public class TaskDaoImpl implements TaskDao {
 
 	@Override
 	public List<Task> listByAuthority(User user) {
+		String query = "SELECT t.taskId,"
+					+ "       t.userId,"
+					+ "       concat(u.lastName, u.firstName) 'userName',"
+					+ "       t.workerId,"
+					+ "       w.userName 'workerName',"
+					+ "       t.createDate,"
+					+ "       t.endDate,"
+					+ "       t.status,"
+					+ "       t.priority,"
+					+ "       t.targetRate,"
+					+ "       t.currentRate,"
+					+ "       t.opened,"
+					+ "       t.title,"
+					+ "       t.content"
+					+ "  FROM task t,"
+					+ "       users u,"
+					+ "       (SELECT concat(lastName, firstName) 'userName', userId FROM users) w"
+					+ " WHERE     t.workerId IN"
+					+ "              (SELECT userid"
+					+ "                 FROM user_dept_position"
+					+ "                WHERE deptid IN"
+					+ "                         (SELECT deptId"
+					+ "                            FROM (SELECT d.deptId deptId"
+					+ "                                    FROM departments d,"
+					+ "                                         (SELECT ? AS deptId"
+					+ "                                          UNION ALL"
+					+ "                                          SELECT getChildDeptList() deptId"
+					+ "                                            FROM (SELECT @start_with :="
+					+ "                                                            ?,"
+					+ "                                                         @deptId :="
+					+ "                                                            @start_with) b,"
+					+ "                                                 departments) t"
+					+ "                                   WHERE d.deptid = t.deptId) tmp))"
+					+ "       AND u.userId = t.userId AND t.workerId = w.userId";
 		List<Task>	tasks = new ArrayList<>();
 		List<UserDepartmentPosition>	udps = user.getDeptPositions();
 		
-		//TODO 조회할 부서 아이디를 먼저 추출한 후, listByDept()를 수행한다.
+		for (int i = 0; i < udps.size(); i++) {
+			System.out.println("udps[" + i + "] : " + udps.get(i));
+			String	deptId = udps.get(i).getDeptId();
+			
+			tasks.addAll(new JdbcTemplate(dataSource).query(query, new Object[] {deptId, deptId}, new TaskRowMapper()));
+		}
 		return tasks;
 	}
 

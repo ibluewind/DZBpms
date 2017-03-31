@@ -112,7 +112,7 @@ public class UserDaoImpl implements UserDao {
 		try {
 			user = new JdbcTemplate(dataSource).queryForObject(query, new Object[] {userId}, new UserRowMapper());
 			
-			query = "select udp.userid, d.deptid 'deptid', d.name 'deptname', p.id 'positionid', p.name 'positionname', p.type 'positiontype'"
+			query = "select udp.userid, d.deptid 'deptid', d.name 'deptname', d.pid 'deptpid', p.id 'positionid', p.name 'positionname', p.type 'positiontype'"
 					+ " from users u, user_dept_position udp, departments d, position p"
 					+ " where udp.userid = u.userid and u.userid=? and d.deptid=udp.deptid and p.id=udp.positionid";
 			deptPositions = new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new UserDepartmentPositionRowMapper());

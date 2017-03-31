@@ -69,8 +69,8 @@ App
 		$location.path('/edit/' + $scope.selectedDeptId);
 	};
 }])
-.controller('deptController', ['DepartmentService', 'UserService', 'TreeService', 'selectDepartment', 'selectUserModal', 'deleteConfirm', '$routeParams', '$location',
-						function(DepartmentService, UserService, TreeService, selectDepartment, selectUserModal, deleteConfirm, $routeParams, $location) {
+.controller('deptController', ['DepartmentService', 'UserService', 'TreeService', 'selectDepartment', 'selectUserModal', 'deleteConfirm', '$routeParams', '$location', '$alert',
+						function(DepartmentService, UserService, TreeService, selectDepartment, selectUserModal, deleteConfirm, $routeParams, $location, $alert) {
 	var self = this;
 	var id = $routeParams.id;
 	self.edit = true;
@@ -80,7 +80,17 @@ App
 	self.secondManager = {};
 	self.docManagers = [];
 	
-	console.log('id = ' + id);
+	function showAlert(title, content) {
+		var alert  = $alert({
+			title: title,
+			content: content,
+			placement: 'bottom',
+			type: 'info',
+			show: true
+		});
+		
+		alert.show();
+	}
 	
 	DepartmentService.getDepartmentById(id)
 	.then(
@@ -198,6 +208,7 @@ App
 					self.dept = d;
 					updateDocumentManagers();
 					TreeService.updateDept(self.dept);
+					showAlert('수정완료', d.name + '의 부서 정보를 수정하였습니다.');
 				},
 				function(err) {
 					console.error('Error while Updating Department Information');

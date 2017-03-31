@@ -4,8 +4,10 @@ public class UserDepartmentPosition {
 	
 	String	userId;
 	String	deptId;
-	String	deptName;
 	String	positionId;
+	
+	String	deptName;
+	String	deptPid;
 	String	positionName;
 	String	positionType;
 	
@@ -29,6 +31,14 @@ public class UserDepartmentPosition {
 	public void setDeptName(String deptName) {
 		this.deptName = deptName;
 	}
+	public String getDeptPid() {
+		return deptPid;
+	}
+
+	public void setDeptPid(String deptPid) {
+		this.deptPid = deptPid;
+	}
+
 	public String getPositionId() {
 		return positionId;
 	}
@@ -51,6 +61,6 @@ public class UserDepartmentPosition {
 	}
 
 	public String toString() {
-		return "UserDepartmentPosition = {userID : " + userId + ", deptId : " + deptId + ", deptName : " + deptName + ", positionId : " + positionId + ", positionName : " + positionName + ", positionType: " + positionType + "}";
+		return "UserDepartmentPosition = {userID : " + userId + ", deptId : " + deptId + ", pid : " + deptPid + ", deptName : " + deptName + ", positionId : " + positionId + ", positionName : " + positionName + ", positionType: " + positionType + "}";
 	}
 }

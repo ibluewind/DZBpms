@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.dizzo.bpms.dao.TaskDao;
 import com.dizzo.bpms.model.Task;
+import com.dizzo.bpms.model.User;
 
 @Service("taskService")
 public class TaskServiceImpl implements TaskService {
@@ -32,6 +33,11 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public List<Task> listByDept(String deptId) {
 		return dao.listByDept(deptId);
+	}
+
+	@Override
+	public List<Task> listByAuthority(User user) {
+		return dao.listByAuthority(user);
 	}
 
 	@Override
