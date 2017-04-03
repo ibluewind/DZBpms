@@ -49,6 +49,9 @@ ul.sub-menu li {
 	background-color: #eee;
 }
 
+.form-view {
+	line-height: 2.5em;
+}
 input:focus {
 	outline: none;
 }

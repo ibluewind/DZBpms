@@ -41,6 +41,16 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	public List<Task> listForOpenedTeam(String userId) {
+		return dao.listForOpenedTeam(userId);
+	}
+
+	@Override
+	public List<Task> listForOpenedDepartment(String userId) {
+		return dao.listForOpenedDepartment(userId);
+	}
+
+	@Override
 	public Task getById(String taskId) {
 		return dao.getById(taskId);
 	}

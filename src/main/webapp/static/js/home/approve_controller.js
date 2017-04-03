@@ -210,7 +210,7 @@ App
 	self.dateDiff = function(start, end) {
 		if (start == "" || end == "")	return 0;
 		var milliDay = 1000 * 60 * 60 * 24;
-		var days = Math.floor((new Date(end) - new Date(start)) / milliDay) + 1;
+		var days = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / milliDay);
 		
 		return days < 0 ? 0 : days;
 	};
@@ -510,6 +510,11 @@ App
 		var $postFields = $('*[data-post-process]');
 	}
 	
+	/**
+	 * 휴가원의 경우 중복 필드가 있을 수 있고, 중복 처리를 해주지 않으면, 마지막 필드가 기존의 필드를 덮어 씌우게 되므로
+	 * 결국은 마지막 필드 값만 전달되어 일정에는 마지막 휴가 일정만 등록 되게 된다.
+	 * 중복 필드가 있는 경우에는 fieldRow만큼 루프로 처리하는 것이 좋을 것 같다.
+	 */
 	function getPostProcessFields() {
 		var $postFields = $('*[data-post-process]');
 		var field = {};
@@ -876,20 +881,29 @@ App
 	
 	self.cancelApprove = function() {
 		$location.path(prevUrl);
-	}
+	};
 	
 	/**
 	 * fileters
 	 */
 	self.onlyRequestApproveLine = function(line) {
 		return line.type == 'R';
-	}
+	};
 	
 	self.onlyProcessingApproveLine = function(line) {
 		return line.type == 'P';
-	}
+	};
 	
 	self.statusName = approveService.getStatusName;
+	
+	self.dateDiff = function(start, end) {
+		if (start == "" || end == "")	return 0;
+		var milliDay = 1000 * 60 * 60 * 24;
+		var days = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / milliDay);
+		
+		console.log('days: ' + days);
+		return days < 0 ? 0 : days;
+	};
 }])
 .controller('trayAppController', ['approveService', 'approveStatus', 'approveTrayType', '$routeParams', '$rootScope',
                                        function(approveService, approveStatus, approveTrayType, $routeParams, $rootScope) {
@@ -917,8 +931,8 @@ App
 		}
 	);
 }])
-.controller('manageAppLineController', ['approveService', 'userService', 'selectUserModal', 'selectFormModal', 'deleteConfirm', '$alert',
-										function(approveService, userService, selectUserModal, selectFormModal, deleteConfirm, $alert) {
+.controller('manageAppLineController', ['approveService', 'userService', 'selectUserModal', 'selectFormModal', 'deleteConfirm', '$alert', '$rootScope',
+										function(approveService, userService, selectUserModal, selectFormModal, deleteConfirm, $alert, $rootScope) {
 	var self = this;
 	
 	self.summaries = [];
@@ -964,7 +978,7 @@ App
 					self.summary.formTitle = form.title;
 					
 					// 본인을 결재라인에 추가한다.
-					var user = userService.getLoggedInUser();
+					var user = $rootScope.loggedInUser;
 					var line = {
 						lineId: '',
 						approvalId: user.userId,
@@ -1096,7 +1110,7 @@ App
 				$alert({
 					title: '수정 완료',
 					content: self.summary.title + ' 사용자 지정 결재라인을 수정하였습니다.',
-					placement: 'top',
+					placement: 'bottom',
 					type: 'info',
 					show: true
 				});
@@ -1108,7 +1122,7 @@ App
 				$alert({
 					title: '수정 실패',
 					content: self.summary.title + ' 사용자 지정 결재라인 수정을 실패하였습니다.',
-					placement: 'top',
+					placement: 'bottom',
 					type: 'warning',
 					show: true
 				});
@@ -1123,7 +1137,7 @@ App
 				$alert({
 					title: '저장 완료',
 					content: self.summary.title + ' 사용자 지정 결재라인을 저장하였습니다.',
-					placement: 'top',
+					placement: 'bottom',
 					type: 'info',
 					show: true
 				});
@@ -1135,7 +1149,7 @@ App
 				$alert({
 					title: '저장 실패',
 					content: self.summary.title + ' 사용자 지정 결재라인 저장을 실패하였습니다.',
-					placement: 'top',
+					placement: 'bottom',
 					type: 'warning',
 					show: true
 				});

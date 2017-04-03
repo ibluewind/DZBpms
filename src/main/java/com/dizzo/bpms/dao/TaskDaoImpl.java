@@ -63,9 +63,9 @@ public class TaskDaoImpl implements TaskDao {
 	public List<Task> listByWorker(String userId) {
 		String	query = "SELECT t.taskId,"
 					  + " t.userId,"
-					  + " concat(u.lastName, u.firstName) 'userName',"
-       				  + " workerId,"
-       				  + " w.userName 'workerName',"
+					  + " getUserName(t.userId) 'userName',"
+       				  + " t.workerId,"
+       				  + " getUserName(t.workerId) 'workerName',"
        				  + " t.createDate,"
        				  + " t.endDate,"
        				  + " t.status,"
@@ -75,12 +75,8 @@ public class TaskDaoImpl implements TaskDao {
        				  + " t.opened,"
        				  + " t.title,"
        				  + " t.content"
-  				  + " FROM task t,"
-       				  + " users u,"
-       				  + " (SELECT userId, concat(lastName, firstName) 'userName' FROM users) w"
- 				  + " WHERE     t.workerId = ?"
-       				  + " AND t.workerId = w.userId"
-       				  + " AND t.userId = u.userId";
+  				  + " FROM task t"
+ 				  + " WHERE     t.workerId = ?";
 				
 		List<Task>	tasks = new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new TaskRowMapper());
 		return tasks;
@@ -90,9 +86,9 @@ public class TaskDaoImpl implements TaskDao {
 	public List<Task> listByCreator(String userId) {
 		String	query = "SELECT t.taskId,"
 				  + " t.userId,"
-				  + " concat(u.lastName, u.firstName) 'userName',"
-				  + " workerId,"
-				  + " w.userName 'workerName',"
+				  + " getUserName(t.userId) 'userName',"
+				  + " t.workerId,"
+				  + " getUserName(t.workerId) 'workerName',"
 				  + " t.createDate,"
 				  + " t.endDate,"
 				  + " t.status,"
@@ -102,13 +98,8 @@ public class TaskDaoImpl implements TaskDao {
 				  + " t.opened,"
 				  + " t.title,"
 				  + " t.content"
-				  + " FROM task t,"
-				  + " users u,"
-				  +  " (SELECT userId, concat(lastName, firstName) 'userName' FROM users) w"
-				  + " WHERE     t.userId = ?"
-				  + " AND t.userId != t.workerId"
-				  + " AND t.workerId = w.userId"
-				  + " AND t.userId = u.userId";
+				  + " FROM task t"
+				  + " WHERE     t.userId = ?";
 		
 		List<Task>	tasks = new JdbcTemplate(dataSource).query(query, new Object[] {userId}, new TaskRowMapper());
 		return tasks;
@@ -116,10 +107,24 @@ public class TaskDaoImpl implements TaskDao {
 
 	@Override
 	public List<Task> listByDept(String deptId) {
-		String	query = "select t.taskId, t.userId, concat(u.lastName, u.firstName) 'userName', t.workerId, w.userName 'workerName', t.createDate, t.endDate, t.status,"
-						+ " t.priority, t.targetRate, t.currentRate, t.opened, t.title, t.content"
-						+ " from task t, users u, (select concat(lastName, firstName) 'userName', userId from users) w"
-						+ " where t.workerId in (select userid from user_dept_position where deptid=?) and u.userId=t.userId and t.workerId=w.userId";
+		String	query = "SELECT t.taskId,"
+						+ "       t.userId,"
+						+ "       getUserName(t.userId) 'userName',"
+						+ "       t.workerId,"
+						+ "       getUserName(t.workerId) 'workerName',"
+						+ "       t.createDate,"
+						+ "       t.endDate,"
+						+ "       t.status,"
+						+ "       t.priority,"
+						+ "       t.targetRate,"
+						+ "       t.currentRate,"
+						+ "       t.opened,"
+						+ "       t.title,"
+						+ "       t.content"
+						+ "  FROM task t"
+						+ " WHERE t.workerId IN (SELECT userid"
+						+ "                        FROM user_dept_position"
+						+ "                       WHERE deptid = ?)";
 		List<Task> tasks = new JdbcTemplate(dataSource).query(query, new Object[] {deptId}, new TaskRowMapper());
 		
 		return tasks;
@@ -129,9 +134,9 @@ public class TaskDaoImpl implements TaskDao {
 	public List<Task> listByAuthority(User user) {
 		String query = "SELECT t.taskId,"
 					+ "       t.userId,"
-					+ "       concat(u.lastName, u.firstName) 'userName',"
+					+ "       getUserName(t.userId) 'userName',"
 					+ "       t.workerId,"
-					+ "       w.userName 'workerName',"
+					+ "       getUserName(t.workerId) 'workerName',"
 					+ "       t.createDate,"
 					+ "       t.endDate,"
 					+ "       t.status,"
@@ -141,9 +146,7 @@ public class TaskDaoImpl implements TaskDao {
 					+ "       t.opened,"
 					+ "       t.title,"
 					+ "       t.content"
-					+ "  FROM task t,"
-					+ "       users u,"
-					+ "       (SELECT concat(lastName, firstName) 'userName', userId FROM users) w"
+					+ "  FROM task t"
 					+ " WHERE     t.workerId IN"
 					+ "              (SELECT userid"
 					+ "                 FROM user_dept_position"
@@ -159,8 +162,7 @@ public class TaskDaoImpl implements TaskDao {
 					+ "                                                         @deptId :="
 					+ "                                                            @start_with) b,"
 					+ "                                                 departments) t"
-					+ "                                   WHERE d.deptid = t.deptId) tmp))"
-					+ "       AND u.userId = t.userId AND t.workerId = w.userId";
+					+ "                                   WHERE d.deptid = t.deptId) tmp))";
 		List<Task>	tasks = new ArrayList<>();
 		List<UserDepartmentPosition>	udps = filteringDepartment(user.getDeptPositions());
 		
@@ -172,12 +174,94 @@ public class TaskDaoImpl implements TaskDao {
 		return tasks;
 	}
 
+	/**
+	 * 팀내 공개 작업 목록 조회
+	 */
+	@Override
+	public List<Task> listForOpenedTeam(String userId) {
+		String	query = "SELECT t.taskId,"
+						+ "       t.createDate,"
+						+ "       t.endDate,"
+						+ "       t.status,"
+						+ "       t.content,"
+						+ "       t.currentRate,"
+						+ "       t.opened,"
+						+ "       t.priority,"
+						+ "       t.targetRate,"
+						+ "       t.title,"
+						+ "       t.userId,"
+						+ "		  getUserName(t.userId) 'userName',"
+						+ "       t.workerId,"
+						+ " 	  getUserName(t.workerId) 'workerName'"
+						+ "  FROM task t"
+						+ " WHERE     t.workerId IN"
+						+ "              (SELECT u1.userId"
+						+ "                 FROM (SELECT getDepartmentCode(?) deptId) t,"
+						+ "                      user_dept_position u1"
+						+ "                WHERE u1.deptid = t.deptId)"
+						+ "       AND t.opened = 'T'"
+						+ "       AND t.workerId <> ?";
+		return new JdbcTemplate(dataSource).query(query, new Object[] { userId, userId }, new TaskRowMapper());
+	}
+
+	@Override
+	public List<Task> listForOpenedDepartment(String userId) {
+		String query = "SELECT t.taskId,"
+						+ "       t.title,"
+						+ "       t.content,"
+						+ "       t.createDate,"
+						+ "       t.endDate,"
+						+ "       t.currentRate,"
+						+ "       t.targetRate,"
+						+ "       t.status,"
+						+ "       t.userId,"
+						+ "		  getUserName(t.userId) 'userName',"
+						+ "       t.workerId,"
+						+ "		  getUserName(t.workerId) 'workerName',"
+						+ "       t.opened,"
+						+ "       t.priority"
+						+ "  FROM task t"
+						+ " WHERE     workerId IN"
+						+ "              (SELECT u1.userid"
+						+ "                 FROM user_dept_position u1"
+						+ "                WHERE u1.deptid IN"
+						+ "                         (SELECT d1.deptid"
+						+ "                            FROM (SELECT getChildDeptList() deptId"
+						+ "                                    FROM (SELECT @start_with := d.pid,"
+						+ "                                                 @deptId := @start_with"
+						+ "                                            FROM user_dept_position u1,"
+						+ "                                                 departments d"
+						+ "                                           WHERE     u1.userid ="
+						+ "                                                        ?"
+						+ "                                                 AND u1.deptid = d.deptid) b,"
+						+ "                                         departments d"
+						+ "                                   WHERE @deptId IS NOT NULL) t,"
+						+ "                                 departments d1"
+						+ "                           WHERE d1.deptid = t.deptId))"
+						+ "       AND t.workerId <> ?"
+						+ "       AND t.opened = 'D'";
+		
+		return new JdbcTemplate(dataSource).query(query, new Object[] { userId, userId }, new TaskRowMapper());
+	}
+
 	@Override
 	public Task getById(String taskId) {
-		String query = "select t.taskId, t.userId, concat(u.lastName, u.firstName) 'userName', t.workerId, w.userName 'workerName',"
-						+ " t.createDate, t.endDate, t.status, t.priority, t.targetRate, t.currentRate, t.opened, t.title, t.content"
-						+ " from task t, users u, (select userId, concat(lastName, firstName) 'userName' from users) w"
-						+ " where t.taskId=? and t.userId=u.userId and t.workerId=w.userId";
+		String query = "SELECT t.taskId,"
+					+ "       t.userId,"
+					+ "       getUserName(t.userId) 'userName',"
+					+ "       t.workerId,"
+					+ "       getUserName(t.workerId) 'workerName',"
+					+ "       t.createDate,"
+					+ "       t.endDate,"
+					+ "       t.status,"
+					+ "       t.priority,"
+					+ "       t.targetRate,"
+					+ "       t.currentRate,"
+					+ "       t.opened,"
+					+ "       t.title,"
+					+ "       t.content"
+					+ "  FROM task t"
+					+ " WHERE t.taskId = ?";
 		
 		return new JdbcTemplate(dataSource).queryForObject(query, new Object[] {taskId}, new TaskRowMapper());
 	}

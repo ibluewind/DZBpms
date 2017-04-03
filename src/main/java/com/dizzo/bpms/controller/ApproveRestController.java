@@ -240,7 +240,7 @@ public class ApproveRestController {
 		 */
 		while (it.hasNext()) {
 			UserDepartmentPosition dp = it.next();
-			
+			System.out.println("DEBUG: procDept = " + procDept + ", deptId = " + dp.getDeptId());
 			if (dp.getDeptId().equals(procDept)) {
 				// 결재 작성자가 처리부서 직원이면, 결재 완료 처리
 				return null;
@@ -496,6 +496,10 @@ public class ApproveRestController {
 		context.getAutowireCapableBeanFactory().autowireBean(post);
 		
 		System.out.println("PostProcess: " + post.getClass().getCanonicalName());
+		
+		/** 휴가원 같은 경우, 입력 필드가 여러개 일 수 있다.
+		 * 이에 대한 처리 방법을 마련해야 한다.
+		 */
 		post.setFields(fields);
 		post.process();
 		

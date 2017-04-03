@@ -21,9 +21,9 @@
 					</tbody>
 				</table>
 			</div>
-			<!-- div class="panel-footer command-line">
-				<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.addCustomApproveLine()"><span class="glyphicon glyphicon-plus">&nbsp;추가</span></button>
-			</div-->
+			<div class="panel-footer command-line">
+				<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.cancel()"><span class="glyphicon glyphicon-plus">&nbsp;결재라인추가</span></button>
+			</div>
 		</div>
 	</div>
 	<div class="col-md-6">
@@ -72,8 +72,7 @@
 				</form>
 			</div>
 			<div class="panel-footer command-line">
-				<button type="button" class="btn btn-primary btn-sm" ng-click="ctrl.save()" ng-disabled="custom_approve_line_form.$invalid" ng-if="ctrl.edit"><span class="glyphicon glyphicon-save"></span>&nbsp;저장</button>
-				<button type="button" class="btn btn-primary btn-sm" ng-click="ctrl.save()" ng-disabled="custom_approve_line_form.$invalid" ng-hide="ctrl.edit"><sapn class="glyphicon glyphicon-plus"></sapn>&nbsp;추가</button>
+				<button type="button" class="btn btn-primary btn-sm" ng-click="ctrl.save()" ng-disabled="custom_approve_line_form.$invalid"><span class="glyphicon glyphicon-save"></span>&nbsp;저장</button>
 				<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.cancel()"><span class="glyphicon glyphicon-remove"></span>&nbsp;취소</button>
 				<button type="button" class="btn btn-danger btn-sm pull-right" ng-click="ctrl.remove()" ng-if="ctrl.edit"><span class="glyphicon glyphicon-trash"></span>&nbsp;삭제</button>
 			</div>

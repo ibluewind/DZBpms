@@ -86,6 +86,14 @@ public class TaskRestController {
 			tasks = taskService.listByWorker(userId);
 			if (!tasks.isEmpty())
 				listAll.addAll(tasks);
+			
+			tasks =  taskService.listForOpenedTeam(userId);
+			if (!tasks.isEmpty())
+				listAll.addAll(tasks);
+			
+			tasks = taskService.listForOpenedDepartment(userId);
+			if (!tasks.isEmpty())
+				listAll.addAll(tasks);
 		}
 		
 		return listAll;

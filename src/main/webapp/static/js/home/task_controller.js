@@ -276,7 +276,7 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 		switch(self.task.opened) {
 		case 'T':
 			return "팀내 공개";
-		case 'P':
+		case 'D':
 			return "부서내 공개";
 		case 'N':
 			return "공개 안함";

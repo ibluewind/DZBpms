@@ -14,19 +14,22 @@
 				<input type="hidden" data-post-process="userId" ng-value="ctrl.summary.userId"/>
 				<input type="hidden" data-post-process="refId" ng-value="ctrl.summary.appId"/>
 				<div class="col-md-11">
-					<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['deptName']" readonly ng-disabled="!ctrl.edit">
+					<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['deptName']" readonly ng-show="ctrl.edit">
+					<div class="form-view" ng-show="!ctrl.edit">{{ctrl.form.fields['deptName']}}</div>
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="col-md-1 control-label">직위/직책</label>
 				<div class="col-md-11">
-					<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['positionName']" readonly ng-disabled="!ctrl.edit">
+					<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['positionName']" readonly ng-show="ctrl.edit">
+					<div class="form-view" ng-show="!ctrl.edit">{{ctrl.form.fields['positionName']}}</div>
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="col-md-1 control-label">성명</label>
 				<div class="col-md-11">
-					<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['userName']" ng-disabled="!ctrl.edit">
+					<input type="text" class="form-control input-sm" ng-model="ctrl.form.fields['userName']" ng-show="ctrl.edit">
+					<div class="form-view" ng-show="!ctrl.edit">{{ctrl.form.fields['userName']}}</div>
 				</div>
 			</div>
 			<div class="row">
@@ -50,7 +53,7 @@
 						<tbody>
 							<tr ng-repeat="field in ctrl.form.fields['fieldRows'][0] track by $index">
 								<td>
-									<select class="form-control input-sm" ng-model="field.type" ng-disabled="!ctrl.edit" required>
+									<select class="form-control input-sm" ng-model="field.type" ng-show="ctrl.edit" required>
 										<option value='1'>연차 휴가</option>
 										<option value='2'>경조 휴가</option>
 										<option value='3'>생리 휴가</option>
@@ -61,26 +64,30 @@
 										<option value='8'>공상</option>
 										<option value='9'>기타</option>
 									</select>
-										
+									<div class="form-view" ng-show="!ctrl.edit">{{field.type}}</div>
 								</td>
 								<td>
 									<div class="form-group">
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" data-post-process="startDate" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker ng-disabled="!ctrl.edit" required/>
+											<input type="text" class="form-control input-sm" data-post-process="startDate" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker ng-show="ctrl.edit" required/>
+											<div class="form-view" ng-show="!ctrl.edit">{{field.startDate|date:'yyyy-MM-dd'}}</div>
 										</div>
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" data-post-process="endDate" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker ng-disabled="!ctrl.edit" required/>
+											<input type="text" class="form-control input-sm" data-post-process="endDate" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker ng-show="ctrl.edit" required/>
+											<div class="form-view" ng-show="!ctrl.edit">{{field.endDate|date:'yyyy-MM-dd'}}</div>
 										</div>
 									</div>
 								</td>
 								<td>
-									<span >{{ctrl.dateDiff(field.startDate, field.endDate)}}</span>
+									<span class="form-view">{{ctrl.dateDiff(field.startDate, field.endDate)}}</span>
 								</td>
 								<td>
-									<input type="text" class="form-control input-sm" data-post-process="content" ng-model="field.comment" ng-disabled="!ctrl.edit" required/>
+									<input type="text" class="form-control input-sm" data-post-process="content" ng-model="field.comment" ng-show="ctrl.edit" required/>
+									<div class="form-view" ng-show="!ctrl.edit">{{field.comment}}</div>
 								</td>
 								<td>
-									<input type="text" class="form-control input-sm" ng-model="field.remark" ng-disabled="!ctrl.edit"/>
+									<input type="text" class="form-control input-sm" ng-model="field.remark" ng-show="ctrl.edit"/>
+									<div class="form-view" ng-show="!ctrl.edit">{{field.remark}}</div>
 								</td>
 								<td ng-show="$index > 0 && ctrl.edit">
 									<button type="button" class="btn btn-default btn-xs" ng-click="ctrl.removeField(0, $index)"><span class="glyphicon glyphicon-minus"></span></button>
@@ -97,6 +104,11 @@
 			</div>
 		</form>
 	</div>
+	<script>
+		function getTypeText(index) {
+			return $($('option:selected')[index]).text();
+		}
+	</script>
 	<div class="panel-footer">
 		<%@ include file="approve_command.jsp" %>
 	</div>
