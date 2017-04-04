@@ -476,28 +476,18 @@ App
 				var line = getUserApproveLine();
 				var summary = document.summary;
 				var postFields = getPostProcessFields();
-				
 				approveService.submitApprove(summary, line, history)
 				.then(
 					function(data) {
 						if (data == "") {
 							// 결재가 완료되었음.
-							// 후 처리를 위한 필드 생성
 							console.log('postFields: ', postFields);
-							return approveService.runPostProcess(postFields);
+							runPostProcess(postFields);
 						}
 						//$location.path(prevUrl);
 					},
 					function(err) {
 						console.error('Error while submit Approve');
-					}
-				)
-				.then(
-					function(data) {
-						console.log('result for postProcessing: ', data);
-					},
-					function(err) {
-						console.error('Error while run postProcessing');
 					}
 				);
 			}
@@ -506,6 +496,21 @@ App
 		$location.path(prevUrl);
 	};
 	
+	
+	function runPostProcess(postFields) {
+		for (var i = 0; i < postFields.length; i++) {
+			console.log('postFields[' + i + ']: ', postFields[i]);
+			
+			approveService.runPostProcess(postFields[i])
+			.then(
+			function(response) {
+				console.log('successfull post process');
+			},
+			function(err) {
+				console.error('Error while post processing');
+			});
+		}
+	}
 	function postProcessing() {
 		var $postFields = $('*[data-post-process]');
 	}
@@ -517,16 +522,61 @@ App
 	 */
 	function getPostProcessFields() {
 		var $postFields = $('*[data-post-process]');
-		var field = {};
+		var field = [];
 		
-		$postFields.each(function() {
-			var prop = $(this).data("post-process");
-			var val = $(this).val();
+		console.log('postFields: ', $postFields);
+		
+		for (var i = 0; i < self.form.fields['fieldRows'][0].length; i++) {
+			console.log('fileds: ', self.form.fields['fieldRows'][0][i]);
+			field[i] = [];
 			
-			field[prop] = val;
-		});
+			$postFields.each(function(index) {
+				console.log('postField[' + index + ']: ', $(this));
+				var prop, val, attr;
+
+				/**
+				 * data-post-process와 ng-model이 정의되어 있다는 것은 self.form.fields에 값이 저장되어 있다는 의미다.
+				 * 그렇지 않다는 것은 단순히 후처리 프로세스에서 필요한 내용을 저장한 것이므로 값을 할당하면 된다.
+				 * ng-model이 있는 경우 self.form.fields와 self.form.fields['fieldRows']에서 값을 찾아야 한다.
+				 */
+				console.log('hasAttribute ng-model: ' + this.hasAttribute('ng-model'));
+				if (this.hasAttribute('ng-model')) {
+					attr = $(this).attr('ng-model');
+					attr = attr.substr(attr.indexOf('.') + 1);
+					
+					console.log('attr: ', attr);
+					
+					prop = $(this).data("post-process");
+					val = self.form.fields[attr];
+					
+					console.log('prop: ' + prop);
+					console.log('val: ' + val);
+					
+					if (angular.isUndefined(val)) {
+						// 기본 필드에 정의되지 않은 것이라면, fields['fieldRows']에서 찾아야 한다.
+						// 젠장 어쩌다가 4차원 배열이 돼버린거냐... ㅡㅡ;
+						val = self.form.fields['fieldRows'][0][i][attr];
+						console.log('val : ' + val);
+					}
+					
+					// data-post-process는 같은 속성을 가진 것이 여러개 존재할 수 있다.
+					// field 리턴 배열에 이미 attr 속성의 값이 저장되어 있는 것이 있다면, 무시하고 넘긴다.
+					if (angular.isUndefined(field[i][prop])) {
+						console.log('save ' + prop + ':' + val);
+						field[i][prop] = val;
+					} else {
+						console.log('already save ' + prop + ':' + val);
+					}
+				} else {
+					prop = $(this).data("post-process");
+					val = $(this).val();
+					field[i][prop] = val;
+				}
+			});
+			
+			field[i]['formId'] = self.form.formId;
+		}
 		
-		field['formId'] = self.form.formId;
 		console.log('field: ', field);
 		return field;
 	}
