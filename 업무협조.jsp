@@ -35,6 +35,6 @@
 	</div>
 	<div class="panel-footer">
 		<%@ include file="approve_command.jsp" %>
-	</div>
+	</div> 
 </div>
 <%@ include file="approve_history.jsp" %>

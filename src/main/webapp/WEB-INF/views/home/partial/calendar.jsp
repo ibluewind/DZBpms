@@ -54,9 +54,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-md-9" ng-controller="calendarController as ctrl">
+		<div class="col-md-9 col-xs-12 col-sm-12" ng-controller="calendarController as ctrl">
 			<div class="row nav_bar">
-				<div class="col-md-7 col-xs-12">
+				<div class="col-md-7 col-sm-12 col-xs-12">
 					<span class="pull-left text-center" style="margin: 0 5px;">
 						<h4><i class="glyphicon glyphicon-chevron-left" ng-click="ctrl.gotoPrev()"></i></h4>
 					</span>
@@ -70,10 +70,10 @@
 						<h4><i class="glyphicon glyphicon-chevron-down" id="peekCalendar" ng-click="ctrl.peekCalendar()"></i></h4>
 					</span>
 				</div>
-				<div class="col-md-5 hidden-xs hidden-sm">
+				<div class="col-md-5 col-sm-12 col-xs-12">
 					<div class="pull-right btn-group">
 						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, 'dayView')">일</button>
-						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, 'weekView')">주</button>
+						<button class="btn btn-default hidden-xs hidden-sm" ng-click="ctrl.calendarViewChange($event, 'weekView')">주</button>
 						<button class="btn btn-default" ng-click="ctrl.calendarViewChange($event, 'monthView')">월</button>
 						<button class="btn btn-info"ng-click="ctrl.goToday()">오늘</button>
 					</div>
@@ -82,16 +82,16 @@
 			<div class="row calendar-view" id="monthView">
 				<div class="col-md-12">
 					<div class="calendar-row">
-						<span class="calendar-week">일요일</span>
-						<span class="calendar-week">월요일</span>
-						<span class="calendar-week">화요일</span>
-						<span class="calendar-week">수요일</span>
-						<span class="calendar-week">목요일</span>
-						<span class="calendar-week">금요일</span>
-						<span class="calendar-week">토요일</span>
+						<span class="calendar-week">일<span class="hidden-sm hidden-xs">요일</span></span>
+						<span class="calendar-week">월<span class="hidden-sm hidden-xs">요일</span></span>
+						<span class="calendar-week">화<span class="hidden-sm hidden-xs">요일</span></span>
+						<span class="calendar-week">수<span class="hidden-sm hidden-xs">요일</span></span>
+						<span class="calendar-week">목<span class="hidden-sm hidden-xs">요일</span></span>
+						<span class="calendar-week">금<span class="hidden-sm hidden-xs">요일</span></span>
+						<span class="calendar-week">토<span class="hidden-sm hidden-xs">요일</span></span>
 					</div>
 					<div class="calendar-row top-border" ng-repeat="cell in ctrl.calendar">
-						<span class="calendar-cell"schedule-popover ng-click="showPopover($event, cell[$index])"  style="height:140px;" ng-repeat="d in cell track by $index" ng-class="[{'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]">
+						<span class="calendar-cell" schedule-popover ng-click="showPopover($event, cell[$index])"  style="height:140px;" ng-repeat="d in cell track by $index" ng-class="[{'not-current-month':!ctrl.isCurrentMonth(d)}, {'today':ctrl.isToday(d)}]">
 							{{d.getDate()}}
 						</span>
 					</div>
@@ -144,7 +144,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="row calendar-view" id="weekView">
+			<div class="row calendar-view hidden-xs hidden-sm" id="weekView">
 				<div class="title-line">
 					<table style="width:100%; border-collapse:separate; text-align:center;">
 						<tbody>

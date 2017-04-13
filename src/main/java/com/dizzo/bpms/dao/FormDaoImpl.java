@@ -56,7 +56,7 @@ public class FormDaoImpl implements FormDao {
 					 + " d.name 'procDeptName'"
 					 + " FROM form f"
 					 + " LEFT JOIN departments d ON f.procDept = d.deptid, users u"
-					 + " WHERE u.userId = f.creator";
+					 + " WHERE u.userId = f.creator AND f.useYN='Y'";
 		List<Form>	forms = new JdbcTemplate(dataSource).query(query, new FormRowMapper());
 		return forms;
 	}

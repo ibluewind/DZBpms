@@ -22,7 +22,7 @@
 		  <div class="container-fluid">
 		    <!-- Brand and toggle get grouped for better mobile display -->
 		    <div class="navbar-header">
-		      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+		      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu_collapse">
 		        <span class="sr-only">Toggle navigation</span>
 		        <span class="icon-bar"></span>
 		        <span class="icon-bar"></span>
@@ -32,33 +32,40 @@
 		    </div>
 		
 		    <!-- Collect the nav links, forms, and other content for toggling -->
-		    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		    <div class="collapse navbar-collapse" id="menu_collapse">
 		      <ul class="nav navbar-nav">
-		        <li><a href="#/calendar"/>일정<span class="sr-only">(current)</span></a></li>
+		        <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/calendar"/>일정<span class="sr-only">(current)</span></a></li>
 		        <li class="dropdown">
 		          <a href="./" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">작업<span class="caret"></span></a>
 		          <ul class="dropdown-menu" role="menu">
-		            <li><a href="#/task_list">작업목록</a></li>
-		            <li><a href="#/regist_task/-9999">작업등록</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/task_list">작업목록</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/regist_task/-9999">작업등록</a></li>
 		            <li class="divider"></li>
-		            <li><a href="#/expect_task">작업 보고서</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/expect_task">작업 보고서</a></li>
 		          </ul>
 		        </li>
 		        <li class="dropdown">
 		          <a href="./" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">결재함<span class="caret"></span></a>
 		          <ul class="dropdown-menu" role="menu">
-		            <li><a href="#/list_app">결재등록</a></li>
-		            <li><a href="#/approve_tray/U">미결함</a></li>
-		            <li><a href="#/approve_tray/D">보류함</a></li>
-		            <li><a href="#/approve_tray/F">기결함</a></li>
-		            <li><a href="#/approve_tray/S">참조함</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/list_app">결재등록</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/approve_tray/U">미결함</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/approve_tray/D">보류함</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/approve_tray/F">기결함</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/approve_tray/S">참조함</a></li>
 		            <li class="divider"></li>
-		            <li><a href="#/approve_tray/C">완료함</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/approve_tray/C">완료함</a></li>
 		            <li class="divider"></li>
-		            <li><a href="#/approve_tray/E">예정함</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/approve_tray/E">예정함</a></li>
 		            <li class="divider"></li>
-		            <li><a href="#/man_appline">결재라인관리</a></li>
+		            <li><a data-toggle="collapse" data-target="#menu_collapse" href="#/man_appline">결재라인관리</a></li>
 		          </ul>
+		        </li>
+		        <li class="dropdown">
+		        	<a href="./" class="dropdown-toggle" data-toggle="dropdown" role="button" arai-expanded="false">프로젝트 관리<span class="caret"></span></a>
+		        	<ul class="dropdown-menu" role="menu">
+		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/list_project">프로젝트 목록</a></li>
+		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/create_project">프로젝트 생성</a></li>
+		        	</ul>
 		        </li>
 		      </ul>
 		      <ul class="nav navbar-nav navbar-right">
@@ -85,6 +92,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
 <script src="<c:url value="/static/js/"/>ngJsTree.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-slider/5.8.7/rzslider.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<script src="<c:url value="/static/js/angular-chart.min.js"/>"></script>
 <script>
 	var company = {id: '${company.id}', name: '${company.name}', ceo: '${company.ceo}'};
 </script>
@@ -104,5 +113,7 @@
 <script src="<c:url value="/static/js/home/calendar_controller.js"/>"></script>
 <script src="<c:url value="/static/js/home/calendar_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/calendar_render.js"/>"></script>
+<script src="<c:url value="/static/js/home/chart_controller.js"/>"></script>
+<script src="<c:url value="/static/js/home/chart_service.js"/>"></script>
 </body>
 </html>

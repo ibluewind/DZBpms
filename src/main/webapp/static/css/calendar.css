@@ -94,14 +94,10 @@ div.nav_bar {
 	width: 12%;
 	line-height: 1.5em;
 }
-#weekView {
-	display: none;
-}
 
 #dayView {
-	display: none;
+	display:none;
 }
-
 .schedule-bar-area {
 	background-color: #f5f5f5;
 }

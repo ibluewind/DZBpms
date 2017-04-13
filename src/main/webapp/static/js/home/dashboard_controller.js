@@ -7,6 +7,7 @@ function(taskService, taskStatus, userService, approveService, approveTrayType, 
 	self.user = {};
 	self.tasks = [];
 	self.trays = [];
+	self.chied = false;
 	
 	if (angular.isUndefined($rootScope.loggedInUser)) {
 		userService.getLoggedInUser()
@@ -14,6 +15,13 @@ function(taskService, taskStatus, userService, approveService, approveTrayType, 
 			function(user) {
 				self.user = user;
 				$rootScope.loggedInUser = user;
+				console.log('user: ', user);
+				
+				user.userAuthorities.forEach(function(auth) {
+					if (auth['roleName'] == 'DL' || auth['roleName'] == 'TL') {
+						self.chief = true;
+					}
+				});
 			},
 			function(err) {
 				console.error('Error while fetching user information');

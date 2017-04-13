@@ -53,7 +53,7 @@
 						<tbody>
 							<tr ng-repeat="field in ctrl.form.fields['fieldRows'][0] track by $index">
 								<td>
-									<select class="form-control input-sm" ng-model="field.type" ng-show="ctrl.edit" required>
+									<select class="form-control input-sm" ng-model="field.type" ng-disabled="!ctrl.edit" required>
 										<option value='1'>연차 휴가</option>
 										<option value='2'>경조 휴가</option>
 										<option value='3'>생리 휴가</option>
@@ -64,16 +64,16 @@
 										<option value='8'>공상</option>
 										<option value='9'>기타</option>
 									</select>
-									<div class="form-view" ng-show="!ctrl.edit">{{field.type}}</div>
+									<!-- div class="form-view" ng-show="!ctrl.edit">{{field.type}}</div-->
 								</td>
 								<td>
 									<div class="form-group">
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" data-post-process="startDate" ng-model="field.startDate" data-max-date="{{field.endDate}}" bs-datepicker ng-show="ctrl.edit" required/>
+											<input type="text" class="form-control input-sm" data-post-process="startDate" ng-model="field.startDate" data-date-type="string" bs-datepicker ng-show="ctrl.edit" required/>
 											<div class="form-view" ng-show="!ctrl.edit">{{field.startDate|date:'yyyy-MM-dd'}}</div>
 										</div>
 										<div class="col-md-6">
-											<input type="text" class="form-control input-sm" data-post-process="endDate" ng-model="field.endDate" data-min-date="{{field.startDate}}" bs-datepicker ng-show="ctrl.edit" required/>
+											<input type="text" class="form-control input-sm" data-post-process="endDate" ng-model="field.endDate" data-date-type="string" bs-datepicker ng-show="ctrl.edit" required/>
 											<div class="form-view" ng-show="!ctrl.edit">{{field.endDate|date:'yyyy-MM-dd'}}</div>
 										</div>
 									</div>
@@ -104,11 +104,6 @@
 			</div>
 		</form>
 	</div>
-	<script>
-		function getTypeText(index) {
-			return $($('option:selected')[index]).text();
-		}
-	</script>
 	<div class="panel-footer">
 		<%@ include file="approve_command.jsp" %>
 	</div>

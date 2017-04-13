@@ -293,7 +293,7 @@ public class ApproveRestController {
 		String	appId = formField.getAppId();
 		String	formId = formField.getFormId();
 		List<FormField>	fields = formField.getFormFields();
-		
+		System.out.println("DEBUG formField: " + fields);
 		formFieldService.insert(appId, formId, fields);
 		return formField;
 	}
@@ -484,18 +484,12 @@ public class ApproveRestController {
 	public Object runPostProcess(@RequestBody Map<String, String> fields) {
 		System.out.println("DEBUG: runPostProcess fields : " + fields);
 		String	formId = fields.get("formId");
-		
-		System.out.println("post processing runnit for : " + formId);
-		
 		Form	form = formService.getById(formId);
-		
 		PostProcess post = (PostProcess)getPostProcess(form);
 		
 		// 후처리 프로세스에서는 필요한 Service를 @Autowired하기 때문에, 생성된 인스턴스를 ApplicationContext Bean에 등록해야
 		// @Autowired가 동작한다.
 		context.getAutowireCapableBeanFactory().autowireBean(post);
-		
-		System.out.println("PostProcess: " + post.getClass().getCanonicalName());
 		
 		/** 휴가원 같은 경우, 입력 필드가 여러개 일 수 있다.
 		 * 이에 대한 처리 방법을 마련해야 한다.

@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +19,14 @@ import com.dizzo.bpms.model.FileAttachRowMapper;
 
 @Repository("taskAttachDao")
 @Transactional
+@PropertySource(value={"classpath:application.properties"})
 public class FileAttachDaoImpl implements FileAttachDao {
 
 	@Autowired
 	DataSource	dataSource;
+	
+	@Autowired
+	Environment	env;
 	
 	@Override
 	public List<FileAttach> listByMainId(String mainId) {
@@ -77,7 +83,7 @@ public class FileAttachDaoImpl implements FileAttachDao {
 	public FileAttach deleteByAttachId(String attachId) {
 		FileAttach	attach = getByAttachId(attachId);
 		String	query = "delete from file_attach where attachId=?";
-		new File(FileController.UPLOAD_LOCATION + attach.getName()).delete();
+		new File(env.getProperty("file.upload") + attach.getName()).delete();
 		new JdbcTemplate(dataSource).update(query, new Object[]{attachId});
 		return attach;
 	}

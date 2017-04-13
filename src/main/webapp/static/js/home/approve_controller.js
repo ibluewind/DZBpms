@@ -210,7 +210,7 @@ App
 	self.dateDiff = function(start, end) {
 		if (start == "" || end == "")	return 0;
 		var milliDay = 1000 * 60 * 60 * 24;
-		var days = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / milliDay);
+		var days = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / milliDay) + 1;
 		
 		return days < 0 ? 0 : days;
 	};
@@ -482,7 +482,8 @@ App
 						if (data == "") {
 							// 결재가 완료되었음.
 							console.log('postFields: ', postFields);
-							runPostProcess(postFields);
+							if (postFields != null)
+								runPostProcess(postFields);
 						}
 						//$location.path(prevUrl);
 					},
@@ -524,57 +525,69 @@ App
 		var $postFields = $('*[data-post-process]');
 		var field = [];
 		
-		console.log('postFields: ', $postFields);
+		console.log('fieldRows: ',self.form.fields['fieldRows'].length);
+		if (!angular.isArray($postFields)) {
+			/**
+			 * 후 처리를 위한 필드가 없으면 data-post-process 가 배열 형태가 아닌 것으로 처리되므로 리턴.
+			 */
+			return null;
+		}
 		
-		for (var i = 0; i < self.form.fields['fieldRows'][0].length; i++) {
-			console.log('fileds: ', self.form.fields['fieldRows'][0][i]);
-			field[i] = [];
+		/**
+		 * fieldRows가 없는 양식도 있을 수 있다.
+		 * 아마도 대부분의 양식은 fieldRows가 없을 것이다. 휴가원이 좀 특이할 뿐...
+		 * 테스트해 볼 양식이 필요하다.
+		 */
+		if (self.form.fields['fieldRows'].length == 0) {
+			field[0] = {};
 			
-			$postFields.each(function(index) {
-				console.log('postField[' + index + ']: ', $(this));
-				var prop, val, attr;
-
-				/**
-				 * data-post-process와 ng-model이 정의되어 있다는 것은 self.form.fields에 값이 저장되어 있다는 의미다.
-				 * 그렇지 않다는 것은 단순히 후처리 프로세스에서 필요한 내용을 저장한 것이므로 값을 할당하면 된다.
-				 * ng-model이 있는 경우 self.form.fields와 self.form.fields['fieldRows']에서 값을 찾아야 한다.
-				 */
-				console.log('hasAttribute ng-model: ' + this.hasAttribute('ng-model'));
-				if (this.hasAttribute('ng-model')) {
-					attr = $(this).attr('ng-model');
-					attr = attr.substr(attr.indexOf('.') + 1);
-					
-					console.log('attr: ', attr);
-					
-					prop = $(this).data("post-process");
-					val = self.form.fields[attr];
-					
-					console.log('prop: ' + prop);
-					console.log('val: ' + val);
-					
-					if (angular.isUndefined(val)) {
-						// 기본 필드에 정의되지 않은 것이라면, fields['fieldRows']에서 찾아야 한다.
-						// 젠장 어쩌다가 4차원 배열이 돼버린거냐... ㅡㅡ;
-						val = self.form.fields['fieldRows'][0][i][attr];
-						console.log('val : ' + val);
-					}
-					
-					// data-post-process는 같은 속성을 가진 것이 여러개 존재할 수 있다.
-					// field 리턴 배열에 이미 attr 속성의 값이 저장되어 있는 것이 있다면, 무시하고 넘긴다.
-					if (angular.isUndefined(field[i][prop])) {
-						console.log('save ' + prop + ':' + val);
-						field[i][prop] = val;
-					} else {
-						console.log('already save ' + prop + ':' + val);
-					}
-				} else {
-					prop = $(this).data("post-process");
-					val = $(this).val();
-					field[i][prop] = val;
-				}
+			$postFields.each(function() {
+				prop = $(this).data("post-process");
+				val = $(this).val();
+				field[0][prop] = val;
 			});
-			
-			field[i]['formId'] = self.form.formId;
+		} else {
+			for (var i = 0; i < self.form.fields['fieldRows'][0].length; i++) {
+				field[i] = {};		// 서버에서는 해당 필드를 HashMap 형태로 수신하게 되므로, Object로 선언해주어야 한다.
+				
+				$postFields.each(function(index) {
+					var prop, val, attr;
+	
+					/**
+					 * data-post-process와 ng-model이 정의되어 있다는 것은 self.form.fields에 값이 저장되어 있다는 의미다.
+					 * 그렇지 않다는 것은 단순히 후처리 프로세스에서 필요한 내용을 저장한 것이므로 값을 할당하면 된다.
+					 * ng-model이 있는 경우 self.form.fields와 self.form.fields['fieldRows']에서 값을 찾아야 한다.
+					 */
+					if (this.hasAttribute('ng-model')) {
+						attr = $(this).attr('ng-model');
+						attr = attr.substr(attr.indexOf('.') + 1);
+						
+						prop = $(this).data("post-process");
+						val = self.form.fields[attr];
+						
+						if (angular.isUndefined(val)) {
+							// 기본 필드에 정의되지 않은 것이라면, fields['fieldRows']에서 찾아야 한다.
+							// 젠장 어쩌다가 4차원 배열이 돼버린거냐... ㅡㅡ;
+							val = self.form.fields['fieldRows'][0][i][attr];
+						}
+						
+						// data-post-process는 같은 속성을 가진 것이 여러개 존재할 수 있다.
+						// field 리턴 배열에 이미 attr 속성의 값이 저장되어 있는 것이 있다면, 무시하고 넘긴다.
+						if (angular.isUndefined(field[i][prop])) {
+							console.log('save ' + prop + ':' + val);
+							field[i][prop] = val;
+						} else {
+							console.log('already save ' + prop + ':' + val);
+						}
+					} else {
+						prop = $(this).data("post-process");
+						val = $(this).val();
+						field[i][prop] = val;
+					}
+				});
+				
+				field[i]['formId'] = self.form.formId;
+			}
 		}
 		
 		console.log('field: ', field);
@@ -949,9 +962,8 @@ App
 	self.dateDiff = function(start, end) {
 		if (start == "" || end == "")	return 0;
 		var milliDay = 1000 * 60 * 60 * 24;
-		var days = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / milliDay);
+		var days = Math.ceil((new Date(end).getTime() - new Date(start).getTime()) / milliDay) + 1;
 		
-		console.log('days: ' + days);
 		return days < 0 ? 0 : days;
 	};
 }])

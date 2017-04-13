@@ -151,3 +151,15 @@
 		</div>
 	</div>
 </div>
+<div class="row" ng-show="ctrl.chief">
+	<div class="col-md-12" ng-controller="chartController as chart">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="panel-title">작업 현황</div>
+			</div>
+			<div class="panel-body">
+				<canvas id="bar" class="chart chart-bar" chart-data="chart.chartData" chart-labels="chart.chartLabels" chart-series="chart.chartSeries" chart-colors="chart.chartColors"></canvas>
+			</div>
+		 </div>
+	</div>
+</div>

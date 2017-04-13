@@ -38,6 +38,11 @@ public class HomeController {
 		return "/home/dashboard";
 	}
 	
+	@RequestMapping(value="/report", method=RequestMethod.GET)
+	public String getReportPage() {
+		return "/home/report";
+	}
+	
 	@RequestMapping(value="/forms/vocation", method=RequestMethod.GET)
 	public String getVocationFormPage() {
 		return "/forms/vocation_form";

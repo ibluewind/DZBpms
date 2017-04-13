@@ -4,4 +4,4 @@
  */
 'use strict';
 
-var App = angular.module('bpmApp', ['ngSanitize', 'ngJsTree', 'ngRoute', 'ngCookies', 'mgcrea.ngStrap', 'angularFileUpload', 'rzModule']);
+var App = angular.module('bpmApp', ['ngSanitize', 'ngJsTree', 'ngRoute', 'ngCookies', 'mgcrea.ngStrap', 'angularFileUpload', 'rzModule', 'chart.js']);

@@ -5,6 +5,10 @@ App
 		templateUrl: '/bpms/home/dashboard',
 		controller: 'dashboardController as ctrl'
 	})
+	.when('/report', {
+		templateUrl: '/bpms/home/report',
+		controller: 'reportController as ctrl'
+	})
 	.when('/calendar', {
 		templateUrl: '/bpms/home/calendar'
 	})

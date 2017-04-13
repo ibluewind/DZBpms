@@ -73,15 +73,23 @@ App
 		return d.getMonth() == self.currentDate.getMonth();
 	};
 	
+	/**
+	 * 일정의 시작화면은 항상 주단위 화면이다.
+	 * 현재 주의 기간을 설정해서 일정 목록을 조회하여야 한다.
+	 */
 	var start = new Date();
 	var end = new Date();
+	start.setDate(start.getDate() - start.getDay());
+	end.setDate(end.getDate() + (6 - end.getDay()));
+	/*
 	start.setDate(1);
 	start.setDate(start.getDate() - start.getDay());
 	
 	end.setFullYear(end.getFullYear(), end.getMonth() + 1, 0);	// 해당 월의 마지막 날
 	end.setDate(end.getDate() + (6 - end.getDay()));
-	
+	*/
 	getScheduleList(start, end);
+	setCalendarTitle();
 	
 	/**
 	 * 일정 목록 가져오기

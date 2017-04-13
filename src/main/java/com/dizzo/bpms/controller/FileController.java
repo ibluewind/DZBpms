@@ -19,6 +19,8 @@ import java.util.regex.Matcher;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,10 +42,11 @@ import com.dizzo.bpms.service.FileAttachService;
  */
 @Controller
 @RequestMapping("/file")
+@PropertySource(value={"classpath:application.properties"})
 public class FileController {
 
-	public static String	UPLOAD_LOCATION = "e:/upload/";
-	public static String	FORMFILE_LOCATION = "e:/workspace/DZBpms/src/main/webapp/WEB-INF/views/forms/";
+	@Autowired
+	Environment env;
 	
 	@Autowired
 	FileAttachService	service;
@@ -58,7 +61,7 @@ public class FileController {
 			file = request.getFile(iterator.next());
 			String	uuid = UUID.randomUUID().toString();
 			String	ext = getFileExtension(file.getOriginalFilename());
-			File	sf =  new File(UPLOAD_LOCATION + uuid + ext);
+			File	sf =  new File(env.getProperty("file.upload") + uuid + ext);
 			FileCopyUtils.copy(file.getBytes(), sf);
 			fileNames.add(replaceFileSeparator(sf.getPath()));
 		}
@@ -76,7 +79,7 @@ public class FileController {
 		while (iterator.hasNext()) {
 			file = request.getFile(iterator.next());
 			String	uuid = UUID.randomUUID().toString();
-			File	sf = new File(FORMFILE_LOCATION + uuid + ".jsp");
+			File	sf = new File(env.getProperty("file.formFile") + uuid + ".jsp");
 			FileCopyUtils.copy(file.getBytes(), new FileOutputStream(sf));
 			fileNames.add(replaceFileSeparator(sf.getPath()));
 		}
