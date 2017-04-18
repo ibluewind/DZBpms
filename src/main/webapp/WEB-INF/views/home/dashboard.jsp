@@ -151,14 +151,14 @@
 		</div>
 	</div>
 </div>
-<div class="row" ng-show="ctrl.chief">
+<div class="row hidden-xs hidden-sm" ng-show="ctrl.chief">
 	<div class="col-md-12" ng-controller="chartController as chart">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<div class="panel-title">작업 현황</div>
 			</div>
 			<div class="panel-body">
-				<canvas id="bar" class="chart chart-bar" chart-data="chart.chartData" chart-labels="chart.chartLabels" chart-series="chart.chartSeries" chart-colors="chart.chartColors"></canvas>
+				<canvas id="bar" class="chart chart-bar" style="width:100%;height:250px;" chart-data="chart.chartData" chart-labels="chart.chartLabels" chart-series="chart.chartSeries" chart-colors="chart.chartColors"></canvas>
 			</div>
 		 </div>
 	</div>

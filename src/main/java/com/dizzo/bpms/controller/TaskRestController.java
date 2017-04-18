@@ -1,5 +1,6 @@
 package com.dizzo.bpms.controller;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dizzo.bpms.model.ChartData;
 import com.dizzo.bpms.model.Task;
 import com.dizzo.bpms.model.TaskHistory;
 import com.dizzo.bpms.model.User;
 import com.dizzo.bpms.model.UserAuthority;
+import com.dizzo.bpms.model.UserDepartmentPosition;
+import com.dizzo.bpms.model.UserRole;
 import com.dizzo.bpms.service.FileAttachService;
 import com.dizzo.bpms.service.TaskHistoryService;
 import com.dizzo.bpms.service.TaskService;
@@ -48,7 +52,7 @@ public class TaskRestController {
 		
 		TaskHistory	history = new TaskHistory();
 		history.setComment(task.getComment());
-		history.setCreator(getPrincipal());
+		history.setCreator(IndexController.getPrincipal());
 		history.setProcRate(task.getCurrentRate());
 		history.setTaskId(task.getTaskId());
 		history.setAction("신규 작업 생성");
@@ -70,7 +74,7 @@ public class TaskRestController {
 	public List<Task> listOfMyTask() {
 		List<Task>		listAll = new ArrayList<Task>();
 		List<Task>		tasks = new ArrayList<Task>();
-		String			userId = getPrincipal();
+		String			userId = IndexController.getPrincipal();
 		
 		User	user = userService.getByUserId(userId);
 		if (hasLeaderAuthority(user)) {
@@ -113,7 +117,7 @@ public class TaskRestController {
 		TaskHistory	history = new TaskHistory();
 		history.setTaskId(task.getTaskId());
 		history.setComment(task.getComment());
-		history.setCreator(getPrincipal());
+		history.setCreator(IndexController.getPrincipal());
 		history.setProcRate(task.getCurrentRate());
 		history.setWorker(task.getWorkerId());
 		history.setAction(task.getAction());
@@ -136,8 +140,65 @@ public class TaskRestController {
 		return historyService.getByHistoryId(historyId);
 	}
 	
-	private String getPrincipal() {
-		return IndexController.getPrincipal();
+	@RequestMapping(value="/chart", method=RequestMethod.GET)
+	public List<Array> getChartData() {
+		String	userId = IndexController.getPrincipal();
+		User	user = userService.getByUserId(userId);
+		List<Array> data = null;
+		String	deptId = getMainDepartmentId(user.getDeptPositions());
+		
+		// 사용자의 권한에 따라 조회해야할 Data가 다르다.
+		// 부서장인 경우에는 부서 산하의 팀별 작업 내역
+		// 팀장인 경우에는 팀원들의 작업 내역 조회
+		List<UserAuthority>	auths = user.getUserAuthorities();
+		List<ChartData>	chartData = null;
+		
+		System.out.println("getChartData: user " + user + ", deptId = " + deptId);
+		for (int i = 0; i < auths.size(); i++) {
+			UserAuthority	auth = auths.get(i);
+			
+			System.out.println("auth = " + auth.getRoleName() + ": " + UserRole.DL);
+			
+			if (auth.getRoleName().equals(UserRole.DL.name())) {
+				// 부서별 작업 현황 조회
+				System.out.println("user " + userId + " has DL");
+				chartData = taskService.getTaskStatusReportForIndividualDepartment(deptId);
+				break;
+			} else if (auth.getRoleName().equals(UserRole.TL.name())) {
+				// 팀원들의 작업 현황 조회
+				System.out.println("user " + userId + " has TL");
+				chartData = taskService.getTaskStatusReportForIndividualPerson(deptId);
+				break;
+			}
+		}
+		
+		// View page에서 사용될 데이터 형태로 변형하여 반환한다.
+		data = reArrangeChartData(chartData);
+		return data;
+	}
+	
+	private List<Array> reArrangeChartData(List<ChartData> chartData) {
+		List<Array>	data = new ArrayList<>();
+		System.out.println("chartData: " + chartData);
+		return data;
+	}
+	
+	/*
+	 * 사용자의 주 부서 아이디를 조회한다.
+	 * 겸직인 경우거나, 직책과 직급이 구분되어 있으므로 팀장 부서장의 부서는 직책이 표시된 부서의 아이디를 조회한다.
+	 * TODO 겸직으로 두개 이상의 직책을 가진 사람의 경우에 대한 처리가 필요하다.
+	 */
+	private String getMainDepartmentId(List<UserDepartmentPosition> pos) {
+		String	deptId = null;
+		
+		for (UserDepartmentPosition p: pos) {
+			if (p.getPositionType().equals("R")) {
+				deptId = p.getDeptId();
+				break;
+			}
+		}
+		
+		return deptId;
 	}
 	
 	private boolean hasLeaderAuthority(User user) {
@@ -147,11 +208,11 @@ public class TaskRestController {
 		for (int i = 0; i < auths.size(); i++) {
 			UserAuthority ua = auths.get(i);
 			System.out.println("DEBUG : ua " + ua);
-			if (ua.getRoleName().equals("DL")) {
+			if (ua.getRoleName().equals(UserRole.DL)) {
 				System.out.println("user has DL");
 				hasAuth = true;
 				break;
-			} else if (ua.getRoleName().equals("TL")) {
+			} else if (ua.getRoleName().equals(UserRole.TL)) {
 				System.out.println("user has TL");
 				hasAuth = true;
 				break;
