@@ -63,15 +63,7 @@ App
 		}
 	};
 	
-	function setReadedMessage() {
-		messageService.setReadedAll()
-		.then(
-			function(result) {
-				/* do nothing */
-			},
-			function(err) {
-				console.error('Error while set message to readed all');
-			}
-		);
-	}
+	self.setReadAllMessages = function() {
+		messageService.setReadAll();
+	};
 }]);

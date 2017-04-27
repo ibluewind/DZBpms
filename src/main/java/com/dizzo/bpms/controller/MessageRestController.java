@@ -55,9 +55,9 @@ public class MessageRestController {
 		return msgService.listForUnRead(userId);
 	}
 	
-	@RequestMapping(value="/readedAll", method=RequestMethod.GET)
-	public void setReadedAll() {
-		String userId = IndexController.getPrincipal();
+	@RequestMapping(value="/readAll", method=RequestMethod.GET)
+	public void readAllMessage() {
+		String	userId = IndexController.getPrincipal();
 		msgService.setReadedAll(userId);
 		return;
 	}

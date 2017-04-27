@@ -10,6 +10,8 @@ App.controller('chartController', ['chartService', '$location', '$rootScope', fu
 	chartService.getReportData()
 	.then(
 		function(results) {
+			console.log("results: ", results);
+			if (results == "")	return;
 			self.chartData = results[0];
 			self.chartLabels = results[1];
 			self.chartIds = results[2];

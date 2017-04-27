@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,10 @@ public class TaskRestController {
 		
 		historyService.save(history);
 		
-		msgService.sendMessage("T", task.getWorkerId(), "신규 작업 " + task.getTitle() + "이(가) 생성되었습니다.");
+		/**
+		 * 신규 작업에 대한 내용을 작업자에게 전달한다.
+		 */
+		msgService.sendMessage("T", task.getWorkerId(), "신규 작업 " + task.getTitle() + " 생성");
 		return task;
 	}
 	
@@ -140,6 +142,10 @@ public class TaskRestController {
 		history.setAction(task.getAction());
 		historyService.save(history);
 		
+		/**
+		 * 작업 수정에 대한 내용 전달은 지시자에게 전달한다.
+		 */
+		msgService.sendMessage("T", task.getUserId(), "작업 " + task.getTitle() + " : "  + task.getAction());
 		return task;
 	}
 	
@@ -188,6 +194,8 @@ public class TaskRestController {
 				break;
 			}
 		}
+		
+		if (chartData == null)	return null;
 		
 		// View page에서 사용될 데이터 형태로 변형하여 반환한다.
 		data = reArrangeChartData(chartData);
@@ -307,10 +315,5 @@ public class TaskRestController {
 		}
 		
 		return hasAuth;
-	}
-	
-	private boolean isEmail(String id) {
-		String	regEx = "^[_a-z0-9]+(.[_a-z0-9]+)*@(?:\\w+\\.)+\\w+$";
-		return	Pattern.matches(regEx, id);
 	}
 }

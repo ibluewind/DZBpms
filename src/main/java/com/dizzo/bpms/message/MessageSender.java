@@ -17,6 +17,7 @@ public class MessageSender {
 	JmsTemplate	jmsTemplate;
 	
 	public void sendMessage(final WFMessage message) {
+		System.out.println("DEBUG : sending Message : " + message);
 		jmsTemplate.send(new MessageCreator() {
 			
 			@Override

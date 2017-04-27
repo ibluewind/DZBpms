@@ -6,6 +6,7 @@ App.service('chartService', ['$http', '$q', function($http, $q) {
 		$http.get('/bpms/rest/task/chart')
 		.then(
 			function(response) {
+				console.log("response: ", response);
 				deferred.resolve(response.data);
 			},
 			function(err) {

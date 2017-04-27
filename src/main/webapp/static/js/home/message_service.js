@@ -82,4 +82,16 @@ App
 		
 		return deferred.promise;
 	};
+	
+	this.setReadAll = function() {
+		$http.get('/bpms/rest/message/readAll')
+		.then(
+			function(response) {
+				console.log('response: ', response);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+	};
 }]);

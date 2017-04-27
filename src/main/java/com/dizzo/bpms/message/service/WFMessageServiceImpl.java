@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dizzo.bpms.controller.IndexController;
 import com.dizzo.bpms.message.MessageSender;
 import com.dizzo.bpms.message.WFMessage;
 import com.dizzo.bpms.message.dao.WFMessageDao;

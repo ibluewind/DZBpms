@@ -25,7 +25,7 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="panel-footer">
+			<div class="panel-footer" ng-init="ctrl.setReadAllMessages()">
 				<button type="button" class="btn btn-xs btn-danger" ng-click="ctrl.deleteMessage()" ng-disabled="!ctrl.checkAtLeastOne()">
 				<span class="glyphicon glyphicon-trash"></span>삭제
 				</button>
