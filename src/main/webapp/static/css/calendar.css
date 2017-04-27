@@ -88,6 +88,7 @@ div.nav_bar {
 
 .calendar-view {
 	width: 100%;
+	margin-bottom: 20px;
 }
 
 .calendar-view td {
@@ -98,6 +99,11 @@ div.nav_bar {
 #dayView {
 	display:none;
 }
+
+#weekView {
+	display:none;
+}
+
 .schedule-bar-area {
 	background-color: #f5f5f5;
 }

@@ -17,8 +17,8 @@
  * approve.tray : ApproveTray.java에 해당하며 배열 형태 또는 단독 오브젝트이다.
  */
 App
-.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveLineType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', 'confirmModal', '$rootScope', '$routeParams', '$filter', '$location', '$alert',
-	function(approveStatus, approveTrayType, approveLineType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, confirmModal, $rootScope, $routeParams, $filter, $location, $alert) {
+.controller('editAppController', ['approveStatus', 'approveTrayType', 'approveLineType', 'approveService', 'userService', 'selectUserModal', 'deleteConfirm', 'insertCommentModal', 'confirmModal', '$rootScope', '$window', '$routeParams', '$filter', '$location', '$alert',
+	function(approveStatus, approveTrayType, approveLineType, approveService, userService, selectUserModal, deleteConfirm, insertCommentModal, confirmModal, $rootScope, $window, $routeParams, $filter, $location, $alert) {
 
 	// 결재 문서 작성
 	var self = this;
@@ -58,7 +58,7 @@ App
 		self.canEditLine = false;
 	}
 	
-	self.user = $rootScope.loggedInUser;
+	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	
 	history.historyId = '';
 	history.appId = '';
@@ -852,8 +852,8 @@ App
 		return title;
 	}
 }])
-.controller('listAppController', ['approveService', 'userService', 'approveStatus', '$rootScope',
-                                  function(approveService, userService, approveStatus, $rootScope) {
+.controller('listAppController', ['approveService', 'userService', 'approveStatus', '$rootScope', '$window',
+                                  function(approveService, userService, approveStatus, $rootScope, $window) {
 	var self = this;
 	self.forms = [];
 	self.summaries = [];
@@ -862,7 +862,7 @@ App
 	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
 		$rootScope.prevUrl = oldUrl.substring(oldUrl.indexOf('#') + 1);
 	});
-	self.user = $rootScope.loggedInUser;
+	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	
 	approveService.getFormList()
 	.then(
@@ -993,8 +993,8 @@ App
 		}
 	);
 }])
-.controller('manageAppLineController', ['approveService', 'userService', 'selectUserModal', 'selectFormModal', 'deleteConfirm', '$alert', '$rootScope',
-										function(approveService, userService, selectUserModal, selectFormModal, deleteConfirm, $alert, $rootScope) {
+.controller('manageAppLineController', ['approveService', 'userService', 'selectUserModal', 'selectFormModal', 'deleteConfirm', '$alert', '$window',
+										function(approveService, userService, selectUserModal, selectFormModal, deleteConfirm, $alert, $window) {
 	var self = this;
 	
 	self.summaries = [];
@@ -1040,7 +1040,7 @@ App
 					self.summary.formTitle = form.title;
 					
 					// 본인을 결재라인에 추가한다.
-					var user = $rootScope.loggedInUser;
+					var user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 					var line = {
 						lineId: '',
 						approvalId: user.userId,

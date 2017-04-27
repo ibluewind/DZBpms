@@ -1,8 +1,6 @@
 package com.dizzo.bpms.utils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,10 +77,13 @@ public class ChartTest {
 		
 		System.out.println("list: " + list.stream().filter(t->t.getStatus().equals("F")).collect(Collectors.toList()));
 		List<String> deptList = new ArrayList<String>();
+		List<String> deptIds = new ArrayList<String>();
 		
 		for (ChartData c: list) {
-			if (!deptList.contains(c.getName()))
+			if (!deptList.contains(c.getName())) {
 				deptList.add(c.getName());
+				deptIds.add(c.getId());
+			}
 		}
 		
 		
@@ -121,16 +122,17 @@ public class ChartTest {
 		}
 		
 		System.out.println("deptList: " + deptList);
+		System.out.println("deptIds" + deptIds);
 		System.out.println("finish: " + finish);
 		System.out.println("process: " + process);
 		System.out.println("late: " + late);
 		
-		List<List>	result = new ArrayList();
-		List<List>	arr = new ArrayList<>();
-		arr.add(process);
-		arr.add(finish);
-		arr.add(late);
-		result.add(arr);
+		List<List<?>>	result = new ArrayList<List<?>>();
+		List<List<?>>	counts = new ArrayList<List<?>>();
+		counts.add(process);
+		counts.add(finish);
+		counts.add(late);
+		result.add(counts);
 		result.add(deptList);
 		
 		System.out.println("result: " + result);

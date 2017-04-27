@@ -94,6 +94,11 @@ public class IndexController {
 		return "/home/partial/listschedule";
 	}
 	
+	@RequestMapping(value="/msgbox", method=RequestMethod.GET)
+	public String getMessageBoxPage() {
+		return "/home/messagebox";
+	}
+	
 	/*
 	 * MODAL Windows
 	 */

@@ -2,8 +2,14 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<div class="row">
-			<div class="col-md-10">
+			<div class="col-md-6">
 				<div class="panel-title">작업목록</div>
+			</div>
+			<!-- 작업자 선택 추가 -->
+			<div class="col-md-2">
+				<select class="form-control"
+				ng-options="name for name in ctrl.workers"
+				ng-model="ctrl.searchWorker"></select>
 			</div>
 			<div class="col-md-2">
 				<select class="form-control" ng-model="ctrl.searchStatus">
@@ -35,7 +41,7 @@
 					<th></th>
 				</thead>
 				<tbody>
-					<tr ng-repeat="task in ctrl.tasks | filter:ctrl.statusFilter" ng-class="{'bg-primary':task.status=='N', 'bg-info':task.status=='S', 'bg-success':task.status=='F', 'bg-warning':task.status=='R', 'bg-danger':task.status=='L' || task.status=='H' || task.status == 'C'}">
+					<tr ng-repeat="task in ctrl.tasks | filter:ctrl.statusFilter | filter:ctrl.workerFilter" ng-class="{'bg-primary':task.status=='N', 'bg-info':task.status=='S', 'bg-success':task.status=='F', 'bg-warning':task.status=='R', 'bg-danger':task.status=='L' || task.status=='H' || task.status == 'C'}">
 						<td>{{$index + 1}}</td>
 						<td>{{ctrl.getStatusName(task.status)}}
 						<td style="cursor:pointer" ng-click="ctrl.canEdit(task) ? ctrl.edit(task.taskId) : ctrl.view(task.taskId)">{{task.title}}</td>

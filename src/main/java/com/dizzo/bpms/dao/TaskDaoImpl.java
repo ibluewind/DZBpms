@@ -250,7 +250,7 @@ public class TaskDaoImpl implements TaskDao {
 	public List<ChartData> getTaskStatusReportForIndividualDepartment(String deptId) {
 		// 부서별 작업 현황 조회
 		// 지정된 부서의 하위 부서의 작업 현황을 조회한다.
-		String	query = "SELECT DISTINCT t.status,"
+		String	query = "SELECT DISTINCT IF (t.status IS NULL, 'N', t.status) status,"
 		              + "    u.deptid id,"
 		              + "    d.name,"
 		              + "    count(t.status) num"
@@ -280,7 +280,7 @@ public class TaskDaoImpl implements TaskDao {
 		// 부서 직원들 개별 작업 현황 조회
 		String query = "SELECT DISTINCT u.userid id,"
                   	 + " concat(u.lastName, u.firstName) 'name',"
-                  	 + " t.status,"
+                  	 + " IF (t.status IS NULL, 'N', t.status) status,"
                   	 + " count(t.status) num"
                   	 + " FROM task t"
                   	 + " RIGHT JOIN (SELECT userid"

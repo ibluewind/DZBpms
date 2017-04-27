@@ -69,7 +69,8 @@
 		        </li>
 		      </ul>
 		      <ul class="nav navbar-nav navbar-right">
-		      	<li><a href="<c:url value="/logout"/>">Logout</a></li>
+		      	<li ng-controller="messageController as msg"><a href="<c:url value='#/msgbox'/>"><span class="galyphicon glyphicon-envelope"></span><span class="badge">{{msg.messages.length}}</span></a></li>
+		      	<li ng-controller="logoutController as ctrl"><a href="<c:url value="/logout"/>" ng-click="ctrl.clearSession()">Logout</a></li>
 		      	<sec:authorize access="hasRole('ADMIN') and hasRole('DBA')">
 		        <li><a href="<c:url value="/admin"/>">Admin</a></li>
 		        </sec:authorize>
@@ -115,5 +116,7 @@
 <script src="<c:url value="/static/js/home/calendar_render.js"/>"></script>
 <script src="<c:url value="/static/js/home/chart_controller.js"/>"></script>
 <script src="<c:url value="/static/js/home/chart_service.js"/>"></script>
+<script src="<c:url value="/static/js/home/message_controller.js"/>"></script>
+<script src="<c:url value="/static/js/home/message_service.js"/>"></script>
 </body>
 </html>

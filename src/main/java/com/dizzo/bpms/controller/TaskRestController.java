@@ -1,10 +1,11 @@
 package com.dizzo.bpms.controller;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dizzo.bpms.message.service.WFMessageService;
 import com.dizzo.bpms.model.ChartData;
 import com.dizzo.bpms.model.Task;
 import com.dizzo.bpms.model.TaskHistory;
@@ -43,11 +45,13 @@ public class TaskRestController {
 	@Autowired
 	FileAttachService	fileAttachService;
 	
+	@Autowired
+	WFMessageService	msgService;
+	
 	@RequestMapping(method=RequestMethod.POST)
 	public Task saveTask(@RequestBody Task task) {
 		task.setTaskId(UUID.randomUUID().toString());
 		task.setCreateDate(new Date());
-		System.out.println("create task " + task);
 		taskService.save(task);
 		
 		TaskHistory	history = new TaskHistory();
@@ -60,6 +64,7 @@ public class TaskRestController {
 		
 		historyService.save(history);
 		
+		msgService.sendMessage("T", task.getWorkerId(), "신규 작업 " + task.getTitle() + "이(가) 생성되었습니다.");
 		return task;
 	}
 	
@@ -103,6 +108,18 @@ public class TaskRestController {
 		return listAll;
 	}
 	
+	/**
+	 * 담당자의 작업 목록을 조회한다.
+	 * 해당 메소드는 부서장 또는 팀장이 차트에서 특정 작업자를 클릭한 경우에만 사용된다.
+	 * @param userId
+	 * @return
+	 */
+	@RequestMapping(value="/user/{userId}/", method=RequestMethod.GET)
+	public List<Task> listOfTaskByUserId(@PathVariable String userId) {
+
+		return taskService.listByWorker(userId);
+	}
+	
 	
 	@RequestMapping(value="/{taskId}", method=RequestMethod.GET)
 	public Task getByTaskId(@PathVariable String taskId) {
@@ -141,10 +158,10 @@ public class TaskRestController {
 	}
 	
 	@RequestMapping(value="/chart", method=RequestMethod.GET)
-	public List<Array> getChartData() {
+	public List<List<?>> getChartData() {
 		String	userId = IndexController.getPrincipal();
 		User	user = userService.getByUserId(userId);
-		List<Array> data = null;
+		List<List<?>> data = null;
 		String	deptId = getMainDepartmentId(user.getDeptPositions());
 		
 		// 사용자의 권한에 따라 조회해야할 Data가 다르다.
@@ -177,10 +194,80 @@ public class TaskRestController {
 		return data;
 	}
 	
-	private List<Array> reArrangeChartData(List<ChartData> chartData) {
-		List<Array>	data = new ArrayList<>();
-		System.out.println("chartData: " + chartData);
-		return data;
+	/*
+	 * 전달된 ID에 따라 조회해야할 내용이 달라져야 한다.
+	 * 부서 ID가 전달된 경우에는 해당 부서의 사용자 작업 현황을 조회하여야 하고,
+	 * 사용자 ID가 전달된 경우에는 사용자의 작업 목록을 조회하여 전달해야한다.
+	 */
+	@RequestMapping(value="/chart/{id}/", method=RequestMethod.GET)
+	public List<List<?>> getChartDataById(@PathVariable String id) {
+		User	user = userService.getByUserId(IndexController.getPrincipal());
+		List<ChartData>	chartData = null;
+		
+		// 부서장 또는 팀장 권한이 없는 경우에는 해당 내용을 표시하지 않음.
+		if (!hasLeaderAuthority(user))	return null;
+		
+		chartData = taskService.getTaskStatusReportForIndividualPerson(id);
+		
+		return reArrangeChartData(chartData);
+	}
+	
+	private List<List<?>> reArrangeChartData(List<ChartData> chartData) {
+		List<List<?>>	results = new ArrayList<List<?>>();
+		List<String>	names = new ArrayList<String>();
+		List<String>	ids = new ArrayList<String>();
+		List<Integer>	finish = new ArrayList<Integer>();
+		List<Integer>	process = new ArrayList<Integer>();
+		List<Integer>	late = new ArrayList<Integer>();
+		List<List<?>>	counts = new ArrayList<List<?>>();
+		
+		for (ChartData c: chartData) {
+			if (!names.contains(c.getName())) {
+				names.add(c.getName());
+				ids.add(c.getId());
+			}
+		}
+		
+		for (int i = 0; i < names.size(); i++) {
+			finish.add(0);
+			process.add(0);
+			late.add(0);
+		}
+		
+		// 부서 목록의 순서대로 data 값을 설정한다.
+		for (int i = 0; i < names.size(); i++) {
+			String name = names.get(i);
+			
+			// 이름으로 필터링을 하면, 3가지 상태에 대한 카운터 배열로 정리된다.
+			// 배열에 있는 상태 값의 카운터를 각각의 상태값 목록에 저장한다.
+			List<ChartData> data = chartData.stream().filter(t->t.getName().equals(name)).collect(Collectors.toList());
+			System.out.println("data: " + data);
+			
+			for (int j = 0; j < data.size(); j++) {
+				String	status = data.get(j).getStatus();
+				int		count = data.get(j).getCount();
+				
+				if (status.equals("P")) {
+					process.set(i, count);
+				} else if (status.equals("F")) {
+					finish.set(i, count);
+				} else if (status.equals("L")) {
+					late.set(i, count);
+				}
+			}
+		}
+		
+		counts.add(process);
+		counts.add(finish);
+		counts.add(late);
+		
+		results.add(counts);
+		results.add(names);
+		results.add(ids);
+		
+		System.out.println("results: " + results);
+		
+		return results;
 	}
 	
 	/*
@@ -208,11 +295,11 @@ public class TaskRestController {
 		for (int i = 0; i < auths.size(); i++) {
 			UserAuthority ua = auths.get(i);
 			System.out.println("DEBUG : ua " + ua);
-			if (ua.getRoleName().equals(UserRole.DL)) {
+			if (ua.getRoleName().equals(UserRole.DL.name())) {
 				System.out.println("user has DL");
 				hasAuth = true;
 				break;
-			} else if (ua.getRoleName().equals(UserRole.TL)) {
+			} else if (ua.getRoleName().equals(UserRole.TL.name())) {
 				System.out.println("user has TL");
 				hasAuth = true;
 				break;
@@ -220,5 +307,10 @@ public class TaskRestController {
 		}
 		
 		return hasAuth;
+	}
+	
+	private boolean isEmail(String id) {
+		String	regEx = "^[_a-z0-9]+(.[_a-z0-9]+)*@(?:\\w+\\.)+\\w+$";
+		return	Pattern.matches(regEx, id);
 	}
 }
