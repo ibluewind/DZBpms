@@ -1,6 +1,7 @@
 App
 .service('messageService', ['$http', '$q', function($http, $q) {
 	this.messages = [];
+	this.unreadmessages = [];
 	
 	this.getUnreadMessages = function() {
 		var	deferred = $q.defer();
@@ -9,8 +10,25 @@ App
 		.then(
 			function(response) {
 				deferred.resolve(response.data);
+				console.log('unreadmessages: ', response.data);
 			},
 			function (err) {
+				$q.reject(err);
+			}
+		);
+		
+		return deferred.promise;
+	};
+	
+	this.getMessageList = function() {
+		var deferred = $q.defer();
+		
+		$http.get('/bpms/rest/message')
+		.then(
+			function(response) {
+				deferred.resolve(response.data);
+			},
+			function(err) {
 				$q.reject(err);
 			}
 		);
@@ -87,6 +105,8 @@ App
 		$http.get('/bpms/rest/message/readAll')
 		.then(
 			function(response) {
+				this.unreadmessages = [];		// 초기화
+				console.log('unreadmessages: ', this.unreadmessages);
 				console.log('response: ', response);
 			},
 			function(err) {

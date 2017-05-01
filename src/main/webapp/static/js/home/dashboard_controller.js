@@ -7,7 +7,7 @@ function(taskService, taskStatus, userService, approveService, approveTrayType, 
 	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	self.tasks = [];
 	self.trays = [];
-	self.chied = false;
+	self.chief = false;
 	
 	if (self.user == null) {
 		userService.getLoggedInUser()

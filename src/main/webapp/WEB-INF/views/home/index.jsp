@@ -69,7 +69,7 @@
 		        </li>
 		      </ul>
 		      <ul class="nav navbar-nav navbar-right">
-		      	<li ng-controller="messageController as msg"><a href="<c:url value='#/msgbox'/>"><span class="galyphicon glyphicon-envelope"></span><span class="badge">{{msg.messages.length}}</span></a></li>
+		      	<li ng-controller="alertMessageController as msg"><a href="<c:url value='#/msgbox'/>"><span class="galyphicon glyphicon-envelope"></span><span class="badge">{{msg.unreadmessages.length}}</span></a></li>
 		      	<li ng-controller="logoutController as ctrl"><a href="<c:url value="/logout"/>" ng-click="ctrl.clearSession()">Logout</a></li>
 		      	<sec:authorize access="hasRole('ADMIN') and hasRole('DBA')">
 		        <li><a href="<c:url value="/admin"/>">Admin</a></li>

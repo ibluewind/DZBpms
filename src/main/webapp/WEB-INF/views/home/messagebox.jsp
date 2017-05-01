@@ -12,7 +12,7 @@
 							<th><input type="checkbox" id='checkedAll' ng-click="ctrl.selectAllMessages($event)"></th>
 							<th>내용</th>
 							<th>일시</th>
-							<th></th>
+							<th>확인</th>
 						</tr>
 					</thead>
 					<tbody>
