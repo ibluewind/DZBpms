@@ -43,6 +43,11 @@ public class HomeController {
 		return "/home/report";
 	}
 	
+	@RequestMapping(value="/regist_project", method=RequestMethod.GET)
+	public String getRegistProjectPage() {
+		return "/project/regist_project";
+	}
+	
 	@RequestMapping(value="/forms/vocation", method=RequestMethod.GET)
 	public String getVocationFormPage() {
 		return "/forms/vocation_form";

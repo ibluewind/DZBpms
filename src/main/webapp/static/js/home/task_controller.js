@@ -341,6 +341,8 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	self.task.userId = self.user.userId;
 	self.task.userName = self.user.lastName + self.user.firstName;
+	self.task.workerName = self.user.lastName + self.user.firstName;
+	self.task.workerId = self.user.userId;
 	
 	if (taskId != -9999) {	// 신규 생성이 아닌 수정
 		self.edit = true;

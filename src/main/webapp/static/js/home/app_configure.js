@@ -74,6 +74,10 @@ App
 		templateUrl: '/bpms/msgbox',
 		controller: 'messageController as ctrl'
 	})
+	.when('/project/regist', {
+		templateUrl: '/bpms/home/regist_project',
+		controller: 'registProject as ctrl'
+	})
 	.otherwise({redirectTo: '/'});
 }])
 .config(['$datepickerProvider', function($datepickerProvider) {

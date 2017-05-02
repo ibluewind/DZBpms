@@ -66,7 +66,7 @@ public class TaskRestController {
 		/**
 		 * 신규 작업에 대한 내용을 작업자에게 전달한다.
 		 */
-		msgService.sendMessage("T", task.getWorkerId(), "신규 작업 " + task.getTitle() + " 생성");
+		msgService.sendMessage("T", task.getWorkerId(), "[신규 작업 ] " + task.getTitle() + " 생성");
 		return task;
 	}
 	
@@ -145,7 +145,7 @@ public class TaskRestController {
 		/**
 		 * 작업 수정에 대한 내용 전달은 지시자에게 전달한다.
 		 */
-		msgService.sendMessage("T", task.getUserId(), "작업 " + task.getTitle() + " : "  + task.getAction());
+		msgService.sendMessage("T", task.getUserId(), "[작업수정] " + task.getTitle() + " : "  + task.getAction());
 		return task;
 	}
 	

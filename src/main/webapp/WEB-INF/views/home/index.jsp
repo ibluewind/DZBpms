@@ -64,7 +64,7 @@
 		        	<a href="./" class="dropdown-toggle" data-toggle="dropdown" role="button" arai-expanded="false">프로젝트 관리<span class="caret"></span></a>
 		        	<ul class="dropdown-menu" role="menu">
 		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/list_project">프로젝트 목록</a></li>
-		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/create_project">프로젝트 생성</a></li>
+		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/project/regist">프로젝트 생성</a></li>
 		        	</ul>
 		        </li>
 		      </ul>
@@ -118,5 +118,7 @@
 <script src="<c:url value="/static/js/home/chart_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/message_controller.js"/>"></script>
 <script src="<c:url value="/static/js/home/message_service.js"/>"></script>
+<script src="<c:url value="/static/js/home/project_controller.js"/>"></script>
+<script src="<c:url value="/static/js/home/project_service.js"/>"></script>
 </body>
 </html>
