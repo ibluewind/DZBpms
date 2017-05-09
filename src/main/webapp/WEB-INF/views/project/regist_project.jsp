@@ -43,5 +43,8 @@
 			</div>
 		</form>
 	</div>
-	<div class="panel-footer"></div>
+	<div class="panel-footer">
+		<button type="button" class="btn btn-primary btn-sm" ng-disabled="regist_project.$invalid" ng-click="ctrl.saveSummaryAndNext()"><span class="glyphicon glyphicon-chevron-right"></span> 다음</button>
+		<button type="button" class="btn btn-default btn-sm" ng-click="ctrl.cancel()"><span class="glyphicon glyphicon-ban-circle"></span> 취소</button>
+	</div>
 </div>

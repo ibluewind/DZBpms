@@ -16,6 +16,8 @@ public class ProjectTaskTest {
 		task.setContent("테스트입니다.");
 		task.setCreateDate(new Date());
 		task.setCurrentRate(0);
+		task.setUserId("andrew@chosun.com");
+		task.setUserName("김현곤");
 		task.setStatus("N");
 		task.setEndDate(new Date());
 		task.setPrevTaskId(UUID.randomUUID().toString());

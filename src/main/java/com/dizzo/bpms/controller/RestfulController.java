@@ -5,6 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,7 +53,6 @@ public class RestfulController {
 	@RequestMapping(value="/dept/tree/{companyId}", method=RequestMethod.GET)
 	public List<DepartmentTree> getDeptJsonTree(@PathVariable String companyId) {
 		List<DepartmentTree> tree =  deptService.getJsTree(companyId);
-		
 		return tree;
 	}
 	
@@ -95,8 +96,16 @@ public class RestfulController {
 	}
 	
 	@RequestMapping(value="/user", method=RequestMethod.GET)
-	public User getLoggedInUser() {
-		return userService.getByUserId(getPrincipal());
+	public ResponseEntity<User> getLoggedInUser() {
+		String	userId = getPrincipal();
+		User user = userService.getByUserId(userId);
+		
+		log.info("User : {}", user);
+		if (user == null) {
+			return new ResponseEntity<User>(new User(), HttpStatus.NO_CONTENT);
+		}
+		
+		return new ResponseEntity<User>(user, HttpStatus.OK);
 	}
 
 	@RequestMapping(value="/user/list/{deptId}", method=RequestMethod.GET)
