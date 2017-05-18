@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dizzo.bpms.message.WFMessage;
 import com.dizzo.bpms.message.service.WFMessageService;
 
-@CrossOrigin(maxAge=3600)
+@CrossOrigin(origins="*", maxAge=3600)
 @RestController
 @RequestMapping("/rest/message")
 public class MessageRestController {

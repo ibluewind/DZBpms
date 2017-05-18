@@ -167,7 +167,7 @@
             	<version>2.4</version>
             	<configuration>
             		<warSourceDirectory>src/main/webapp</warSourceDirectory>
-            		<warName>DZBpms</warName>
+            		<warName>bpms</warName>
             		<failOnMissingWebXml>false</failOnMissingWebXml>
             	</configuration>
             </plugin>
