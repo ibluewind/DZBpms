@@ -37,7 +37,7 @@ public class DZBpmInitializer extends AbstractAnnotationConfigDispatcherServletI
 		
 		//CORSFilter()는 생략한다. @RestController가 정의된 class에 @CrossOrigin annotation을 사용하는 것이 낫다.
 		//return new Filter[] { encodingFilter, new CORSFilter(), new CSRFHeaderFilter() };
-		return new Filter[] { encodingFilter, new CSRFHeaderFilter() };
+		return new Filter[] { encodingFilter };
 	}
 	
 	/**
