@@ -70,6 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http
 			.authorizeRequests()
 			.antMatchers("/home/**").access("hasRole('USER')")
+			.antMatchers("/rest/**").access("hasRole('USER')")
 			.antMatchers("/admin/**").access("hasRole('ADMIN')")
 			.and()
 				.formLogin().loginPage("/login")
@@ -80,7 +81,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.addFilterAfter(new CSRFHeaderFilter(), CsrfFilter.class)		// angularjs의 xsrf 처리를 위해서 필터를 등록한다.
 				.exceptionHandling().accessDeniedPage("/Access_Denied")
 			.and()
-				.sessionManagement().maximumSessions(1).expiredUrl("/login");	// 동시 접속 방지
+				.sessionManagement().maximumSessions(1).expiredUrl("/logout");	// 동시 접속 방지
 	}
 	
 	/*
@@ -90,7 +91,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
 	}
-
+	
 	/**
 	 * rememeber-me option을 사용하는 경우를 위한 함수.
 	 * @return

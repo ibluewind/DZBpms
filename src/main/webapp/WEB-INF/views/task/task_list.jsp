@@ -60,6 +60,25 @@
 				</tbody>
 			</table>
 		</div>
+		<div class="text-center">
+			<ul ng-if="ctrl.pager.pages.length" class="pagination text-center">
+				<li ng-class="{disabled:ctrl.pager.currentPage === 1}">
+					<a ng-click="ctrl.setPage(1)"><span class="glyphicon glyphicon-step-backward"></span></a>
+				</li>
+				<li ng-class="{disabled:ctrl.pager.currentPage === 1}">
+					<a ng-click="ctrl.setPage(ctrl.pager.currentPage - 1)"><span class="glyphicon glyphicon-chevron-left"></span></a>
+				</li>
+				<li ng-repeat="page in ctrl.pager.pages" ng-class="{active:ctrl.pager.currentPage === page}">
+					<a ng-click="ctrl.setPage(page)">{{page}}</a>
+				</li>
+				<li ng-class="{disabled:ctrl.pager.currentPage === ctrl.pager.totalPages}">
+					<a ng-click="ctrl.setPage(ctrl.pager.currentPage + 1)"><span class="glyphicon glyphicon-chevron-right"></span></a>
+				</li>
+				<li ng-class="{disabled:ctrl.pager.currentPage === ctrl.pager.totalPages}">
+					<a ng-click="ctrl.setPage(ctrl.pager.totalPages)"><span class="glyphicon glyphicon-step-forward"></span></a>
+				</li>
+			</ul>
+		</div>
 	</div>
 	<div class="panel-footer">
 		작업 내용을 확인하거나 수정하시려면, 제목을 클릭하십시오.	

@@ -2,6 +2,8 @@ package com.dizzo.bpms.configuration;
 
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.springframework.web.filter.CharacterEncodingFilter;
@@ -40,6 +42,12 @@ public class DZBpmInitializer extends AbstractAnnotationConfigDispatcherServletI
 		return new Filter[] { encodingFilter };
 	}
 	
+	@Override
+	public void onStartup(ServletContext servletContext) throws ServletException {
+		super.onStartup(servletContext);
+		servletContext.addListener(new SessionListener());
+	}
+
 	/**
 	 * 파일 업로드를 위한 MultipartConfigElement 설정
 	 * DZBpmConfiguration에 MultipartResolver Bean을 설정해야 한다.

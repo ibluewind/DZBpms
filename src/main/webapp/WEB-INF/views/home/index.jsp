@@ -82,6 +82,7 @@
 	</div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-cookies.min.js"></script>
@@ -103,6 +104,7 @@
 <script src="<c:url value="/static/js/modal_window.js"/>"></script>
 <script src="<c:url value="/static/js/admin/user/app_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/app_configure.js"/>"></script>
+<script src="<c:url value="/static/js/home/pagination_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/dashboard_controller.js"/>"></script>
 <script src="<c:url value="/static/js/home/task_constant.js"/>"></script>
 <script src="<c:url value="/static/js/home/task_service.js"/>"></script>

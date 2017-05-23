@@ -533,14 +533,16 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 		self.task.action += action;
 	}
 }])
-.controller('taskList', ['taskStatus', 'taskService', 'userService', '$location', '$routeParams', '$window',
-			function(taskStatus, taskService, userService, $location, $routeParams, $window) {
+.controller('taskList', ['taskStatus', 'taskService', 'userService', 'PageService', '$location', '$routeParams', '$window',
+			function(taskStatus, taskService, userService, PageService, $location, $routeParams, $window) {
 	var	self = this;
 	var workerName = $routeParams.workerName;
+	var _items = [];
 	
 	console.log('DEBUG: workerName = ' + workerName);
 	self.tasks = [];
 	self.user = {};
+	self.pager = {};
 	
 	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	
@@ -578,12 +580,21 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 		console.log('workers: ', self.workers);
 	}
 	
+	self.setPage = function(page) {
+		if (page < 1 || page > self.pager.totalPages)		return;
+		
+		self.pager = PageService.GetPager(_items.length, page);
+		console.log('pager: ', self.pager);
+		self.tasks = _items.slice(self.pager.startIndex, self.pager.endIndex + 1);
+	}
+	
 	function getTaskList() {
 		
 		taskService.listOfMyTask()
 		.then(
 			function(data) {
-				self.tasks = data;
+				_items = data;
+				self.setPage(1);
 				console.log('tasks: ', self.tasks);
 				setWorkers(data);
 			},
