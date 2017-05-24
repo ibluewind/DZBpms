@@ -80,8 +80,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.and()
 				.addFilterAfter(new CSRFHeaderFilter(), CsrfFilter.class)		// angularjs의 xsrf 처리를 위해서 필터를 등록한다.
 				.exceptionHandling().accessDeniedPage("/Access_Denied")
+//			.and().rememberMe().rememberMeParameter("remember-me").tokenRepository(persistentTokenRepository()).tokenValiditySeconds(86400)
 			.and()
-				.sessionManagement().maximumSessions(1).expiredUrl("/logout");	// 동시 접속 방지
+				.sessionManagement().invalidSessionUrl("/login").maximumSessions(1).expiredUrl("/logout");	// 동시 접속 방지
 	}
 	
 	/*
