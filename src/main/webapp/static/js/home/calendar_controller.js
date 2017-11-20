@@ -2,7 +2,8 @@
  * Angular Calendar Controller
  */
 App
-.controller('miniCalendarController', ['calendarService', 'calendarType', '$scope', '$rootScope', function(calendarService, calendarType, $scope, $rootScope) {
+.controller('miniCalendarController', ['calendarService', 'calendarType', '$scope', '$rootScope',
+			function(calendarService, calendarType, $scope, $rootScope) {
 	
 	var self = this;
 	var today = new Date();
@@ -56,11 +57,12 @@ App
 		}
 	});
 }])
-.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope', '$filter',
-									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope, $filter) {
+.controller('calendarController', ['calendarService', 'calendarType', 'peekCalendarPopover', '$scope', '$rootScope', '$window', '$filter',
+									function(calendarService, calendarType, peekCalendarPopover, $scope, $rootScope, $window, $filter) {
 	var self = this;
 	var today = new Date();
 	var calType = calendarType.MONTH;
+	var user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	
 	self.currentDate = calendarService.currentDate = new Date();
 	self.scheduleList = [];
@@ -117,7 +119,7 @@ App
 		var plist = [], vlist = [], tlist = [];
 		
 		if (calendarService.filterOptions.own) {
-			list = $filter('filter')(list, {userId: $rootScope.loggedInUser.userId});
+			list = $filter('filter')(list, {userId: user.userId});
 		}
 		
 		if (calendarService.filterOptions.task)

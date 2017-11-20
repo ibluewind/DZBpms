@@ -1,32 +1,58 @@
-App.controller('chartController', ['chartService', function(chartService) {
+App.controller('chartController', ['chartService', '$location', '$rootScope', function(chartService, $location, $rootScope) {
 	
 	var self = this;
-//	self.chartData = [];		/* 상태별 작업 현황 데이터 */
-//	self.chartLabels = [];		/* 부서명 또는 사용자 명 */
 	self.chartSeries = ['진행중', '완료', '지연'];
 	self.chartColors = ['#4286f4', '#1df7cf', '#f7204b'];	/* 진행중, 완료, 지연 */
-	
-	self.chartData = [
-		[3, 1, 1, 5, 0],
-		[7, 0, 4, 2, 3],
-		[1, 2, 1, 0, 3]		
-	];
-	
-	self.chartLabels = ['인터넷개발팀', '모바일개발팀', '시너지개발팀', 'IT시스템팀', 'IT협력팀'];
-	console.log('data: ', self.chartData);
-	console.log('labels: ', self.chartLabels);
+
 	/*
+	 * 부서장이나 팀장인 경우에만 데이터를 가져오도록 서버에서 처리한다.
+	 */
 	chartService.getReportData()
 	.then(
 		function(results) {
+			console.log("results: ", results);
+			if (results == "")	return;
 			self.chartData = results[0];
 			self.chartLabels = results[1];
-			console.log('data: ', self.chartData);
-			console.log('labels: ', self.chartLabels);
+			self.chartIds = results[2];
 		},
 		function(err) {
 			console.error('Error while fetching task report data');
 		}
 	);
-	*/
+	
+	function getIdByName(name) {
+		var idx = self.chartLabels.indexOf(name);
+		return self.chartIds[idx];
+	}
+	
+	self.onClick = function(points, evenvt) {
+		console.log(points, event);
+		var name = points[0]._model.label;
+		var id = getIdByName(name);
+		var regex = "^[_a-z0-9]+(.[_a-z0-9]+)*@(?:\\w+\\.)+\\w+$";
+		
+		console.log('id: ' + id);
+		if (id.match(regex) == null) {
+			console.log('fetch chart data for individual person');
+			chartService.getReportDataById(id)
+			.then(
+				function(results) {
+					self.chartData = results[0];
+					self.chartLabels = results[1];
+					self.chartIds = results[2];
+				},
+				function(err) {
+					console.error('Error while fetching report data');
+				}
+			);
+		} else {
+			console.log('location to user task list');
+			$rootScope.$apply(function() {
+				// 왜 $apply()를 이용해야 $location.path()가 적용되는건지 알 수가 없다.
+				// 다른 controller에서는 그냥 $location.path()가 잘 동작하는데... ㅡㅡ;
+				$location.path('/task_list/' + name);
+			});
+		}
+	};
 }]);

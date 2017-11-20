@@ -88,6 +88,7 @@ div.nav_bar {
 
 .calendar-view {
 	width: 100%;
+	margin-bottom: 20px;
 }
 
 .calendar-view td {

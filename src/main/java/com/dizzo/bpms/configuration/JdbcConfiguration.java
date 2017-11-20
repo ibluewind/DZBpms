@@ -2,13 +2,13 @@ package com.dizzo.bpms.configuration;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
@@ -21,7 +21,13 @@ public class JdbcConfiguration {
 	
 	@Bean
 	public DataSource dataSource() {
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+
+		BasicDataSource	dataSource = new BasicDataSource();
+		
+		dataSource.setMaxTotal(10);
+		dataSource.setMaxIdle(10);
+		dataSource.setInitialSize(10);
+		dataSource.setMaxWaitMillis(300L);
 		
 		dataSource.setDriverClassName(environment.getProperty("jdbc.driverClassName"));
 		dataSource.setUrl(environment.getProperty("jdbc.url"));

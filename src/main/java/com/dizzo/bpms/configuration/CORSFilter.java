@@ -10,6 +10,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * CORS 처리 때문에 사용되는 filter인데, RestfulController나 @RestController가 정의된 class에
+ * 그냥 @CrossOrigin annotation을 정의해서 사용하는게 번거롭지 않다.
+ * filter를 등록해서 사용하는 경우 http.OPTIONS에 대한 처리가 제대로 되지 않는다.
+ * 무슨 pre-flight 때문이라는데...
+ * @author 김현곤
+ *
+ */
 public class CORSFilter implements Filter {
 
 	@Override

@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Home Page</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -64,12 +64,13 @@
 		        	<a href="./" class="dropdown-toggle" data-toggle="dropdown" role="button" arai-expanded="false">프로젝트 관리<span class="caret"></span></a>
 		        	<ul class="dropdown-menu" role="menu">
 		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/list_project">프로젝트 목록</a></li>
-		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/create_project">프로젝트 생성</a></li>
+		        		<li><a data-toggle="collapse" data-target="#menu_collapse" href="#/project/regist">프로젝트 생성</a></li>
 		        	</ul>
 		        </li>
 		      </ul>
 		      <ul class="nav navbar-nav navbar-right">
-		      	<li><a href="<c:url value="/logout"/>">Logout</a></li>
+		      	<li ng-controller="alertMessageController as msg"><a href="<c:url value='#/msgbox'/>"><span class="galyphicon glyphicon-envelope"></span><span class="badge">{{msg.unreadmessages.length}}</span></a></li>
+		      	<li ng-controller="logoutController as ctrl"><a href="<c:url value="/logout"/>" ng-click="ctrl.clearSession()">Logout</a></li>
 		      	<sec:authorize access="hasRole('ADMIN') and hasRole('DBA')">
 		        <li><a href="<c:url value="/admin"/>">Admin</a></li>
 		        </sec:authorize>
@@ -81,6 +82,7 @@
 	</div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-cookies.min.js"></script>
@@ -102,6 +104,7 @@
 <script src="<c:url value="/static/js/modal_window.js"/>"></script>
 <script src="<c:url value="/static/js/admin/user/app_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/app_configure.js"/>"></script>
+<script src="<c:url value="/static/js/home/pagination_service.js"/>"></script>
 <script src="<c:url value="/static/js/home/dashboard_controller.js"/>"></script>
 <script src="<c:url value="/static/js/home/task_constant.js"/>"></script>
 <script src="<c:url value="/static/js/home/task_service.js"/>"></script>
@@ -115,5 +118,9 @@
 <script src="<c:url value="/static/js/home/calendar_render.js"/>"></script>
 <script src="<c:url value="/static/js/home/chart_controller.js"/>"></script>
 <script src="<c:url value="/static/js/home/chart_service.js"/>"></script>
+<script src="<c:url value="/static/js/home/message_controller.js"/>"></script>
+<script src="<c:url value="/static/js/home/message_service.js"/>"></script>
+<script src="<c:url value="/static/js/home/project_controller.js"/>"></script>
+<script src="<c:url value="/static/js/home/project_service.js"/>"></script>
 </body>
 </html>

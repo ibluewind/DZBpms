@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dizzo.bpms.dao.TaskDao;
+import com.dizzo.bpms.model.ChartData;
 import com.dizzo.bpms.model.Task;
 import com.dizzo.bpms.model.User;
 
@@ -63,5 +64,15 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public Task delete(String taskId) {
 		return dao.delete(taskId);
+	}
+
+	@Override
+	public List<ChartData> getTaskStatusReportForIndividualDepartment(String deptId) {
+		return dao.getTaskStatusReportForIndividualDepartment(deptId);
+	}
+
+	@Override
+	public List<ChartData> getTaskStatusReportForIndividualPerson(String deptId) {
+		return dao.getTaskStatusReportForIndividualPerson(deptId);
 	}
 }

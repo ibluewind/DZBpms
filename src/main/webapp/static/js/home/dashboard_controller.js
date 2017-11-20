@@ -1,23 +1,22 @@
 'use strict';
 App
-.controller('dashboardController', ['taskService', 'taskStatus', 'userService', 'approveService', 'approveTrayType', '$location', '$rootScope',
-function(taskService, taskStatus, userService, approveService, approveTrayType, $location, $rootScope) {
+.controller('dashboardController', ['taskService', 'taskStatus', 'userService', 'approveService', 'approveTrayType', '$location', '$rootScope', '$window',
+function(taskService, taskStatus, userService, approveService, approveTrayType, $location, $rootScope, $window) {
 	var self = this;
 	
-	self.user = {};
+	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	self.tasks = [];
 	self.trays = [];
-	self.chied = false;
+	self.chief = false;
 	
-	if (angular.isUndefined($rootScope.loggedInUser)) {
+	if (self.user == null) {
 		userService.getLoggedInUser()
 		.then(
 			function(user) {
-				self.user = user;
-				$rootScope.loggedInUser = user;
-				console.log('user: ', user);
-				
-				user.userAuthorities.forEach(function(auth) {
+				$window.sessionStorage.setItem("currentUser", angular.toJson(user));
+				self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
+				console.log('user: ', self.user);
+				self.user.userAuthorities.forEach(function(auth) {
 					if (auth['roleName'] == 'DL' || auth['roleName'] == 'TL') {
 						self.chief = true;
 					}
@@ -28,7 +27,11 @@ function(taskService, taskStatus, userService, approveService, approveTrayType, 
 			}
 		);
 	} else {
-		self.user = $rootScope.loggedInUser;
+		self.user.userAuthorities.forEach(function(auth) {
+			if (auth['roleName'] == 'DL' || auth['roleName'] == 'TL') {
+				self.chief = true;
+			}
+		});
 	}
 	
 	$rootScope.$on('$locationChangeSuccess', function(e, newUrl, oldUrl, newState, oldState) {
@@ -99,5 +102,13 @@ function(taskService, taskStatus, userService, approveService, approveTrayType, 
 			return true;
 		else
 			return false;
+	};
+}])
+.controller('logoutController', ['$window', function($window) {
+	var self = this;
+	
+	console.log('clear session');
+	this.clearSession = function() {
+		$window.sessionStorage.clear();
 	};
 }]);

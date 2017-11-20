@@ -75,6 +75,25 @@ App
 		return deferred.promise;
 	};
 	
+	/**
+	 * 특정 작업자의 작업 목록 조회
+	 */
+	this.listOfWorkerTask = function(workerId) {
+		var deferred = $q.defer();
+		
+		$http.get('/bpms/rest/task/user/' + workerId + '/')
+		.then(
+			function(response) {
+				deferred.resolve(response.data);
+			},
+			function(err) {
+				$q.reject(err);
+			}
+		);
+		
+		return deferred.promise;
+	};
+	
 	this.getByTaskId = function(taskId) {
 		var deferred = $q.defer();
 		
@@ -216,24 +235,19 @@ App
 		return name;
 	};
 }])
-.service('userService', ['$rootScope', '$http', '$q', function($rootScope, $http, $q) {
+.service('userService', ['$http', '$q', function($http, $q) {
 	this.getLoggedInUser = function() {
 		var deferred = $q.defer();
 		
-		if (!angular.isUndefined($rootScope.loggedInUser)) {
-			console.log('already stored logged user information');
-			deferred.resolve($rootScope.loggedInUser);
-		} else {
-			$http.get('/bpms/rest/user')
-			.then(
-				function(response) {
-					deferred.resolve(response.data);
-				},
-				function(err) {
-					$q.reject();
-				}
-			);
-		}
+		$http.get('/bpms/rest/user')
+		.then(
+			function(response) {
+				deferred.resolve(response.data);
+			},
+			function(err) {
+				$q.reject();
+			}
+		);
 		
 		return deferred.promise;
 	};

@@ -16,6 +16,10 @@ App
 		templateUrl: '/bpms/home/task/list',
 		controller: 'taskList as ctrl'
 	})
+	.when('/task_list/:workerName', {
+		templateUrl: '/bpms/home/task/list',
+		controller: 'taskList as ctrl'
+	})
 	.when('/view_task/:taskId', {
 		templateUrl: '/bpms/home/task/view',
 		controller: 'viewTask as ctrl'
@@ -65,6 +69,14 @@ App
 	.when('/man_appline', {
 		templateUrl: '/bpms/approve/manappline',
 		controller: 'manageAppLineController as ctrl'
+	})
+	.when('/msgbox', {
+		templateUrl: '/bpms/msgbox',
+		controller: 'messageController as ctrl'
+	})
+	.when('/project/regist', {
+		templateUrl: '/bpms/home/regist_project',
+		controller: 'registProject as ctrl'
 	})
 	.otherwise({redirectTo: '/'});
 }])

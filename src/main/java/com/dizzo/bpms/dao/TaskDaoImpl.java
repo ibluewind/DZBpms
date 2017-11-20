@@ -14,6 +14,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dizzo.bpms.model.ChartData;
+import com.dizzo.bpms.model.ChartDataRowMapper;
 import com.dizzo.bpms.model.Schedule;
 import com.dizzo.bpms.model.ScheduleType;
 import com.dizzo.bpms.model.Task;
@@ -242,6 +244,53 @@ public class TaskDaoImpl implements TaskDao {
 						+ "       AND t.opened = 'D'";
 		
 		return new JdbcTemplate(dataSource).query(query, new Object[] { userId, userId }, new TaskRowMapper());
+	}
+
+	@Override
+	public List<ChartData> getTaskStatusReportForIndividualDepartment(String deptId) {
+		// 부서별 작업 현황 조회
+		// 지정된 부서의 하위 부서의 작업 현황을 조회한다.
+		String	query = "SELECT DISTINCT IF (t.status IS NULL, 'N', t.status) status,"
+		              + "    u.deptid id,"
+		              + "    d.name,"
+		              + "    count(t.status) num"
+		              + " FROM departments d,"
+		              + " task t"
+		              + " RIGHT JOIN"
+		              + " (SELECT u.userId, u.deptId"
+		              + " FROM user_dept_position u,"
+		              + "   (SELECT d.deptid"
+		              + "      FROM (SELECT getChildDeptList() deptId"
+		              + "              FROM (SELECT @start_with :=?,"
+		              + "                           @deptId := @start_with) t,"
+		              + "                   departments"
+		              + "             WHERE @deptId IS NOT NULL) b,"
+		              + "           departments d"
+		              + "     WHERE d.deptId = b.deptId) tmp"
+		              + " WHERE tmp.deptId = u.deptId) u"
+		              + " ON t.workerid = u.userid"
+		              + " WHERE u.deptid = d.deptid"
+		              + " GROUP BY t.status, u.deptid";
+		
+		return new JdbcTemplate(dataSource).query(query, new Object[]{ deptId }, new ChartDataRowMapper());
+	}
+
+	@Override
+	public List<ChartData> getTaskStatusReportForIndividualPerson(String deptId) {
+		// 부서 직원들 개별 작업 현황 조회
+		String query = "SELECT DISTINCT u.userid id,"
+                  	 + " concat(u.lastName, u.firstName) 'name',"
+                  	 + " IF (t.status IS NULL, 'N', t.status) status,"
+                  	 + " count(t.status) num"
+                  	 + " FROM task t"
+                  	 + " RIGHT JOIN (SELECT userid"
+                     + " FROM user_dept_position"
+                     + " WHERE deptId = ?) u1"
+                     + " ON u1.userid = t.workerid,"
+                     + " users u"
+                     + " WHERE u.userid = u1.userid"
+                     + " GROUP BY u.userid, t.status";
+		return new JdbcTemplate(dataSource).query(query, new Object[] { deptId }, new ChartDataRowMapper());
 	}
 
 	@Override

@@ -12,8 +12,6 @@ import com.dizzo.bpms.model.UserRole;
 public class RoleTest {
 
 	public static void main(String[] args) throws Exception {
-		List<UserDepartmentPosition> udps = new ArrayList<>();
-		UserDepartmentPosition	udp = new UserDepartmentPosition();
-		
+		System.out.println("DL: " + UserRole.DL.name().equals("DL"));
 	}
 }

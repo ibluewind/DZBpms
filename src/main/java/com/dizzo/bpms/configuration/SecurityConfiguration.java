@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -69,6 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http
 			.authorizeRequests()
 			.antMatchers("/home/**").access("hasRole('USER')")
+			.antMatchers("/rest/**").access("hasRole('USER')")
 			.antMatchers("/admin/**").access("hasRole('ADMIN')")
 			.and()
 				.formLogin().loginPage("/login")
@@ -78,10 +80,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.and()
 				.addFilterAfter(new CSRFHeaderFilter(), CsrfFilter.class)		// angularjs의 xsrf 처리를 위해서 필터를 등록한다.
 				.exceptionHandling().accessDeniedPage("/Access_Denied")
+//			.and().rememberMe().rememberMeParameter("remember-me").tokenRepository(persistentTokenRepository()).tokenValiditySeconds(86400)
 			.and()
-				.sessionManagement().maximumSessions(1).expiredUrl("/login");
+				.sessionManagement().invalidSessionUrl("/login").maximumSessions(1).expiredUrl("/logout");	// 동시 접속 방지
 	}
-
+	
+	/*
+	 * pre-flight http.OPTIONS 처리
+	 */
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
+	}
+	
 	/**
 	 * rememeber-me option을 사용하는 경우를 위한 함수.
 	 * @return

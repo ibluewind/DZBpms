@@ -3,6 +3,7 @@ package com.dizzo.bpms.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import com.dizzo.bpms.service.ApproveHistoryService;
 
 @CrossOrigin(origins="*", maxAge=3600)
 @RestController
+@Scope("session")
 @RequestMapping(value="/rest/approve/history")
 public class ApproveHistoryRestController {
 

@@ -1,8 +1,8 @@
 'use strict';
 
 App
-.controller('viewTask', ['taskStatus', 'taskService', 'userService', 'warningModal', 'insertCommentModal', 'historyModal', 'confirmModal', 'selectUserModal', '$rootScope', '$routeParams', '$location',
-function(taskStatus, taskService, userService, warningModal, insertCommentModal, historyModal, confirmModal, selectUserModal, $rootScope, $routeParams, $location) {
+.controller('viewTask', ['taskStatus', 'taskService', 'userService', 'warningModal', 'insertCommentModal', 'historyModal', 'confirmModal', 'selectUserModal', '$window', '$routeParams', '$location',
+function(taskStatus, taskService, userService, warningModal, insertCommentModal, historyModal, confirmModal, selectUserModal, $window, $routeParams, $location) {
 	var self = this;
 	var taskId = $routeParams.taskId;
 	
@@ -80,7 +80,7 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 		);
 	}
 	
-	self.user = $rootScope.loggedInUser;
+	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	getTask();
 	
 	taskService.listTaskHistory(taskId)
@@ -318,8 +318,8 @@ function(taskStatus, taskService, userService, warningModal, insertCommentModal,
 		self.task.action += action;
 	}
 }])
-.controller('registTask', ['taskStatus', 'taskService', 'userService', 'selectUserModal', 'warningModal', 'insertCommentModal', 'historyModal', '$rootScope', '$routeParams', '$location',
-function(taskStatus, taskService, userService, selectUserModal, warningModal, insertCommentModal, historyModal, $rootScope, $routeParams, $location) {
+.controller('registTask', ['taskStatus', 'taskService', 'userService', 'selectUserModal', 'warningModal', 'insertCommentModal', 'historyModal', '$window', '$routeParams', '$location',
+	function(taskStatus, taskService, userService, selectUserModal, warningModal, insertCommentModal, historyModal, $window, $routeParams, $location) {
 	var self =this;
 	var taskId = $routeParams.taskId;
 	
@@ -338,9 +338,11 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 	self.attachFiles = taskService.attachFiles;
 	self.taskHistory = [];
 	
-	self.user = $rootScope.loggedInUser;
+	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	self.task.userId = self.user.userId;
 	self.task.userName = self.user.lastName + self.user.firstName;
+	self.task.workerName = self.user.lastName + self.user.firstName;
+	self.task.workerId = self.user.userId;
 	
 	if (taskId != -9999) {	// 신규 생성이 아닌 수정
 		self.edit = true;
@@ -531,12 +533,18 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 		self.task.action += action;
 	}
 }])
-.controller('taskList', ['taskStatus', 'taskService', 'userService', '$location', '$rootScope', function(taskStatus, taskService, userService, $location, $rootScope) {
+.controller('taskList', ['taskStatus', 'taskService', 'userService', 'PageService', '$location', '$routeParams', '$window',
+			function(taskStatus, taskService, userService, PageService, $location, $routeParams, $window) {
 	var	self = this;
+	var workerName = $routeParams.workerName;
+	var _items = [];
+	
+	console.log('DEBUG: workerName = ' + workerName);
 	self.tasks = [];
 	self.user = {};
+	self.pager = {};
 	
-	self.user = $rootScope.loggedInUser;
+	self.user = JSON.parse($window.sessionStorage.getItem("currentUser"));
 	
 	self.isOwner = function(task) {
 		return self.user.userId == task.userId;
@@ -556,16 +564,69 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 			return false;
 	};
 	
+	self.workers = [];
+	self.searchWorker = '';		// 담당자 선택
+	
+	if (!angular.isUndefined(workerName))
+		self.searchWorker = workerName;
+	
+	function setWorkers(tasks) {
+		self.workers.push('');
+		$.each(tasks, function (index, t) {
+			if ($.inArray(t.workerName, self.workers) < 0)
+				self.workers.push(t.workerName);
+		});
+		
+		console.log('workers: ', self.workers);
+	}
+	
+	self.setPage = function(page) {
+		if (page < 1 || page > self.pager.totalPages)		return;
+		
+		self.pager = PageService.GetPager(_items.length, page);
+		console.log('pager: ', self.pager);
+		self.tasks = _items.slice(self.pager.startIndex, self.pager.endIndex + 1);
+	}
+	
 	function getTaskList() {
+		
 		taskService.listOfMyTask()
 		.then(
 			function(data) {
-				self.tasks = data;
+				_items = data;
+				self.setPage(1);
+				console.log('tasks: ', self.tasks);
+				setWorkers(data);
 			},
 			function(err) {
 				console.error('Error while fetching task list');
 			}
 		);
+		/**
+		if (angular.isUndefined(workerId)) {
+			taskService.listOfMyTask()
+			.then(
+				function(data) {
+					self.tasks = data;
+					console.log('tasks: ', self.tasks);
+					setWorkers(data);
+				},
+				function(err) {
+					console.error('Error while fetching task list');
+				}
+			);
+		} else {
+			taskService.listOfWorkerTask(workerId)
+			.then(
+				function(data) {
+					self.tasks = data;
+				},
+				function(err) {
+					console.error('Error while fetching task list');
+				}
+			);
+		}
+		**/
 	}
 	
 	getTaskList();
@@ -638,6 +699,10 @@ function(taskStatus, taskService, userService, selectUserModal, warningModal, in
 		if (self.searchStatus == '')
 			return true;
 		return task.status == self.searchStatus;
+	};
+	self.workerFilter = function(task) {
+		if (self.searchWorker == '')	return true;
+		return task.workerName == self.searchWorker;
 	};
 }])
 .controller('fileController', ['$scope', '$cookies', 'FileUploader', 'taskService', function($scope, $cookies, FileUploader, taskService) {

@@ -2,6 +2,8 @@ package com.dizzo.bpms.configuration;
 
 import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 
 import org.springframework.web.filter.CharacterEncodingFilter;
@@ -28,12 +30,28 @@ public class DZBpmInitializer extends AbstractAnnotationConfigDispatcherServletI
 	protected Filter[] getServletFilters() {
 		CharacterEncodingFilter	encodingFilter = new CharacterEncodingFilter();
 		
+		/*
+		 * 어떤 경우에 발생하는지는 모르겠지만, 가끔 MySQL DB에 저장된 한글이 깨지는 경우가 있다.
+		 * 이를 방지하기 위해서 Encoding Filter를 등록한다.
+		 */
 		encodingFilter.setEncoding("UTF-8");
 		encodingFilter.setForceEncoding(true);
 		
-		return new Filter[] { encodingFilter, new CORSFilter(), new CSRFHeaderFilter() };
+		//CORSFilter()는 생략한다. @RestController가 정의된 class에 @CrossOrigin annotation을 사용하는 것이 낫다.
+		//return new Filter[] { encodingFilter, new CORSFilter(), new CSRFHeaderFilter() };
+		return new Filter[] { encodingFilter };
 	}
 	
+	@Override
+	public void onStartup(ServletContext servletContext) throws ServletException {
+		super.onStartup(servletContext);
+		servletContext.addListener(new SessionListener());
+	}
+
+	/**
+	 * 파일 업로드를 위한 MultipartConfigElement 설정
+	 * DZBpmConfiguration에 MultipartResolver Bean을 설정해야 한다.
+	 */
 	@Override
 	protected void customizeRegistration(Dynamic registration) {
 		registration.setMultipartConfig(getMultipartConfigElement());

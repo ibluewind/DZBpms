@@ -1,10 +1,12 @@
 package com.dizzo.bpms.controller;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
+@Scope("session")
 @RequestMapping("/home")
 public class HomeController {
 
@@ -41,6 +43,11 @@ public class HomeController {
 	@RequestMapping(value="/report", method=RequestMethod.GET)
 	public String getReportPage() {
 		return "/home/report";
+	}
+	
+	@RequestMapping(value="/regist_project", method=RequestMethod.GET)
+	public String getRegistProjectPage() {
+		return "/project/regist_project";
 	}
 	
 	@RequestMapping(value="/forms/vocation", method=RequestMethod.GET)
